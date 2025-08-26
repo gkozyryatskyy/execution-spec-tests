@@ -208,7 +208,7 @@ class EthRPC(BaseRPC):
 
         return int(response, 16)
 
-    def get_transaction_by_hash(self, transaction_hash: Hash) -> TransactionByHashResponse | None:
+    def get_transaction_by_hash(self, transaction_hash: Hash, original_tx: Transaction) -> TransactionByHashResponse | None:
         """`eth_getTransactionByHash`: Returns transaction details."""
         try:
             response = self.post_request(
@@ -292,10 +292,11 @@ class EthRPC(BaseRPC):
 
     def wait_for_transaction(self, transaction: Transaction) -> TransactionByHashResponse:
         """Use `eth_getTransactionByHash` to wait until a transaction is included in a block."""
+        print("+++++++++++++++++++original tx", transaction)
         tx_hash = transaction.hash
         start_time = time.time()
         while True:
-            tx = self.get_transaction_by_hash(tx_hash)
+            tx = self.get_transaction_by_hash(tx_hash, transaction)
             if tx is not None and tx.block_number is not None:
                 return tx
             if (time.time() - start_time) > self.transaction_wait_timeout:

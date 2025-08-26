@@ -1,6 +1,7 @@
 """Types used in the RPC module for `eth` and `engine` namespaces' requests."""
 
 import json
+import ethereum_rlp as eth_rlp
 from binascii import crc32
 from enum import Enum
 from hashlib import sha256
@@ -48,6 +49,8 @@ class JSONRPCError(Exception):
 class TransactionByHashResponse(Transaction):
     """Represents the response of a transaction by hash request."""
 
+    original_tx: Transaction | None = None
+
     block_hash: Hash | None = None
     block_number: HexNumber | None = None
 
@@ -79,8 +82,18 @@ class TransactionByHashResponse(Transaction):
         us.
         """
         Transaction.model_post_init(self, __context)
+        # TODO Glib: hash calculation changes --------------
+        original_tx = __context.get('original_tx')
+        print("+++++++++++++++++eth_getTransactionByHash.hashes:", str(self.transaction_hash), str(self.hash))
+        print("+++++++++++++++++eth_getTransactionByHash.resp", self)
+        # print("+++++++++++++++++default.rlp", Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex())
+        self.gas_limit = original_tx.gas_limit # TODO Glib: Fix for hash calculation
+        self.value = original_tx.value # TODO Glib: Fix for hash calculation
+        # print("+++++++++++++++++updated.rlp", Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex())
+        del self.hash # cleaning up a cached 'hash' value
+        print("+++++++++++++++++eth_getTransactionByHash.hash updated:", str(self.hash))
+        # TODO Glib: ------------------------------------------
         assert self.transaction_hash == self.hash
-
 
 class ForkchoiceState(CamelModel):
     """Represents the forkchoice state of the beacon chain."""
