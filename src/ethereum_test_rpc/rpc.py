@@ -189,6 +189,8 @@ class EthRPC(BaseRPC):
             # TODO Glib: putting original_tx into the context ------------
             if self.response_validation_context is None:
                 self.response_validation_context = {'original_tx': original_tx}
+            else:
+                self.response_validation_context['original_tx'] = original_tx
             # TODO Glib: ------------------------------------------------
             if response is None:
                 return None

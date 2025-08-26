@@ -91,6 +91,7 @@ class TransactionByHashResponse(Transaction):
         self.value = original_tx.value # TODO Glib: Fix for hash calculation
         # print("+++++++++++++++++updated.rlp", Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex())
         del self.hash # cleaning up a cached 'hash' value
+        print("+++++++++++++++++eth_getTransactionByHash.resp updated", self)
         print("+++++++++++++++++eth_getTransactionByHash.hash updated:", str(self.hash))
         # TODO Glib: ------------------------------------------
         assert self.transaction_hash == self.hash
