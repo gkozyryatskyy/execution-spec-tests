@@ -260,6 +260,7 @@ class EthRPC(BaseRPC):
 
     def wait_for_transaction(self, transaction: Transaction) -> TransactionByHashResponse:
         """Use `eth_getTransactionByHash` to wait until a transaction is included in a block."""
+        # TODO Glib: logging
         print("+++++++++++++++++++original tx", transaction)
         tx_hash = transaction.hash
         start_time = time.time()
