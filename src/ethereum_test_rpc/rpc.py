@@ -182,10 +182,14 @@ class EthRPC(BaseRPC):
         block = hex(block_number) if isinstance(block_number, int) else block_number
         return int(self.post_request("getTransactionCount", f"{address}", block), 16)
 
-    def get_transaction_by_hash(self, transaction_hash: Hash) -> TransactionByHashResponse | None:
+    def get_transaction_by_hash(self, transaction_hash: Hash, original_tx: Transaction) -> TransactionByHashResponse | None:
         """`eth_getTransactionByHash`: Returns transaction details."""
         try:
             response = self.post_request("getTransactionByHash", f"{transaction_hash}")
+            # TODO Glib: putting original_tx into the context ------------
+            if self.response_validation_context is None:
+                self.response_validation_context = {'original_tx': original_tx}
+            # TODO Glib: ------------------------------------------------
             if response is None:
                 return None
             return TransactionByHashResponse.model_validate(
@@ -256,10 +260,11 @@ class EthRPC(BaseRPC):
 
     def wait_for_transaction(self, transaction: Transaction) -> TransactionByHashResponse:
         """Use `eth_getTransactionByHash` to wait until a transaction is included in a block."""
+        print("+++++++++++++++++++original tx", transaction)
         tx_hash = transaction.hash
         start_time = time.time()
         while True:
-            tx = self.get_transaction_by_hash(tx_hash)
+            tx = self.get_transaction_by_hash(tx_hash, transaction)
             if tx is not None and tx.block_number is not None:
                 return tx
             if (time.time() - start_time) > self.transaction_wait_timeout:
