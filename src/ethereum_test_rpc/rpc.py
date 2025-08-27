@@ -217,7 +217,9 @@ class EthRPC(BaseRPC):
             if response is None:
                 return None
             return TransactionByHashResponse.model_validate(
-                response, context=self.response_validation_context
+                # response, context=self.response_validation_context
+                # TODO Glib: putting original_tx into the context
+                response, context={'original_tx': original_tx}
             )
         except ValidationError as e:
             pprint(e.errors())
@@ -292,8 +294,6 @@ class EthRPC(BaseRPC):
 
     def wait_for_transaction(self, transaction: Transaction) -> TransactionByHashResponse:
         """Use `eth_getTransactionByHash` to wait until a transaction is included in a block."""
-        # TODO Glib: logging
-        print("+++++++++++++++++++original tx", transaction)
         tx_hash = transaction.hash
         start_time = time.time()
         while True:
@@ -320,9 +320,11 @@ class EthRPC(BaseRPC):
         start_time = time.time()
         while True:
             i = 0
+            j = 0
             while i < len(tx_hashes):
                 tx_hash = tx_hashes[i]
-                tx = self.get_transaction_by_hash(tx_hash)
+                tx = self.get_transaction_by_hash(tx_hash, transactions[j])
+                j += 1
                 if tx is not None and tx.block_number is not None:
                     responses.append(tx)
                     tx_hashes.pop(i)
