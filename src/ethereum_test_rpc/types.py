@@ -49,8 +49,6 @@ class JSONRPCError(Exception):
 class TransactionByHashResponse(Transaction):
     """Represents the response of a transaction by hash request."""
 
-    original_tx: Transaction | None = None
-
     block_hash: Hash | None = None
     block_number: HexNumber | None = None
 
@@ -82,19 +80,31 @@ class TransactionByHashResponse(Transaction):
         us.
         """
         Transaction.model_post_init(self, __context)
-        # TODO Glib: hash calculation changes --------------
-        original_tx = __context.get('original_tx')
-        print("+++++++++++++++++eth_getTransactionByHash.hashes:", str(self.transaction_hash), str(self.hash))
-        print("+++++++++++++++++eth_getTransactionByHash.resp", self)
-        # print("+++++++++++++++++default.rlp", Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex())
-        self.gas_limit = original_tx.gas_limit # TODO Glib: Fix for hash calculation
-        self.value = original_tx.value # TODO Glib: Fix for hash calculation
-        # print("+++++++++++++++++updated.rlp", Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex())
-        del self.hash # cleaning up a cached 'hash' value
-        print("+++++++++++++++++eth_getTransactionByHash.resp updated", self)
-        print("+++++++++++++++++eth_getTransactionByHash.hash updated:", str(self.hash))
+        # TODO Glib: hash calculation fixes --------------
+        # if self.transaction_hash != self.hash:
+        #     original_tx = __context.get('original_tx')
+        #     old_hash = str(self.hash)
+        #     old_self = str(self)
+        #     old_rlp = Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex()
+        #
+        #     self.gas_limit = original_tx.gas_limit # TODO Glib: Fix for hash calculation
+        #     self.value = original_tx.value # TODO Glib: Fix for hash calculation
+        #     del self.hash # cleaning up a cached 'hash' value
+        #     if self.transaction_hash != self.hash:
+        #         print("eth_getTransactionByHash tx hash:", self.transaction_hash)
+        #         print("eth_getTransactionByHash old hash:", old_hash)
+        #         print("eth_getTransactionByHash new hash:", str(self.hash))
+        #         print("eth_getTransactionByHash original tx:", original_tx)
+        #         print("eth_getTransactionByHash old self:", old_self)
+        #         print("eth_getTransactionByHash new self:", str(self))
+        #         print("eth_getTransactionByHash old rlp:", old_rlp)
+        #         print("eth_getTransactionByHash new rlp:", Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex())
         # TODO Glib: ------------------------------------------
-        assert self.transaction_hash == self.hash
+        # TODO Glib: hashes are not matching because of:
+        #  - https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4318
+        #  - https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4327
+        #  - https://github.com/hiero-ledger/hiero-mirror-node/issues/11860
+        # assert self.transaction_hash == self.hash
 
 class ForkchoiceState(CamelModel):
     """Represents the forkchoice state of the beacon chain."""

@@ -141,7 +141,7 @@ def pytest_addoption(parser):
         action="store",
         dest="sender_key_initial_balance",
         type=int,
-        default=10**26,
+        default=10 ** 26,
         help=(
             "Initial balance of each sender key. There is one sender key per worker process "
             "(`-n` option)."
@@ -184,7 +184,7 @@ def seed_sender(session_temp_folder: Path) -> EOA:
                 seed_sender_key = Hash(f.read())
             seed_sender = EOA(key=seed_sender_key)
         else:
-            seed_sender = EOA(key=randint(0, 2**256))
+            seed_sender = EOA(key=randint(0, 2 ** 256))
             with base_file.open("w") as f:
                 f.write(str(seed_sender.key))
     return seed_sender
@@ -195,14 +195,14 @@ def base_pre(request, seed_sender: EOA, worker_count: int) -> Alloc:
     """Pre-allocation for the client's genesis."""
     sender_key_initial_balance = request.config.getoption("sender_key_initial_balance")
     return Alloc(
-        {seed_sender: Account(balance=(worker_count * sender_key_initial_balance) + 10**18)}
+        {seed_sender: Account(balance=(worker_count * sender_key_initial_balance) + 10 ** 18)}
     )
 
 
 @pytest.fixture(scope="session")
 def base_pre_genesis(
-    base_fork: Fork,
-    base_pre: Alloc,
+        base_fork: Fork,
+        base_pre: Alloc,
 ) -> Tuple[Alloc, FixtureHeader]:
     """Create a genesis block from the blockchain test definition."""
     env = Environment().set_fork_requirements(base_fork)
@@ -282,7 +282,7 @@ def buffered_genesis(client_genesis: dict) -> io.BufferedReader:
 
 @pytest.fixture(scope="session")
 def client_files(
-    buffered_genesis: io.BufferedReader,
+        buffered_genesis: io.BufferedReader,
 ) -> Mapping[str, io.BufferedReader]:
     """
     Define the files that hive will start the client with.
@@ -323,7 +323,7 @@ def test_suite_description() -> str:
 
 @pytest.fixture(autouse=True, scope="session")
 def base_hive_test(
-    request: pytest.FixtureRequest, test_suite: HiveTestSuite, session_temp_folder: Path
+        request: pytest.FixtureRequest, test_suite: HiveTestSuite, session_temp_folder: Path
 ) -> Generator[HiveTest, None, None]:
     """Test (base) used to deploy the main client to be used throughout all tests."""
     base_name = "base_hive_test"
@@ -384,11 +384,11 @@ def client_type(simulator: Simulation) -> ClientType:
 
 @pytest.fixture(autouse=True, scope="session")
 def client(
-    base_hive_test: HiveTest,
-    client_files: dict,
-    environment: dict,
-    client_type: ClientType,
-    session_temp_folder: Path,
+        base_hive_test: HiveTest,
+        client_files: dict,
+        environment: dict,
+        client_type: ClientType,
+        session_temp_folder: Path,
 ) -> Generator[Client, None, None]:
     """Initialize the client with the appropriate files and environment variables."""
     base_name = "hive_client"
@@ -539,17 +539,17 @@ class EthRPC(BaseEthRPC):
     pending_tx_hashes: PendingTxHashes
 
     def __init__(
-        self,
-        *,
-        client: Client,
-        fork: Fork,
-        engine_rpc: EngineRPC,
-        base_genesis_header: FixtureHeader,
-        transactions_per_block: int,
-        session_temp_folder: Path,
-        get_payload_wait_time: float,
-        initial_forkchoice_update_retries: int = 5,
-        transaction_wait_timeout: int = 60,
+            self,
+            *,
+            client: Client,
+            fork: Fork,
+            engine_rpc: EngineRPC,
+            base_genesis_header: FixtureHeader,
+            transactions_per_block: int,
+            session_temp_folder: Path,
+            get_payload_wait_time: float,
+            initial_forkchoice_update_retries: int = 5,
+            transaction_wait_timeout: int = 60,
     ):
         """Initialize the Ethereum RPC client for the hive simulator."""
         super().__init__(
@@ -693,7 +693,7 @@ class EthRPC(BaseEthRPC):
         return self.wait_for_transactions([transaction])[0]
 
     def wait_for_transactions(
-        self, transactions: List[Transaction]
+            self, transactions: List[Transaction]
     ) -> List[TransactionByHashResponse]:
         """
         Wait for all transactions in the provided list to be included in a block.
@@ -721,10 +721,12 @@ class EthRPC(BaseEthRPC):
         pending_transactions_handler = PendingTransactionHandler(self)
         while True:
             tx_id = 0
+            j = 0
             pending_responses = {}
             while tx_id < len(tx_hashes):
                 tx_hash = tx_hashes[tx_id]
-                tx = self.get_transaction_by_hash(tx_hash)
+                tx = self.get_transaction_by_hash(tx_hash, transactions[j])
+                j += 1
                 assert tx is not None, f"Transaction {tx_hash} not found"
                 if tx.block_number is not None:
                     responses.append(tx)
@@ -792,9 +794,9 @@ class PendingTransactionHandler:
                 self.eth_rpc.generate_block()
             else:
                 if (
-                    self.last_pending_tx_hashes_count is not None
-                    and len(self.eth_rpc.pending_tx_hashes) == self.last_pending_tx_hashes_count
-                    and self.i % self.block_generation_interval == 0
+                        self.last_pending_tx_hashes_count is not None
+                        and len(self.eth_rpc.pending_tx_hashes) == self.last_pending_tx_hashes_count
+                        and self.i % self.block_generation_interval == 0
                 ):
                     # If no new transactions have been added to the pending list,
                     # generate a block to avoid potential deadlock.
@@ -829,13 +831,13 @@ def engine_rpc(client: Client) -> EngineRPC | None:
 
 @pytest.fixture(autouse=True, scope="session")
 def eth_rpc(
-    request: pytest.FixtureRequest,
-    client: Client,
-    engine_rpc: EngineRPC,
-    base_genesis_header: FixtureHeader,
-    base_fork: Fork,
-    transactions_per_block: int,
-    session_temp_folder: Path,
+        request: pytest.FixtureRequest,
+        client: Client,
+        engine_rpc: EngineRPC,
+        base_genesis_header: FixtureHeader,
+        base_fork: Fork,
+        transactions_per_block: int,
+        session_temp_folder: Path,
 ) -> EthRPC:
     """Initialize ethereum RPC client for the execution client under test."""
     get_payload_wait_time = request.config.getoption("get_payload_wait_time")
