@@ -127,7 +127,8 @@ class EthRPC(BaseRPC):
     hive simulators.
     """
 
-    transaction_wait_timeout: int = 60
+    # TODO Glib: increase timeout
+    transaction_wait_timeout: int = 180
 
     BlockNumberType = int | Literal["latest", "earliest", "pending"]
 
