@@ -258,8 +258,9 @@ class Transaction(
     TransactionGeneric[HexNumber], TransactionTransitionToolConverter, SignableRLPSerializable
 ):
     """Generic object that can represent all Ethereum transaction types."""
-
-    gas_limit: HexNumber = Field(HexNumber(21_000), serialization_alias="gas")
+    # TODO Glib; fix for testnet 'gas_limit', somehow it takes 600_000 gas for some transfer transactions
+    #  like this one https://hashscan.io/testnet/transaction/1756295734.438319000/result
+    gas_limit: HexNumber = Field(HexNumber(1_000_000), serialization_alias="gas")
     to: Address | None = Field(Address(0xAA))
     data: Bytes = Field(Bytes(b""), alias="input")
 

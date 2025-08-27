@@ -91,6 +91,9 @@ class TransactionByHashResponse(Transaction):
         #     self.value = original_tx.value # TODO Glib: Fix for hash calculation
         #     del self.hash # cleaning up a cached 'hash' value
         #     if self.transaction_hash != self.hash:
+        #         # TODO Glib: In this case we also assume the problem is on the consensus side, with empty 'to' param
+        #         # self.to = None
+        #         # del self.hash
         #         print("eth_getTransactionByHash tx hash:", self.transaction_hash)
         #         print("eth_getTransactionByHash old hash:", old_hash)
         #         print("eth_getTransactionByHash new hash:", str(self.hash))

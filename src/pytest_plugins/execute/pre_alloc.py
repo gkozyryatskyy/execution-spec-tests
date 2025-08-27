@@ -440,7 +440,6 @@ def pre(
     """Return default pre allocation for all tests (Empty alloc)."""
     # Record the starting balance of the sender
     sender_test_starting_balance = eth_rpc.get_balance(sender_key)
-
     # Prepare the pre-alloc
     pre = Alloc(
         fork=fork,
@@ -461,14 +460,14 @@ def pre(
     for idx, eoa in enumerate(pre._funded_eoa):
         remaining_balance = eth_rpc.get_balance(eoa)
         eoa.nonce = Number(eth_rpc.get_transaction_count(eoa))
-        refund_gas_limit = 21_000
+        refund_gas_limit = 100_000
         tx_cost = refund_gas_limit * default_gas_price
         if remaining_balance < tx_cost:
             continue
         refund_tx = Transaction(
             sender=eoa,
             to=sender_key,
-            gas_limit=21_000,
+            gas_limit=refund_gas_limit,
             gas_price=default_gas_price,
             value=remaining_balance - tx_cost,
         ).with_signature_and_sender()
