@@ -541,7 +541,6 @@ def pre(
     """Return default pre allocation for all tests (Empty alloc)."""
     # Record the starting balance of the sender
     sender_test_starting_balance = eth_rpc.get_balance(sender_key)
-
     # Prepare the pre-alloc
     pre = Alloc(
         fork=fork,
