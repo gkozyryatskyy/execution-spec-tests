@@ -99,6 +99,7 @@ def test_warm_coinbase_call_out_of_gas(
     )
     caller_address = pre.deploy_contract(caller_code)
 
+    # TODO Glib: work with this tx. Mb reconfigure local relay somehow
     tx = Transaction(
         ty=0x0,
         chain_id=0x01,

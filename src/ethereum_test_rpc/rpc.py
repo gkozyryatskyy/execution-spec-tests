@@ -119,8 +119,7 @@ class EthRPC(BaseRPC):
     hive simulators.
     """
 
-    # TODO Glib: increase timeout
-    transaction_wait_timeout: int = 180
+    transaction_wait_timeout: int = 60
 
     BlockNumberType = int | Literal["latest", "earliest", "pending"]
 
@@ -129,7 +128,7 @@ class EthRPC(BaseRPC):
         url: str,
         extra_headers: Dict | None = None,
         *,
-        transaction_wait_timeout: int = 180, # TODO Glib: increase timeout
+        transaction_wait_timeout: int = 60,
         response_validation_context: Any | None = None,
     ):
         """Initialize EthRPC class with the given url and transaction wait timeout."""
