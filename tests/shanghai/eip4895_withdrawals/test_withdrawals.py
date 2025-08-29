@@ -138,12 +138,13 @@ def test_use_value_in_contract(
 ):
     """Test sending value from contract that has not received a withdrawal."""
     sender = pre.fund_eoa()
-    recipient = pre.fund_eoa(1)
+    # TODO Glib: Value can't be non-zero and less than 10_000_000_000 wei which is 1 tinybar
+    recipient = pre.fund_eoa(100_000_000_000)
 
     contract_address = pre.deploy_contract(
         Op.SSTORE(
             Op.NUMBER,
-            Op.CALL(address=recipient, value=1000000000),
+            Op.CALL(address=recipient, value=10_000_000_000),
         )
     )
     (tx_0, tx_1) = (
