@@ -42,6 +42,7 @@ pytestmark = pytest.mark.valid_from("Shanghai")
 Initcode templates used throughout the tests
 """
 # TODO Glib: for contract create: initcode limit -> jumbo tx payload limit
+#  - https://github.com/hiero-ledger/hiero-consensus-node/issues/20872
 INITCODE_ONES_MAX_LIMIT_JUMBO = Initcode(
     deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
     initcode_length=Spec.JUMBO_MAX_PAYLOAD_SIZE,
