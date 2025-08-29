@@ -6,7 +6,6 @@ note: Tests ported from:
     - [ethereum/tests/pull/990](https://github.com/ethereum/tests/pull/990)
     - [ethereum/tests/pull/1012](https://github.com/ethereum/tests/pull/990)
 """
-import pdb
 from typing import List
 
 import pytest
@@ -292,8 +291,6 @@ class TestContractCreationGasUsage:
     @pytest.fixture
     def exact_execution_gas(self, exact_intrinsic_gas: int, initcode: Initcode) -> int:
         """Calculate total execution gas cost."""
-        # TODO Glib:
-        print("++++++++++++++++++initcode.deployment_gas, initcode.execution_gas", initcode.deployment_gas, initcode.execution_gas)
         return exact_intrinsic_gas + initcode.deployment_gas + initcode.execution_gas
 
     @pytest.fixture
@@ -333,8 +330,6 @@ class TestContractCreationGasUsage:
         else:
             pytest.fail("Invalid gas test case provided.")
 
-        # TODO Glib:
-        print("++++++++++++++++++2", exact_intrinsic_gas, exact_execution_gas)
         # TODO Glib: tx changes
         #  - gas_price override removed
         #  - access_list commented because Hedera relay is not supporting it
@@ -396,16 +391,16 @@ class TestContractCreationGasUsage:
 @pytest.mark.parametrize(
     "initcode",
     [
-        # INITCODE_ZEROS_MAX_LIMIT,
-        # INITCODE_ONES_MAX_LIMIT,
+        INITCODE_ZEROS_MAX_LIMIT,
+        INITCODE_ONES_MAX_LIMIT,
         INITCODE_ZEROS_OVER_LIMIT,
-        # INITCODE_ONES_OVER_LIMIT,
-        # EMPTY_INITCODE,
-        # SINGLE_BYTE_INITCODE,
-        # INITCODE_ZEROS_32_BYTES,
-        # INITCODE_ZEROS_33_BYTES,
-        # INITCODE_ZEROS_49120_BYTES,
-        # INITCODE_ZEROS_49121_BYTES,
+        INITCODE_ONES_OVER_LIMIT,
+        EMPTY_INITCODE,
+        SINGLE_BYTE_INITCODE,
+        INITCODE_ZEROS_32_BYTES,
+        INITCODE_ZEROS_33_BYTES,
+        INITCODE_ZEROS_49120_BYTES,
+        INITCODE_ZEROS_49121_BYTES,
     ],
     ids=get_initcode_name,
 )
