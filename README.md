@@ -179,6 +179,14 @@ The available test cases can be browsed in the [Test Case Reference doc](https:/
 
 If you encounter issues during the installation process, please refer to the [Installation Troubleshooting](https://eest.ethereum.org/main/getting_started/installation_troubleshooting/) page.
 
+## Client Spec Test Reports
+
+- [Frontier](tests/frontier/report.html)
+- [Homestead](tests/homestead/report.html)
+- [Byzantium](tests/byzantium/report.html)
+- [Constantinople](tests/constantinople/report.html)
+- [Istanbul](tests/istanbul/report.html)
+
 ## Contributing
 
 Contributions and feedback are welcome. Please see our [Contributing Guidelines](CONTRIBUTING.md) for detailed information on how to contribute, and the [online documentation](https://eest.ethereum.org/main/writing_tests/) for this repository's coding standards and help on implementing new tests.
