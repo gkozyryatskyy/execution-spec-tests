@@ -11,6 +11,8 @@ from ethereum_test_tools import Opcodes as Op
 
 from .spec import ref_spec_1014
 
+TINY_BAR = 10_000_000_000
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_1014.git_path
 REFERENCE_SPEC_VERSION = ref_spec_1014.version
 
@@ -65,7 +67,7 @@ def test_create2_return_data(
         storage={},
     )
     address_to = pre.deploy_contract(
-        balance=100_000_000,
+        balance=100_000_000 * TINY_BAR,
         code=Op.JUMPDEST()
         + Op.MSTORE(0x100, Op.CALLDATALOAD(0))
         + Op.CALL(0x0900000000, address_call, 0, 0, 0, 0, call_return_size)
