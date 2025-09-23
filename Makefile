@@ -8,6 +8,7 @@
 #
 
 UV=~/.local/bin/uv
+JUNIT2HTML=~/.local/bin/junit2html
 
 FORK=Prague
 SOLO_RPC=http://localhost:7546/
@@ -36,6 +37,11 @@ clean:
 
 tests/%/report.xml: tests/%/*/test_*.py
 	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(SOLO_RPC) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 --junit-xml=$@ --html=tests/$*/report.html --self-contained-html $(ARGS) tests/$*
+
+junit-html: $(patsubst tests/%/report.xml,tests/%/report.junit-xml.html,$(wildcard tests/*/report.xml))
+
+tests/%/report.junit-xml.html: tests/%/report.xml
+	$(JUNIT2HTML) $< $@
 
 SOLO=$(shell kubectl get namespaces | grep solo-setup --invert-match | grep "solo-" | cut -f 1 -d " ")
 
