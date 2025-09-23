@@ -10,6 +10,7 @@ from ethereum_test_forks import Frontier, Homestead
 from ethereum_test_tools import Account, Alloc, Environment, StateTestFiller, Storage, Transaction
 from ethereum_test_tools import Opcodes as Op
 
+MIN_GAS_PRICE = 710000000000
 
 @pytest.mark.parametrize(
     "dup_opcode",
@@ -66,7 +67,7 @@ def test_dup(
         nonce=0,
         to=account,
         gas_limit=500000,
-        gas_price=10,
+        gas_price=10 * MIN_GAS_PRICE,
         protected=False if fork in [Frontier, Homestead] else True,
         data="",
         sender=sender,

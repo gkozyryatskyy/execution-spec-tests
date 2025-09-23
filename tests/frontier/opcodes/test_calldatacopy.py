@@ -6,6 +6,8 @@ from ethereum_test_forks import Byzantium, Fork
 from ethereum_test_tools import Account, Alloc, Bytecode, StateTestFiller, Transaction
 from ethereum_test_vm import Opcodes as Op
 
+MIN_GAS_PRICE = 710000000000
+TINY_BAR=10_000_000_000
 
 @pytest.mark.ported_from(
     [
@@ -173,11 +175,11 @@ def test_calldatacopy(
     tx = Transaction(
         data=tx_data,
         gas_limit=100_000,
-        gas_price=0x0A,
+        gas_price=0x0A * MIN_GAS_PRICE,
         protected=fork >= Byzantium,
         sender=pre.fund_eoa(),
         to=to,
-        value=0x01,
+        value=0x01 * TINY_BAR,
     )
     if to_address_storage:
         post = {code_address: code_address_storage, to: to_address_storage}

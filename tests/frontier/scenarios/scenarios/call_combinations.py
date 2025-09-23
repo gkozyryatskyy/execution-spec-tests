@@ -9,6 +9,7 @@ from ethereum_test_vm import Opcodes as Op
 
 from ..common import Scenario, ScenarioEnvironment, ScenarioGeneratorInput
 
+TINY_BAR = 10_000_000_000
 
 class ScenariosCallCombinations:
     """Class that would generate scenarios for all call combinations."""
@@ -21,10 +22,10 @@ class ScenariosCallCombinations:
         first_call_value = 3
         second_call_value = 5
 
-        root_contract_balance = 105
-        scenario_contract_balance = 107
-        sub_contract_balance = 111
-        program_selfbalance = 113
+        root_contract_balance = 105 * TINY_BAR
+        scenario_contract_balance = 107 * TINY_BAR
+        sub_contract_balance = 111 * TINY_BAR
+        program_selfbalance = 113 * TINY_BAR
 
     """The gas we keep before calling an address"""
     keep_gas = 100000

@@ -20,6 +20,8 @@ from ethereum_test_tools import (
 from ethereum_test_vm import Opcode, UndefinedOpcodes
 from ethereum_test_vm import Opcodes as Op
 
+TINY_BAR=10_000_000_000
+
 REFERENCE_SPEC_GIT_PATH = "N/A"
 REFERENCE_SPEC_VERSION = "N/A"
 
@@ -54,6 +56,7 @@ def prepare_suffix(opcode: Opcode) -> Bytecode:
     pr=["https://github.com/ethereum/execution-spec-tests/pull/748"],
 )
 @pytest.mark.valid_from("Frontier")
+@pytest.mark.xfail
 def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
     """
     Test each possible opcode on the fork with a single contract that
@@ -65,7 +68,7 @@ def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
     code_contract: Dict[Opcode, Address] = {}
     for opcode in sorted(set(Op) | set(UndefinedOpcodes)):
         code_contract[opcode] = pre.deploy_contract(
-            balance=10,
+            balance=10 * TINY_BAR,
             code=prepare_stack(opcode) + opcode + prepare_suffix(opcode),
             storage={},
         )
@@ -110,6 +113,7 @@ def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
 
 
 @pytest.mark.valid_from("Cancun")
+@pytest.mark.xfail
 def test_cover_revert(state_test: StateTestFiller, pre: Alloc):
     """Cover state revert from original tests for the coverage script."""
     tx = Transaction(

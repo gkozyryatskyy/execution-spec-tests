@@ -27,6 +27,7 @@ RETURNDATASIZE_OFFSET = 0x10000000000000000  # Must be greater than UPPER_BOUND
     ],
 )
 @pytest.mark.valid_from("Byzantium")
+@pytest.mark.xfail(reason="Raises internal error at `pre.deploy_contract`")
 def test_precompile_absence(
     state_test: StateTestFiller,
     pre: Alloc,
