@@ -27,6 +27,8 @@ def test_coverage(
 
     Modify this test to cover more Yul code if required in the future.
     """
+    print("Adjusted `MIN_GAS_PRICE` or `TINY_BAR`")
+
     missed_coverage = pre.deploy_contract(
         balance=0,
         code=Op.SHL(0x0000000000000000000000000000000000000000000000000000000000000001, 0x00)
