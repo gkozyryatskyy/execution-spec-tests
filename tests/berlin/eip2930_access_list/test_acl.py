@@ -40,6 +40,7 @@ def test_account_storage_warm_cold_state(
     fork: Fork,
     account_warm: bool,
     storage_key_warm: bool,
+    chain_id: int,
 ):
     """Test type 1 transaction."""
     env = Environment()

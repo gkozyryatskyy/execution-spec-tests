@@ -20,15 +20,14 @@ ARGS+=--sender-fund-refund-gas-limit 1000000
 ARGS+=--seed-account-sweep-amount=70000000000000000000000
 ARGS+=--eoa-fund-amount-default=8000000000000000000000
 
-FORKS=frontier homestead byzantium constantinople istanbul
-# berlin
+FORKS=frontier homestead byzantium constantinople istanbul berlin
 # paris
 # shanghai
 # cancun
 # prague
 REPORTS=$(patsubst %,tests/%/report.xml,$(FORKS))
 
-.PHONY: all clean edit restart
+.PHONY: all clean pods relay-edit relay-restart
 
 all: $(REPORTS)
 
@@ -43,10 +42,16 @@ junit-html: $(patsubst tests/%/report.xml,tests/%/report.junit-xml.html,$(wildca
 tests/%/report.junit-xml.html: tests/%/report.xml
 	$(JUNIT2HTML) $< $@
 
+#
+# Solo commands to view and manage deployment nodes
+#
 SOLO=$(shell kubectl get namespaces | grep solo-setup --invert-match | grep "solo-" | cut -f 1 -d " ")
 
-edit:
+pods:
+	kubectl get pods -n $(SOLO)
+
+relay-edit:
 	kubectl edit configmap -n $(SOLO) relay-node1
 
-restart:
+relay-restart:
 	kubectl rollout restart deployment relay-node1 -n $(SOLO)

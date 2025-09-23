@@ -181,11 +181,11 @@ If you encounter issues during the installation process, please refer to the [In
 
 ## Client Spec Test Reports
 
-- **Frontier** [html](tests/frontier/report.html) | [junit](tests/frontier/report.junit-xml.html)
-- **Homestead** [html](tests/homestead/report.html) | [junit](tests/homestead/report.junit-xml.html)
-- **Byzantium** [html](tests/byzantium/report.html) | [junit](tests/byzantium/report.junit-xml.html)
-- **Constantinople** [html](tests/constantinople/report.html) | [junit](tests/constantinople/report.junit-xml.html)
-- **Istanbul** [html](tests/istanbul/report.html) | [junit](tests/istanbul/report.junit-xml.html)
+- **Frontier** [html](tests/frontier/report.html) \| [junit](tests/frontier/report.junit-xml.html)
+- **Homestead** [html](tests/homestead/report.html) \| [junit](tests/homestead/report.junit-xml.html)
+- **Byzantium** [html](tests/byzantium/report.html) \| [junit](tests/byzantium/report.junit-xml.html)
+- **Constantinople** [html](tests/constantinople/report.html) \| [junit](tests/constantinople/report.junit-xml.html)
+- **Istanbul** [html](tests/istanbul/report.html) \| [junit](tests/istanbul/report.junit-xml.html)
 
 ## Contributing
 
