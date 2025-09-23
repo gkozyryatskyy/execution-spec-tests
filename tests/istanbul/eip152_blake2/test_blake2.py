@@ -21,6 +21,8 @@ from ethereum_test_vm import Opcodes as Op
 from .common import Blake2bInput, ExpectedOutput
 from .spec import SpecTestVectors, ref_spec_152
 
+TINY_BAR = 10_000_000_000
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_152.git_path
 REFERENCE_SPEC_VERSION = ref_spec_152.version
 
@@ -421,7 +423,7 @@ def test_blake2b(
         gas_limit=1_000_000,
         protected=True,
         sender=sender,
-        value=100000,
+        value=100000 * TINY_BAR,
     )
 
     post = {
@@ -554,7 +556,7 @@ def max_tx_gas_limit(fork: Fork) -> int:
     tx_limit = fork.transaction_gas_limit_cap()
     if tx_limit is not None:
         return tx_limit
-    return Environment().gas_limit
+    return pytest.param(Environment().gas_limit, marks=pytest.mark.xfail(reason="Causes Relay's precheck to fail: eth_sendRawTransaction 400 (Transaction gas limit '22500000' exceeds max gas per sec limit '15000000')"))
 
 
 def tx_gas_limits(fork: Fork) -> List[int]:
