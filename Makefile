@@ -19,7 +19,12 @@ ARGS+=--sender-fund-refund-gas-limit 1000000
 ARGS+=--seed-account-sweep-amount=70000000000000000000000
 ARGS+=--eoa-fund-amount-default=8000000000000000000000
 
-FORKS=frontier homestead byzantium
+FORKS=frontier homestead byzantium constantinople istanbul
+# berlin
+# paris
+# shanghai
+# cancun
+# prague
 REPORTS=$(patsubst %,tests/%/report.xml,$(FORKS))
 
 .PHONY: all clean edit restart
