@@ -32,7 +32,7 @@ from ethereum_test_types import compute_create_address
 )
 @pytest.mark.valid_from("Frontier")
 @pytest.mark.with_all_create_opcodes
-@pytest.mark.xfail(reason="Error is due to `MAX_CHILD_RECORDS_EXCEEDED` when sending create transactions")
+@pytest.mark.xfail(reason="Error is due to `MAX_CHILD_RECORDS_EXCEEDED` when creating more than `consensus.handle.maxFollowingRecord` (default 50) contracts within the same transaction")
 def test_create_one_byte(
     state_test: StateTestFiller,
     fork: Fork,
@@ -40,6 +40,9 @@ def test_create_one_byte(
     create_opcode: Op,
 ):
     """Run create deploys with single bytes for each byte."""
+    
+    print("CN config variable `consensus.handle.maxFollowingRecord` needs to be greater than 255 (default 50). Otherwise this test reverts with `MAX_CHILD_RECORDS_EXCEEDED` when creating too many contracts within the same transaction")
+
     initcode: dict[int, Bytecode] = {}
     for byte in range(256):
         initcode[byte] = Op.MSTORE8(0, byte) + Op.RETURN(0, 1)
