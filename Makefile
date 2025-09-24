@@ -10,7 +10,7 @@
 UV=~/.local/bin/uv
 JUNIT2HTML=~/.local/bin/junit2html
 
-FORK=Prague
+FORK=Cancun
 SOLO_RPC=http://localhost:7546/
 SEED_KEY=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106
 
@@ -20,27 +20,26 @@ ARGS+=--sender-fund-refund-gas-limit 1000000
 ARGS+=--seed-account-sweep-amount=70000000000000000000000
 ARGS+=--eoa-fund-amount-default=8000000000000000000000
 
-FORKS=frontier homestead byzantium constantinople istanbul berlin
+# berlin
 # paris
 # shanghai
 # cancun
 # prague
-REPORTS=$(patsubst %,tests/%/report.xml,$(FORKS))
+FORKS=frontier homestead byzantium constantinople istanbul
+XML_HTMLS=$(patsubst %,tests/%/report-junit.xml.html,$(FORKS))
 
 .PHONY: all clean pods relay-edit relay-restart
 
-all: $(REPORTS)
+all: $(XML_HTMLS)
 
-clean:
-	-rm -v $(REPORTS)
+tests/%/report-junit.xml.html: tests/%/report-junit.xml
+	$(JUNIT2HTML) $< $@
 
-tests/%/report.xml: tests/%/*/test_*.py
+tests/%/report-junit.xml: tests/%/*/test_*.py
 	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(SOLO_RPC) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 --junit-xml=$@ --html=tests/$*/report.html --self-contained-html $(ARGS) tests/$*
 
-junit-html: $(patsubst tests/%/report.xml,tests/%/report.junit-xml.html,$(wildcard tests/*/report.xml))
-
-tests/%/report.junit-xml.html: tests/%/report.xml
-	$(JUNIT2HTML) $< $@
+clean:
+	-rm -v $(XML_HTMLS) tests/*/report.html
 
 #
 # Solo commands to view and manage deployment nodes
