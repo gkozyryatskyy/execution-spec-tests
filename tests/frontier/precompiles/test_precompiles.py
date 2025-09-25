@@ -80,6 +80,7 @@ def test_precompiles(
 
     # Empty account to serve as reference
     empty_account = pre.fund_eoa(amount=0)
+    print(f"Empty account with no funds to serve as reference at {empty_account}")
 
     # Memory
     args_offset = 0
@@ -121,10 +122,14 @@ def test_precompiles(
         + Op.STOP,
         storage={0: 0xDEADBEEF},
     )
+    print(f"Caller contract deployed at {account}")
+
+    sender = pre.fund_eoa()
+    print(f"Sender account funded at {sender}")
 
     tx = Transaction(
         to=account,
-        sender=pre.fund_eoa(),
+        sender=sender,
         gas_limit=1_000_000,
         protected=True,
     )

@@ -27,7 +27,7 @@ RETURNDATASIZE_OFFSET = 0x10000000000000000  # Must be greater than UPPER_BOUND
     ],
 )
 @pytest.mark.valid_from("Byzantium")
-@pytest.mark.xfail(reason="Raises internal error at `pre.deploy_contract`")
+@pytest.mark.skip(reason="Raises internal error at `pre.deploy_contract`: 'initcode prefix too long'. This test can be safely skipped. See issue https://github.com/ethereum/execution-spec-tests/issues/1700.")
 def test_precompile_absence(
     state_test: StateTestFiller,
     pre: Alloc,

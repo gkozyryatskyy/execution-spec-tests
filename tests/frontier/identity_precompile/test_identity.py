@@ -60,12 +60,12 @@ TINY_BAR = 10_000_000_000
             id="identity_1",
         ),
         pytest.param(
-            CallArgs(gas=0x30D40 * MIN_GAS_PRICE, value=0x1, args_size=0x0),
+            CallArgs(gas=0x30D40, value=0x1, args_size=0x0),
             (0x1,),
             0x1 * TINY_BAR,
             True,
             id="identity_1_nonzerovalue",
-            marks=pytest.mark.skip(reason="Note: value was updated to pass Relay's precheck but it still fails"),
+            marks=pytest.mark.skip(reason="Do we support value transfer to identity precompile?"),
         ),
         pytest.param(
             CallArgs(gas=0x30D40, value=0x1, args_size=0x0),
@@ -138,10 +138,14 @@ def test_call_identity_precompile(
         storage=storage.canary(),
         balance=contract_balance,
     )
+    print(f"Contract account is {account}")
+
+    sender = pre.fund_eoa()
+    print(f"Sender account is {sender}")
 
     tx = Transaction(
         to=account,
-        sender=pre.fund_eoa(),
+        sender=sender,
         gas_limit=tx_gas_limit,
     )
 
