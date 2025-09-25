@@ -22,10 +22,10 @@ class ScenariosCallCombinations:
         first_call_value = 3
         second_call_value = 5
 
-        root_contract_balance = 105 * TINY_BAR
-        scenario_contract_balance = 107 * TINY_BAR
-        sub_contract_balance = 111 * TINY_BAR
-        program_selfbalance = 113 * TINY_BAR
+        root_contract_balance = 105
+        scenario_contract_balance = 107
+        sub_contract_balance = 111
+        program_selfbalance = 113
 
     """The gas we keep before calling an address"""
     keep_gas = 100000
@@ -88,7 +88,7 @@ class ScenariosCallCombinations:
         pre: Alloc = scenario_input.pre
         balance = self.balance
         operation_contract = pre.deploy_contract(
-            code=scenario_input.operation_code, balance=balance.program_selfbalance
+            code=scenario_input.operation_code, balance=balance.program_selfbalance * TINY_BAR
         )
 
         scenario_contract = pre.deploy_contract(
@@ -112,7 +112,7 @@ class ScenariosCallCombinations:
                 )
             )
             + Op.RETURN(0, 32),
-            balance=balance.scenario_contract_balance,
+            balance=balance.scenario_contract_balance * TINY_BAR,
         )
 
         root_contract = pre.deploy_contract(
@@ -122,7 +122,7 @@ class ScenariosCallCombinations:
                 ret_size=32,
             )
             + Op.RETURN(0, 32),
-            balance=balance.root_contract_balance,
+            balance=balance.root_contract_balance * TINY_BAR,
         )
 
         return Scenario(
@@ -236,7 +236,7 @@ class ScenariosCallCombinations:
         second_call_value = balance.second_call_value if first_call != Op.STATICCALL else 0
 
         operation_contract = pre.deploy_contract(
-            code=scenario_input.operation_code, balance=balance.program_selfbalance
+            code=scenario_input.operation_code, balance=balance.program_selfbalance * TINY_BAR
         )
         sub_contract = pre.deploy_contract(
             code=Op.MSTORE(32, 1122334455)
@@ -259,7 +259,7 @@ class ScenariosCallCombinations:
                 )
             )
             + Op.RETURN(0, 32),
-            balance=balance.sub_contract_balance,
+            balance=balance.sub_contract_balance * TINY_BAR,
         )
         scenario_contract = pre.deploy_contract(
             code=(
@@ -277,11 +277,11 @@ class ScenariosCallCombinations:
                 )
             )
             + Op.RETURN(0, 32),
-            balance=balance.scenario_contract_balance,
+            balance=balance.scenario_contract_balance * TINY_BAR,
         )
 
         root_contract = pre.deploy_contract(
-            balance=balance.root_contract_balance,
+            balance=balance.root_contract_balance * TINY_BAR,
             code=Op.CALL(
                 gas=Op.SUB(Op.GAS, self.keep_gas),
                 address=scenario_contract,

@@ -20,8 +20,8 @@ class AddressBalance:
     root_call_value = 1
     create_value = 3
     call_value = 5
-    root_contract_balance = 100 * TINY_BAR
-    scenario_contract_balance = 200 * TINY_BAR
+    root_contract_balance = 100
+    scenario_contract_balance = 200
 
 
 def scenarios_create_combinations(scenario_input: ScenarioGeneratorInput) -> List[Scenario]:
@@ -104,7 +104,7 @@ def scenarios_create_combinations(scenario_input: ScenarioGeneratorInput) -> Lis
             salt = [0] if create == Op.CREATE2 else []
 
             scenario_contract = pre.deploy_contract(
-                balance=balance.scenario_contract_balance,
+                balance=balance.scenario_contract_balance * TINY_BAR,
                 code=Om.MSTORE(deploy_code, 0)
                 + Op.MSTORE(32, create(balance.create_value, 0, deploy_code_size, *salt))
                 + Op.MSTORE(0, 0)
@@ -133,7 +133,7 @@ def scenarios_create_combinations(scenario_input: ScenarioGeneratorInput) -> Lis
             )
 
             root_contract = pre.deploy_contract(
-                balance=balance.root_contract_balance,
+                balance=balance.root_contract_balance * TINY_BAR,
                 code=Op.CALL(
                     gas=Op.SUB(Op.GAS, keep_gas),
                     address=scenario_contract,
