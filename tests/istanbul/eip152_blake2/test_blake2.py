@@ -556,7 +556,7 @@ def max_tx_gas_limit(fork: Fork) -> int:
     tx_limit = fork.transaction_gas_limit_cap()
     if tx_limit is not None:
         return tx_limit
-    return pytest.param(Environment().gas_limit, marks=pytest.mark.xfail(reason="Causes Relay's precheck to fail: eth_sendRawTransaction 400 (Transaction gas limit '22500000' exceeds max gas per sec limit '15000000')"))
+    return Environment().gas_limit
 
 
 def tx_gas_limits(fork: Fork) -> List[int]:

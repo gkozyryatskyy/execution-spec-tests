@@ -7,6 +7,10 @@
 # solo account update --account-id 0.0.1018 --deployment $DEPLOYMENT --hbar-amount 1000000000
 #
 
+# The following environment variables were set in the Relay configmap
+# MAX_TRANSACTION_FEE_THRESHOLD: "22500000"                                         
+# RATE_LIMIT_DISABLED: "true"                                                       
+
 UV=~/.local/bin/uv
 JUNIT2HTML=~/.local/bin/junit2html
 
