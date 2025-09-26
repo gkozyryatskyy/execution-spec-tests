@@ -26,13 +26,15 @@ ARGS+=--seed-account-sweep-amount=70000000000000000000000
 ARGS+=--eoa-fund-amount-default=8000000000000000000000
 
 # berlin
-# paris
 # cancun
-FORKS=frontier homestead byzantium constantinople istanbul shanghai
+FORKS=frontier homestead byzantium constantinople istanbul paris shanghai
 
 .PHONY: all clean pods relay-edit relay-restart
 
 all: report.html
+
+test-reports: $(patsubst %,%.html, $(foreach fork,$(FORKS),$(wildcard tests/$(fork)/*/test_*.py)) )
+	@echo $?
 
 report.html: $(patsubst %,tests/%-fork.html,$(FORKS))
 	$(HTML_MERGER) --title "Report - $(FORKS)" --input tests/ --output $@
