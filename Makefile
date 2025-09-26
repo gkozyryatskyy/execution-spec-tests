@@ -12,48 +12,38 @@
 # RATE_LIMIT_DISABLED: "true"                                                       
 
 UV=~/.local/bin/uv
-# https://github.com/akavbathen/pytest_html_merger
-HTML_MERGER=~/.local/bin/pytest_html_merger
 
 FORK=Cancun
-SOLO_RPC=http://localhost:7546/
+RPC_URL=http://localhost:7546/
 SEED_KEY=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106
 
-ARGS=--sender-funding-txs-gas-price 710000000000
-ARGS+=--default-gas-price 710000000000
-ARGS+=--sender-fund-refund-gas-limit 1000000
-ARGS+=--seed-account-sweep-amount=70000000000000000000000
-ARGS+=--eoa-fund-amount-default=8000000000000000000000
-
-# berlin
-# cancun
-FORKS=frontier homestead byzantium constantinople istanbul paris shanghai
+FORKS=frontier homestead byzantium constantinople istanbul paris shanghai cancun
 
 .PHONY: all clean pods relay-edit relay-restart
 
-all: report.html
+all: $(FORKS:%=tests/%/report.html)
 
-test-reports: $(patsubst %,%.html, $(foreach fork,$(FORKS),$(wildcard tests/$(fork)/*/test_*.py)) )
-	@echo $?
+$(FORKS): %: tests/%/report.html
 
-report.html: $(patsubst %,tests/%-fork.html,$(FORKS))
-	$(HTML_MERGER) --title "Report - $(FORKS)" --input tests/ --output $@
-
-P:=%
-.SECONDEXPANSION:
-.PRECIOUS: tests/%-feat.html tests/%.py.html
-
-tests/%-fork.html: $$(patsubst $$(P)/,$$(P)-feat.html,$$(dir $$(wildcard tests/%/*/test_*.py)))
-	$(HTML_MERGER) --input tests/$* --output $@
-
-tests/%-feat.html: $$(patsubst $$(P).py,$$(P).py.html,$$(wildcard tests/%/test_*.py))
-	$(HTML_MERGER) --input tests/$* --output $@
-
-tests/%.py.html: tests/%.py
-	$(UV) run execute remote -rA --verbose --suppress-no-test-exit-code --fork=$(FORK) --rpc-endpoint=$(SOLO_RPC) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 --html=$@ --self-contained-html $(ARGS) $<
+tests/%/report.html: CHAIN_ID=$(shell cat .chain-id)
+tests/%/report.html: tests/%/*/test_*.py .chain-id
+	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id $(CHAIN_ID) \
+		--html=$@ --self-contained-html \
+		--sender-funding-txs-gas-price 710000000000 \
+		--default-gas-price 710000000000 \
+		--sender-fund-refund-gas-limit 1000000 \
+		--seed-account-sweep-amount=70000000000000000000000 \
+		--eoa-fund-amount-default=8000000000000000000000 $(PYTEST_OPTS) tests/$*
 
 clean:
-	-rm -v tests/*/*/test_*.py.html
+	-rm -v tests/*/report.html .chain-id
+
+# Determines the network's chain ID from the JSON-RPC url
+# Using `curl` and `jq` instead of `cast` to avoid dependency on Foundry
+# Using Foundry's `cast` command
+# cast chain-id --rpc-url $(RPC_URL) > .chain-id
+.chain-id:
+	echo $$((`curl --request POST --url $(RPC_URL) --data '{ "method":"eth_chainId", "id":1, "jsonrpc":"2.0"}' | jq --raw-output .result`)) > .chain-id
 
 #
 # Solo commands to view and manage deployment nodes

@@ -157,7 +157,7 @@ def scenarios(fork: Fork, pre: Alloc, test_program: ScenarioTestProgram) -> List
         pytest.param(ProgramBlockhash(), marks=[pytest.mark.slow()]),
         ProgramCoinbase(),
         ProgramTimestamp(),
-        pytest.param(ProgramNumber(), marks=pytest.mark.xfail(reason="It is comparing current block number against hardcoded value 1")),
+        pytest.param(ProgramNumber(), marks=pytest.mark.skip(reason="It compares network's current block number against hardcoded value 1")),
         ProgramDifficultyRandao(),
         pytest.param(ProgramGasLimit(), marks=pytest.mark.xfail),
         ProgramChainid(),
