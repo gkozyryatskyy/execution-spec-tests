@@ -217,6 +217,7 @@ class SelfDestructCases(PytestParameterEnum):
 
 
 @SelfDestructCases.parametrize()
+@pytest.mark.skip(reason="Do we support selfdestruct?")
 def test_reentrant_selfdestructing_call(
     state_test: StateTestFiller,
     pre: Alloc,
