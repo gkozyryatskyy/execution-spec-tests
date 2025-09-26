@@ -1,7 +1,6 @@
 """Types used in the RPC module for `eth` and `engine` namespaces' requests."""
 
 import json
-import ethereum_rlp as eth_rlp
 from binascii import crc32
 from enum import Enum
 from hashlib import sha256
@@ -80,29 +79,6 @@ class TransactionByHashResponse(Transaction):
         us.
         """
         Transaction.model_post_init(self, __context)
-        # TODO Glib: hash calculation fixes --------------
-        # if self.transaction_hash != self.hash:
-        #     original_tx = __context.get('original_tx')
-        #     old_hash = str(self.hash)
-        #     old_self = str(self)
-        #     old_rlp = Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex()
-        #
-        #     self.gas_limit = original_tx.gas_limit # TODO Glib: Fix for hash calculation
-        #     self.value = original_tx.value # TODO Glib: Fix for hash calculation
-        #     del self.hash # cleaning up a cached 'hash' value
-        #     if self.transaction_hash != self.hash:
-        #         # TODO Glib: In this case we also assume the problem is on the consensus side, with empty 'to' param
-        #         # self.to = None
-        #         # del self.hash
-        #         print("eth_getTransactionByHash tx hash:", self.transaction_hash)
-        #         print("eth_getTransactionByHash old hash:", old_hash)
-        #         print("eth_getTransactionByHash new hash:", str(self.hash))
-        #         print("eth_getTransactionByHash original tx:", original_tx)
-        #         print("eth_getTransactionByHash old self:", old_self)
-        #         print("eth_getTransactionByHash new self:", str(self))
-        #         print("eth_getTransactionByHash old rlp:", old_rlp)
-        #         print("eth_getTransactionByHash new rlp:", Bytes(self.get_rlp_prefix() + eth_rlp.encode(self.to_list(signing=False))).hex())
-        # TODO Glib: ------------------------------------------
         # TODO Glib: hashes are not matching because of:
         #  - https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4318
         #  - https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4327

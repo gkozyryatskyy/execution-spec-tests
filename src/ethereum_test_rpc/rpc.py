@@ -110,6 +110,10 @@ class BaseRPC:
 
         logger.debug(f"Sending RPC request, timeout is set to {timeout}...")
         response = requests.post(self.url, json=payload, headers=headers, timeout=timeout)
+
+        if 400 <= response.status_code < 500 or 500 <= response.status_code < 600:
+            print(f"post_request: {response.json()} payload: {payload}")
+
         response.raise_for_status()
         response_json = response.json()
 
@@ -208,7 +212,7 @@ class EthRPC(BaseRPC):
 
         return int(response, 16)
 
-    def get_transaction_by_hash(self, transaction_hash: Hash, original_tx: Transaction) -> TransactionByHashResponse | None:
+    def get_transaction_by_hash(self, transaction_hash: Hash) -> TransactionByHashResponse | None:
         """`eth_getTransactionByHash`: Returns transaction details."""
         try:
             response = self.post_request(
@@ -217,9 +221,7 @@ class EthRPC(BaseRPC):
             if response is None:
                 return None
             return TransactionByHashResponse.model_validate(
-                # response, context=self.response_validation_context
-                # TODO Glib: putting original_tx into the context
-                response, context={'original_tx': original_tx}
+                response, context=self.response_validation_context
             )
         except ValidationError as e:
             pprint(e.errors())
@@ -297,7 +299,7 @@ class EthRPC(BaseRPC):
         tx_hash = transaction.hash
         start_time = time.time()
         while True:
-            tx = self.get_transaction_by_hash(tx_hash, transaction)
+            tx = self.get_transaction_by_hash(tx_hash)
             if tx is not None and tx.block_number is not None:
                 return tx
             if (time.time() - start_time) > self.transaction_wait_timeout:
@@ -320,11 +322,9 @@ class EthRPC(BaseRPC):
         start_time = time.time()
         while True:
             i = 0
-            j = 0
             while i < len(tx_hashes):
                 tx_hash = tx_hashes[i]
-                tx = self.get_transaction_by_hash(tx_hash, transactions[j])
-                j += 1
+                tx = self.get_transaction_by_hash(tx_hash)
                 if tx is not None and tx.block_number is not None:
                     responses.append(tx)
                     tx_hashes.pop(i)
