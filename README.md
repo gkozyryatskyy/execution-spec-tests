@@ -181,16 +181,14 @@ If you encounter issues during the installation process, please refer to the [In
 
 ## Client Spec Test Reports
 
-[**Main report**](./report.html)
-
-- **Frontier** [html](./tests/frontier-fork.html)
-- **Homestead** [html](./tests/homestead-fork.html)
-- **Byzantium** [html](./tests/byzantium-fork.html)
-- **Constantinople** [html](./tests/constantinople-fork.html)
-- **Istanbul** [html](./tests/istanbul-fork.html)
+- **Frontier** [html](./tests/frontier/report.html)
+- **Homestead** [html](./tests/homestead/report.html)
+- **Byzantium** [html](./tests/byzantium/report.html)
+- **Constantinople** [html](./tests/constantinople/report.html)
+- **Istanbul** [html](./tests/istanbul/report.html)
 - **Berlin** _TBD_
-- **Paris** [html](./tests/paris-fork.html)
-- **Shanghai** [html](./tests/shanghai-fork.html)
+- **Paris** [html](./tests/paris/report.html)
+- **Shanghai** [html](./tests/shanghai/report.html)
 - **Cancun** _TBD_
 
 ## Contributing
