@@ -13,6 +13,7 @@
 
 UV=~/.local/bin/uv
 JUNIT2HTML=~/.local/bin/junit2html
+HTML_MERGER=~/.local/bin/pytest_html_merger
 
 FORK=Cancun
 SOLO_RPC=http://localhost:7546/
@@ -26,21 +27,54 @@ ARGS+=--eoa-fund-amount-default=8000000000000000000000
 
 # berlin
 # paris
-# shanghai
 # cancun
-# prague
-FORKS=frontier homestead byzantium constantinople istanbul
+# FORKS=frontier homestead byzantium constantinople istanbul shanghai cancun
+FORKS=byzantium constantinople
 XML_HTMLS=$(patsubst %,tests/%/report-junit.xml.html,$(FORKS))
 
 .PHONY: all clean pods relay-edit relay-restart
 
-all: $(XML_HTMLS)
+TEST_PYS=$(wildcard tests/*/*/test_*.py)
+EIPS_REPORTS=$(patsubst %/,%.html,$(dir $(TEST_PYS)))
 
-tests/%/report-junit.xml.html: tests/%/report-junit.xml
-	$(JUNIT2HTML) $< $@
+XML_HTMLS=$(patsubst %,%report-junit.xml.html,$(EIPS))
 
-tests/%/report-junit.xml: tests/%/*/test_*.py
-	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(SOLO_RPC) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 --junit-xml=$@ --html=tests/$*/report.html --self-contained-html $(ARGS) tests/$*
+all: report.html
+# 	@echo $(EIPS_REPORTS)
+
+report.html: $(patsubst %,tests/report-%.html,$(FORKS))
+	@echo $? "-->>" $@
+	$(HTML_MERGER) -i tests/ -o $@
+
+P:=%
+
+# tests/report-%.html: $(patsubst $(P),$(P)-eip.html,tests/%/eip*)
+# 	@echo $? "-->>" $@
+
+.SECONDEXPANSION:
+
+# tests/report-%.html: $$(patsubst $$(P),$$(P)-eip.html,tests/%/eip*)
+# 	@echo $? "-->>" $@
+
+tests/report-%.html: $$(patsubst $$(P)/,$$(P)-eip.html,$$(dir $$(wildcard tests/%/*/test_*.py)))
+# tests/report-%.html: $$(addsuffix .asdf,$$(dir $$(wildcard tests/%/*/test_*.py)) )
+# tests/report-%.html: $(filter tests/%/*.html,$(EIPS_REPORTS))
+	@echo $? "-->>" $@ $*
+	$(HTML_MERGER) -i tests/$* -o $@
+
+# tests/%/report-junit.xml: tests/%/test_*.py
+
+.PRECIOUS: tests/%-eip.html tests/%.py.html
+
+tests/%-eip.html: $$(patsubst $$(P).py,$$(P).py.html,$$(wildcard tests/%/test_*.py))
+	@echo merge eip $? $@ $*
+	$(HTML_MERGER) -i tests/$* -o $@
+
+# tests/%.html: tests/%/test_*.html
+
+
+tests/%.py.html: tests/%.py
+	$(UV) run execute remote -rA --verbose --suppress-no-test-exit-code --fork=$(FORK) --rpc-endpoint=$(SOLO_RPC) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 --html=$@ --self-contained-html $(ARGS) $<
 
 clean:
 	-rm -v $(XML_HTMLS) tests/*/report.html
