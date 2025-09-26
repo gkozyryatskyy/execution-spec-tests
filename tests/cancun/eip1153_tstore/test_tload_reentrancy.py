@@ -25,6 +25,8 @@ from ethereum_test_vm import Opcodes as Op
 REFERENCE_SPEC_GIT_PATH = "EIPS/eip-1153.md"
 REFERENCE_SPEC_VERSION = "1eb863b534a5a3e19e9c196ab2a7f3db4bb9da17"
 
+MIN_GAS_PRICE = 710000000000
+TINY_BAR = 10_000_000_000
 
 class CallDestType(Enum):
     """Call dest type."""
@@ -154,10 +156,13 @@ def test_tload_reentrancy(
             )
         }
 
+    sender = pre.fund_eoa(7_000_000_000 * TINY_BAR)
+    print(f"Sender account {sender}")
+
     tx = Transaction(
-        sender=pre.fund_eoa(7_000_000_000_000_000_000),
+        sender=sender,
         to=address_to,
-        gas_price=10,
+        gas_price=10 * MIN_GAS_PRICE,
         data=Hash(do_reenter),
         gas_limit=5000000,
         value=0,
