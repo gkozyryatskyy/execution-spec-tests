@@ -12,7 +12,7 @@
 # RATE_LIMIT_DISABLED: "true"                                                       
 
 UV=~/.local/bin/uv
-JUNIT2HTML=~/.local/bin/junit2html
+# https://github.com/akavbathen/pytest_html_merger
 HTML_MERGER=~/.local/bin/pytest_html_merger
 
 FORK=Cancun
@@ -28,56 +28,30 @@ ARGS+=--eoa-fund-amount-default=8000000000000000000000
 # berlin
 # paris
 # cancun
-# FORKS=frontier homestead byzantium constantinople istanbul shanghai cancun
-FORKS=byzantium constantinople
-XML_HTMLS=$(patsubst %,tests/%/report-junit.xml.html,$(FORKS))
+FORKS=frontier homestead byzantium constantinople istanbul shanghai
 
 .PHONY: all clean pods relay-edit relay-restart
 
-TEST_PYS=$(wildcard tests/*/*/test_*.py)
-EIPS_REPORTS=$(patsubst %/,%.html,$(dir $(TEST_PYS)))
-
-XML_HTMLS=$(patsubst %,%report-junit.xml.html,$(EIPS))
-
 all: report.html
-# 	@echo $(EIPS_REPORTS)
 
-report.html: $(patsubst %,tests/report-%.html,$(FORKS))
-	@echo $? "-->>" $@
-	$(HTML_MERGER) -i tests/ -o $@
+report.html: $(patsubst %,tests/%-fork.html,$(FORKS))
+	$(HTML_MERGER) --title "Report - $(FORKS)" --input tests/ --output $@
 
 P:=%
-
-# tests/report-%.html: $(patsubst $(P),$(P)-eip.html,tests/%/eip*)
-# 	@echo $? "-->>" $@
-
 .SECONDEXPANSION:
+.PRECIOUS: tests/%-feat.html tests/%.py.html
 
-# tests/report-%.html: $$(patsubst $$(P),$$(P)-eip.html,tests/%/eip*)
-# 	@echo $? "-->>" $@
+tests/%-fork.html: $$(patsubst $$(P)/,$$(P)-feat.html,$$(dir $$(wildcard tests/%/*/test_*.py)))
+	$(HTML_MERGER) --input tests/$* --output $@
 
-tests/report-%.html: $$(patsubst $$(P)/,$$(P)-eip.html,$$(dir $$(wildcard tests/%/*/test_*.py)))
-# tests/report-%.html: $$(addsuffix .asdf,$$(dir $$(wildcard tests/%/*/test_*.py)) )
-# tests/report-%.html: $(filter tests/%/*.html,$(EIPS_REPORTS))
-	@echo $? "-->>" $@ $*
-	$(HTML_MERGER) -i tests/$* -o $@
-
-# tests/%/report-junit.xml: tests/%/test_*.py
-
-.PRECIOUS: tests/%-eip.html tests/%.py.html
-
-tests/%-eip.html: $$(patsubst $$(P).py,$$(P).py.html,$$(wildcard tests/%/test_*.py))
-	@echo merge eip $? $@ $*
-	$(HTML_MERGER) -i tests/$* -o $@
-
-# tests/%.html: tests/%/test_*.html
-
+tests/%-feat.html: $$(patsubst $$(P).py,$$(P).py.html,$$(wildcard tests/%/test_*.py))
+	$(HTML_MERGER) --input tests/$* --output $@
 
 tests/%.py.html: tests/%.py
 	$(UV) run execute remote -rA --verbose --suppress-no-test-exit-code --fork=$(FORK) --rpc-endpoint=$(SOLO_RPC) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 --html=$@ --self-contained-html $(ARGS) $<
 
 clean:
-	-rm -v $(XML_HTMLS) tests/*/report.html
+	-rm -v tests/*/*/test_*.py.html
 
 #
 # Solo commands to view and manage deployment nodes
