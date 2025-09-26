@@ -131,6 +131,16 @@ def pytest_configure(config: pytest.Config):
         # Potentially could be `engine_getClientVersionV1` but need to implement this in rpc.py.
     config.engine_rpc = engine_rpc  # type: ignore
 
+    # Add option to suppress "no tests collected" exit code
+    # Adapted from https://github.com/yashtodi94/pytest-custom_exit_code
+    group = parser.getgroup('custom_exit_code')
+    group.addoption(
+        '--suppress-no-test-exit-code',
+        action='store_true',
+        default=False,
+        help='Suppress the "no tests collected" exit code.'
+    )
+
 
 @pytest.fixture(scope="session")
 def engine_rpc(request) -> EngineRPC | None:
