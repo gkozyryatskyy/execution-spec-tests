@@ -15,8 +15,6 @@ from .spec import Spec, ref_spec_1153
 REFERENCE_SPEC_GIT_PATH = ref_spec_1153.git_path
 REFERENCE_SPEC_VERSION = ref_spec_1153.version
 
-MIN_GAS_PRICE = 710000000000
-TINY_BAR = 10_000_000_000
 
 @pytest.mark.ported_from(
     [
@@ -57,13 +55,10 @@ def test_basic_tload_transaction_begin(
         )
     }
 
-    sender = pre.fund_eoa(7_000_000_000 * TINY_BAR)
-    print(f"Sender account {sender}")
-
     tx = Transaction(
-        sender=sender,
+        sender=pre.fund_eoa(7_000_000_000_000_000_000),
         to=address_to,
-        gas_price=10 * MIN_GAS_PRICE,
+        gas_price=10,
         data=b"",
         gas_limit=5000000,
         value=0,
@@ -118,13 +113,10 @@ def test_basic_tload_works(
         )
     }
 
-    sender = pre.fund_eoa(7_000_000_000 * TINY_BAR)
-    print(f"Sender account {sender}")
-
     tx = Transaction(
-        sender=sender,
+        sender=pre.fund_eoa(7_000_000_000_000_000_000),
         to=address_to,
-        gas_price=10 * MIN_GAS_PRICE,
+        gas_price=10,
         data=b"",
         gas_limit=5000000,
         value=0,
@@ -175,13 +167,10 @@ def test_basic_tload_other_after_tstore(
         )
     }
 
-    sender = pre.fund_eoa(7_000_000_000 * TINY_BAR)
-    print(f"Sender account {sender}")
-
     tx = Transaction(
-        sender=sender,
+        sender=pre.fund_eoa(7_000_000_000_000_000_000),
         to=address_to,
-        gas_price=10 * MIN_GAS_PRICE,
+        gas_price=10,
         data=b"",
         gas_limit=5000000,
         value=0,
@@ -262,13 +251,10 @@ def test_basic_tload_gasprice(
         )
     }
 
-    sender = pre.fund_eoa(7_000_000_000 * TINY_BAR)
-    print(f"Sender account {sender}")
-
     tx = Transaction(
-        sender=sender,
+        sender=pre.fund_eoa(7_000_000_000_000_000_000),
         to=address_to,
-        gas_price=10 * MIN_GAS_PRICE,
+        gas_price=10,
         data=b"",
         gas_limit=5000000,
         value=0,
@@ -316,13 +302,10 @@ def test_basic_tload_after_store(
         }
     )
 
-    sender = pre.fund_eoa(7_000_000_000 * TINY_BAR)
-    print(f"Sender account {sender}")
-
     tx = Transaction(
-        sender=sender,
+        sender=pre.fund_eoa(7_000_000_000_000_000_000),
         to=address_to,
-        gas_price=10 * MIN_GAS_PRICE,
+        gas_price=10,
         data=b"",
         gas_limit=5000000,
         value=0,
