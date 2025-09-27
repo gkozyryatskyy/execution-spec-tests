@@ -260,9 +260,8 @@ class Transaction(
     TransactionGeneric[HexNumber], TransactionTransitionToolConverter, SignableRLPSerializable
 ):
     """Generic object that can represent all Ethereum transaction types."""
-    # TODO Glib; fix for testnet 'gas_limit', somehow it takes 600_000 gas for some transfer transactions
-    #  like this one https://hashscan.io/testnet/transaction/1756295734.438319000/result
-    gas_limit: HexNumber = Field(HexNumber(1_000_000), serialization_alias="gas")
+
+    gas_limit: HexNumber = Field(HexNumber(21_000), serialization_alias="gas")
     to: Address | None = Field(Address(0xAA))
     data: Bytes = Field(Bytes(b""), alias="input")
 
@@ -304,6 +303,13 @@ class Transaction(
         """Ensure transaction has no conflicting properties."""
         super().model_post_init(__context)
 
+        print(f"[DEBUG] Transaction value {self.value}")
+
+        TINY_BAR = 10_000_000_000
+        if 0 < self.value < TINY_BAR:
+            self.value = self.value * TINY_BAR
+            print(f"[DEBUG] Transaction value {self.value} adjusting to TINY_BAR")
+
         if self.gas_price is not None and (
             self.max_fee_per_gas is not None
             or self.max_priority_fee_per_gas is not None
@@ -339,10 +345,14 @@ class Transaction(
         # Set default values for fields that are required for certain tx types
         if self.ty <= 1 and self.gas_price is None:
             self.gas_price = TransactionDefaults.gas_price
-        if self.ty >= 1 and self.access_list is None:
+        if self.ty >= 1: # and self.access_list is None:
             self.access_list = []
         if self.ty < 1:
             assert self.access_list is None, "access_list must be None"
+
+        if not self.gas_price is None and self.gas_price < 710000000000:
+            self.gas_price += 710000000000
+            print(f"[DEBUG] Adjusted gas_price {self.gas_price }")
 
         if self.ty >= 2 and self.max_fee_per_gas is None:
             self.max_fee_per_gas = TransactionDefaults.max_fee_per_gas
@@ -351,6 +361,13 @@ class Transaction(
         if self.ty < 2:
             assert self.max_fee_per_gas is None, "max_fee_per_gas must be None"
             assert self.max_priority_fee_per_gas is None, "max_priority_fee_per_gas must be None"
+
+        if not self.max_fee_per_gas is None and self.max_fee_per_gas < 710000000000:
+            self.max_fee_per_gas += 710000000000
+            print(f"[DEBUG] Adjusted max_fee_per_gas {self.max_fee_per_gas }")
+        if not self.max_priority_fee_per_gas is None and self.max_priority_fee_per_gas < 710000000000:
+            self.max_priority_fee_per_gas += 710000000000
+            print(f"[DEBUG] Adjusted max_priority_fee_per_gas {self.max_priority_fee_per_gas  }")
 
         if self.ty == 3 and self.max_fee_per_blob_gas is None:
             self.max_fee_per_blob_gas = 1
