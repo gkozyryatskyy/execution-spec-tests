@@ -6,6 +6,7 @@ note: Tests ported from:
     - [ethereum/tests/pull/990](https://github.com/ethereum/tests/pull/990)
     - [ethereum/tests/pull/1012](https://github.com/ethereum/tests/pull/990)
 """
+
 from typing import List
 
 import pytest
@@ -476,7 +477,6 @@ class TestCreateInitcode:
     @pytest.fixture
     def tx(self, caller_contract_address: Address, initcode: Initcode, sender: EOA) -> Transaction:
         """Generate transaction that executes the caller contract."""
-
         return Transaction(
             nonce=0,
             to=caller_contract_address,
