@@ -45,8 +45,6 @@ from ethereum_test_tools import Opcodes as Op
 
 from .spec import Spec, SpecHelpers, ref_spec_4844
 
-TINY_BAR = 10_000_000_000
-
 REFERENCE_SPEC_GIT_PATH = ref_spec_4844.git_path
 REFERENCE_SPEC_VERSION = ref_spec_4844.version
 
@@ -71,7 +69,7 @@ def destination_account(
     if destination_account_code is not None:
         return pre.deploy_contract(
             code=destination_account_code,
-            balance=destination_account_balance * TINY_BAR,
+            balance=destination_account_balance,
         )
     return pre.fund_eoa(destination_account_balance)
 
@@ -193,7 +191,7 @@ def sender_initial_balance(  # noqa: D103
 @pytest.fixture
 def sender(pre: Alloc, sender_initial_balance: int) -> Address:  # noqa: D103
     print(f"Sender initial balance {sender_initial_balance}")
-    return pre.fund_eoa(sender_initial_balance * TINY_BAR)
+    return pre.fund_eoa(sender_initial_balance)
 
 
 @pytest.fixture
@@ -749,7 +747,7 @@ def test_sufficient_balance_blob_tx_pre_fund_tx(
     - Transactions with and without calldata
     - Transactions with max fee per blob gas lower or higher than the priority fee
     """
-    pre_funding_sender = pre.fund_eoa(amount=((21_000 * 100) + total_account_minimum_balance) * TINY_BAR)
+    pre_funding_sender = pre.fund_eoa(amount=(21_000 * 100) + total_account_minimum_balance)
     txs = [
         Transaction(
             sender=pre_funding_sender,
