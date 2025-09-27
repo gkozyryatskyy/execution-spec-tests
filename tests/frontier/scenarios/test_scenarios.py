@@ -70,8 +70,6 @@ from .scenarios.create_combinations import scenarios_create_combinations
 from .scenarios.double_call_combinations import scenarios_double_call_combinations
 from .scenarios.revert_combinations import scenarios_revert_combinations
 
-MIN_GAS_PRICE = 710000000000
-
 REFERENCE_SPEC_GIT_PATH = "N/A"
 REFERENCE_SPEC_VERSION = "N/A"
 
