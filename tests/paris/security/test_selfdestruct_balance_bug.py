@@ -25,7 +25,6 @@ from ethereum_test_tools import (
 )
 from ethereum_test_vm import Opcodes as Op
 
-TINY_BAR = 10_000_000_000
 
 @pytest.mark.valid_from("Constantinople")
 @pytest.mark.xfail(reason="Do we support this test?")
@@ -86,7 +85,7 @@ def test_tx_selfdestruct_balance_bug(blockchain_test: BlockchainTestFiller, pre:
         + Op.CALL(gas=100000, address=Op.MLOAD(0), value=1)
     )
 
-    cc_address = pre.deploy_contract(cc_code, balance=1000000000 * TINY_BAR)
+    cc_address = pre.deploy_contract(cc_code, balance=1000000000)
     aa_location = compute_create_address(address=cc_address, nonce=1)
     balance_code = Op.SSTORE(0xBA1AA, Op.BALANCE(aa_location))
     balance_address_1 = pre.deploy_contract(balance_code)
@@ -116,7 +115,7 @@ def test_tx_selfdestruct_balance_bug(blockchain_test: BlockchainTestFiller, pre:
                     sender=sender,
                     to=aa_location,
                     gas_limit=100000,
-                    value=5 * TINY_BAR,
+                    value=5,
                 ),
                 # Dummy tx to store balance of 0xaa after second TX.
                 Transaction(
