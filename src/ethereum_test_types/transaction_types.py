@@ -303,12 +303,10 @@ class Transaction(
         """Ensure transaction has no conflicting properties."""
         super().model_post_init(__context)
 
-        print(f"[DEBUG] Transaction value {self.value}")
-
         TINY_BAR = 10_000_000_000
         if 0 < self.value < TINY_BAR:
             self.value = self.value * TINY_BAR
-            print(f"[DEBUG] Transaction value {self.value} adjusting to TINY_BAR")
+            print(f"[DEBUG] Transaction value {self.value} adjusted by TINY_BAR")
 
         if self.gas_price is not None and (
             self.max_fee_per_gas is not None

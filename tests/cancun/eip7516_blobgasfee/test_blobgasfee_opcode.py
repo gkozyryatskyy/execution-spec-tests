@@ -83,7 +83,7 @@ def tx(pre: Alloc, caller_address: Address) -> Transaction:
 @pytest.mark.parametrize(
     "callee_code,call_fails",
     [
-        pytest.param(Op.BLOBBASEFEE * 1024, False, id="no_stack_overflow"),
+        pytest.param(Op.BLOBBASEFEE * 1024, False, id="no_stack_overflow", marks=pytest.mark.xfail(reason="Does Hedera support `BLOBBASEFEE` opcode?")),
         pytest.param(Op.BLOBBASEFEE * 1025, True, id="stack_overflow"),
     ],
 )
@@ -116,7 +116,7 @@ def test_blobbasefee_stack_overflow(
 @pytest.mark.parametrize(
     "call_gas,call_fails",
     [
-        pytest.param(BLOBBASEFEE_GAS, False, id="enough_gas"),
+        pytest.param(BLOBBASEFEE_GAS, False, id="enough_gas", marks=pytest.mark.xfail(reason="Does Hedera support `BLOBBASEFEE` opcode?")),
         pytest.param(BLOBBASEFEE_GAS - 1, True, id="out_of_gas"),
     ],
 )

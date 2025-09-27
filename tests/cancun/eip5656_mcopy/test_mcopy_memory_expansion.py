@@ -110,6 +110,8 @@ def call_exact_cost(
 
 @pytest.fixture
 def block_gas_limit() -> int:  # noqa: D103
+    # The JSON-RPC Relay's config variable `MAX_TRANSACTION_FEE_THRESHOLD` needs to be
+    # at least `block_gas_limit` for the tests to pass.
     return 100_000_000
 
 

@@ -554,6 +554,9 @@ def max_tx_gas_limit(fork: Fork) -> int:
     tx_limit = fork.transaction_gas_limit_cap()
     if tx_limit is not None:
         return tx_limit
+    # The JSON-RPC Relay's config variable `MAX_TRANSACTION_FEE_THRESHOLD` needs to be
+    # at least this `Environment().gas_limit` for the tests to pass.
+    # This value can be configured using the `--transaction-gas-limit` flag.
     return Environment().gas_limit
 
 
