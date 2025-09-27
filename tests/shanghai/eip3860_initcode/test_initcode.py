@@ -32,6 +32,12 @@ from ethereum_test_vm import Opcodes as Op
 from .helpers import INITCODE_RESULTING_DEPLOYED_CODE, get_create_id, get_initcode_name
 from .spec import Spec, ref_spec_3860
 
+# TODO Glib: seems like Hedera has no INITCODE limit check.
+#  Hedera has just Jumbo tx payload check = 131072
+#  details https://swirldslabs.slack.com/archives/C09B3UPEMKM/p1756384889485429
+#   - https://github.com/hiero-ledger/hiero-consensus-node/issues/20872
+JUMBO_MAX_PAYLOAD_SIZE = 131072
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_3860.git_path
 REFERENCE_SPEC_VERSION = ref_spec_3860.version
 
@@ -45,28 +51,28 @@ Initcode templates used throughout the tests
 #  - https://github.com/hiero-ledger/hiero-consensus-node/issues/20872
 INITCODE_ONES_MAX_LIMIT_JUMBO = Initcode(
     deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
-    initcode_length=Spec.JUMBO_MAX_PAYLOAD_SIZE,
+    initcode_length=JUMBO_MAX_PAYLOAD_SIZE,
     padding_byte=0x01,
     name="max_size_ones",
 )
 
 INITCODE_ZEROS_MAX_LIMIT_JUMBO = Initcode(
     deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
-    initcode_length=Spec.JUMBO_MAX_PAYLOAD_SIZE,
+    initcode_length=JUMBO_MAX_PAYLOAD_SIZE,
     padding_byte=0x00,
     name="max_size_zeros",
 )
 
 INITCODE_ONES_OVER_LIMIT_JUMBO = Initcode(
     deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
-    initcode_length=Spec.JUMBO_MAX_PAYLOAD_SIZE + 1,
+    initcode_length=JUMBO_MAX_PAYLOAD_SIZE + 1,
     padding_byte=0x01,
     name="over_limit_ones",
 )
 
 INITCODE_ZEROS_OVER_LIMIT_JUMBO = Initcode(
     deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
-    initcode_length=Spec.JUMBO_MAX_PAYLOAD_SIZE + 1,
+    initcode_length=JUMBO_MAX_PAYLOAD_SIZE + 1,
     padding_byte=0x00,
     name="over_limit_zeros",
 )
@@ -188,7 +194,7 @@ def test_contract_creating_tx(
         sender=sender,
     )
 
-    if len(initcode) > Spec.JUMBO_MAX_PAYLOAD_SIZE:
+    if len(initcode) > JUMBO_MAX_PAYLOAD_SIZE:
         # Initcode is above the max size, tx inclusion in the block makes
         # it invalid.
         post[create_contract_address] = Account.NONEXISTENT
@@ -545,7 +551,7 @@ class TestCreateInitcode:
         Test contract creation via the CREATE/CREATE2 opcodes that have an
         initcode that is on/over the max allowed limit.
         """
-        if len(initcode) > Spec.JUMBO_MAX_PAYLOAD_SIZE:
+        if len(initcode) > JUMBO_MAX_PAYLOAD_SIZE:
             # Call returns 0 as out of gas s[0]==1
             post[caller_contract_address] = Account(
                 nonce=1,

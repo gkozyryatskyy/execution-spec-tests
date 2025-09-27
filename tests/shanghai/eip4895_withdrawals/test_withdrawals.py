@@ -133,20 +133,19 @@ class TestUseValueInTx:
         blockchain_test(pre=pre, post=post, blocks=blocks)
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
+@pytest.mark.xfail(reason="Hedera is not supporting EIP-4895")
 def test_use_value_in_contract(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
 ):
     """Test sending value from contract that has not received a withdrawal."""
     sender = pre.fund_eoa()
-    # TODO Glib: Value can't be non-zero and less than 10_000_000_000 wei which is 1 tinybar
-    recipient = pre.fund_eoa(100_000_000_000)
+    recipient = pre.fund_eoa(1)
 
     contract_address = pre.deploy_contract(
         Op.SSTORE(
             Op.NUMBER,
-            Op.CALL(address=recipient, value=10_000_000_000),
+            Op.CALL(address=recipient, value=1000000000),
         )
     )
     (tx_0, tx_1) = (

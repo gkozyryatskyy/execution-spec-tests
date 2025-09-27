@@ -21,10 +21,5 @@ class Spec:
     https://eips.ethereum.org/EIPS/eip-3860#parameters.
     """
 
-    # TODO Glib: seems like Hedera has no INITCODE limit check.
-    #  Hedera has just Jumbo tx payload check = 131072
-    #  details https://swirldslabs.slack.com/archives/C09B3UPEMKM/p1756384889485429
-    #   - https://github.com/hiero-ledger/hiero-consensus-node/issues/20872
-    JUMBO_MAX_PAYLOAD_SIZE = 131072
     MAX_INITCODE_SIZE = 49152
     INITCODE_WORD_COST = 2
