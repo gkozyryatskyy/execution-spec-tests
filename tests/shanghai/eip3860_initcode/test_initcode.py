@@ -181,16 +181,12 @@ def test_contract_creating_tx(
         nonce=0,
     )
 
-    # TODO Glib: tx changes
-    #  - gas_limit changet for tests to pass.
-    #  - gas_price override removed
-    #  - with this changes --eoa-fund-amount-default=2000000000000000000 increased
     tx = Transaction(
         nonce=0,
         to=None,
         data=initcode,
-        gas_limit=2200000,
-        # gas_price=10,
+        gas_limit=10000000,
+        gas_price=10,
         sender=sender,
     )
 
@@ -292,7 +288,7 @@ class TestContractCreationGasUsage:
             calldata=initcode,
             contract_creation=True,
             # TODO Glib: access_list commented because Hedera relay is not supporting it
-            # access_list=tx_access_list,
+            access_list=tx_access_list,
         )
 
     @pytest.fixture
@@ -343,10 +339,10 @@ class TestContractCreationGasUsage:
         return Transaction(
             nonce=0,
             to=None,
-            # access_list=tx_access_list,
+            access_list=tx_access_list,
             data=initcode,
             gas_limit=gas_limit,
-            # gas_price=10,
+            gas_price=10,
             error=tx_error,
             sender=sender,
             # The entire gas limit is expected to be consumed.
@@ -492,8 +488,8 @@ class TestCreateInitcode:
             nonce=0,
             to=caller_contract_address,
             data=initcode,
-            gas_limit=1000000,
-            # gas_price=10,
+            gas_limit=10000000,
+            gas_price=10,
             sender=sender,
         )
 
