@@ -9,7 +9,6 @@ from ethereum_test_vm import Opcodes as Op
 
 from ..common import Scenario, ScenarioEnvironment, ScenarioGeneratorInput
 
-TINY_BAR = 10_000_000_000
 
 class ScenariosCallCombinations:
     """Class that would generate scenarios for all call combinations."""
@@ -88,7 +87,7 @@ class ScenariosCallCombinations:
         pre: Alloc = scenario_input.pre
         balance = self.balance
         operation_contract = pre.deploy_contract(
-            code=scenario_input.operation_code, balance=balance.program_selfbalance * TINY_BAR
+            code=scenario_input.operation_code, balance=balance.program_selfbalance
         )
 
         scenario_contract = pre.deploy_contract(
@@ -112,7 +111,7 @@ class ScenariosCallCombinations:
                 )
             )
             + Op.RETURN(0, 32),
-            balance=balance.scenario_contract_balance * TINY_BAR,
+            balance=balance.scenario_contract_balance,
         )
 
         root_contract = pre.deploy_contract(
@@ -122,7 +121,7 @@ class ScenariosCallCombinations:
                 ret_size=32,
             )
             + Op.RETURN(0, 32),
-            balance=balance.root_contract_balance * TINY_BAR,
+            balance=balance.root_contract_balance,
         )
 
         return Scenario(
@@ -236,7 +235,7 @@ class ScenariosCallCombinations:
         second_call_value = balance.second_call_value if first_call != Op.STATICCALL else 0
 
         operation_contract = pre.deploy_contract(
-            code=scenario_input.operation_code, balance=balance.program_selfbalance * TINY_BAR
+            code=scenario_input.operation_code, balance=balance.program_selfbalance
         )
         sub_contract = pre.deploy_contract(
             code=Op.MSTORE(32, 1122334455)
@@ -259,7 +258,7 @@ class ScenariosCallCombinations:
                 )
             )
             + Op.RETURN(0, 32),
-            balance=balance.sub_contract_balance * TINY_BAR,
+            balance=balance.sub_contract_balance,
         )
         scenario_contract = pre.deploy_contract(
             code=(
@@ -277,11 +276,11 @@ class ScenariosCallCombinations:
                 )
             )
             + Op.RETURN(0, 32),
-            balance=balance.scenario_contract_balance * TINY_BAR,
+            balance=balance.scenario_contract_balance,
         )
 
         root_contract = pre.deploy_contract(
-            balance=balance.root_contract_balance * TINY_BAR,
+            balance=balance.root_contract_balance,
             code=Op.CALL(
                 gas=Op.SUB(Op.GAS, self.keep_gas),
                 address=scenario_contract,

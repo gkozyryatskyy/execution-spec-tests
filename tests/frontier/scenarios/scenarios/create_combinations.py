@@ -11,7 +11,6 @@ from ethereum_test_vm import Opcodes as Op
 
 from ..common import Scenario, ScenarioEnvironment, ScenarioGeneratorInput
 
-TINY_BAR = 10_000_000_000
 
 @dataclass
 class AddressBalance:
@@ -54,7 +53,7 @@ def scenarios_create_combinations(scenario_input: ScenarioGeneratorInput) -> Lis
 
         # the code result in init code will be actually code of a deployed contract
         scenario_contract = scenario_input.pre.deploy_contract(
-            balance=3 * TINY_BAR,
+            balance=3,
             code=Op.EXTCODECOPY(operation_contract, 0, 0, Op.EXTCODESIZE(operation_contract))
             + Op.MSTORE(0, create(3, 0, Op.EXTCODESIZE(operation_contract), *salt))
             + Op.EXTCODECOPY(Op.MLOAD(0), 0, 0, 32)
@@ -104,7 +103,7 @@ def scenarios_create_combinations(scenario_input: ScenarioGeneratorInput) -> Lis
             salt = [0] if create == Op.CREATE2 else []
 
             scenario_contract = pre.deploy_contract(
-                balance=balance.scenario_contract_balance * TINY_BAR,
+                balance=balance.scenario_contract_balance,
                 code=Om.MSTORE(deploy_code, 0)
                 + Op.MSTORE(32, create(balance.create_value, 0, deploy_code_size, *salt))
                 + Op.MSTORE(0, 0)
@@ -133,7 +132,7 @@ def scenarios_create_combinations(scenario_input: ScenarioGeneratorInput) -> Lis
             )
 
             root_contract = pre.deploy_contract(
-                balance=balance.root_contract_balance * TINY_BAR,
+                balance=balance.root_contract_balance,
                 code=Op.CALL(
                     gas=Op.SUB(Op.GAS, keep_gas),
                     address=scenario_contract,

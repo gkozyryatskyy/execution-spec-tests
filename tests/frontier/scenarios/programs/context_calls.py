@@ -13,7 +13,6 @@ from ..common import (
     make_gas_hash_contract,
 )
 
-TINY_BAR = 10_000_000_000
 
 class ProgramAddress(ScenarioTestProgram):
     """Check that ADDRESS is really the code execution address in all scenarios."""
@@ -39,8 +38,7 @@ class ProgramBalance(ScenarioTestProgram):
 
     def make_test_code(self, pre: Alloc, fork: Fork) -> Bytecode:
         """Test code."""
-        external_address = pre.deploy_contract(code=Op.ADD(1, 1), balance=self.external_balance * TINY_BAR)
-        print(f"External contract to host balance deployed at {external_address}")
+        external_address = pre.deploy_contract(code=Op.ADD(1, 1), balance=self.external_balance)
         return Op.MSTORE(0, Op.BALANCE(external_address)) + Op.RETURN(0, 32)
 
     @cached_property
@@ -205,7 +203,7 @@ class ProgramExtCodeCopyExtCodeSize(ScenarioTestProgram):
 
     def make_test_code(self, pre: Alloc, fork: Fork) -> Bytecode:
         """Test code."""
-        external_address = pre.deploy_contract(code=Op.ADD(1, 1), balance=self.external_balance * TINY_BAR)
+        external_address = pre.deploy_contract(code=Op.ADD(1, 1), balance=self.external_balance)
         return (
             Op.MSTORE(0, Op.EXTCODESIZE(external_address))
             + Op.EXTCODECOPY(external_address, 0, 0, 30)
@@ -273,7 +271,7 @@ class ProgramExtCodehash(ScenarioTestProgram):
 
     def make_test_code(self, pre: Alloc, fork: Fork) -> Bytecode:
         """Test code."""
-        external_address = pre.deploy_contract(code=Op.ADD(1, 1), balance=123 * TINY_BAR)
+        external_address = pre.deploy_contract(code=Op.ADD(1, 1), balance=123)
         return Op.MSTORE(0, Op.EXTCODEHASH(external_address)) + Op.RETURN(0, 32)
 
     @cached_property

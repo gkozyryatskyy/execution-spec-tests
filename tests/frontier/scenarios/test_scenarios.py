@@ -210,7 +210,7 @@ def test_scenarios(
         if scenario.category == "double_call_combinations":
             tx_max_gas *= 2
 
-        tx_gasprice: int = 10 * MIN_GAS_PRICE
+        tx_gasprice: int = 10
         exec_env = ExecutionEnvironment(
             fork=fork,
             origin=tx_origin,
@@ -218,8 +218,7 @@ def test_scenarios(
             timestamp=tx_env.timestamp,  # we can't know timestamp before head, use gas hash
             number=len(blocks) + 1,
             gaslimit=tx_env.gas_limit,
-            # coinbase=tx_env.fee_recipient,
-            coinbase="0x0000000000000000000000000000000000000062",
+            coinbase="0x0000000000000000000000000000000000000062", # tx_env.fee_recipient,
         )
 
         def make_result(scenario: Scenario, exec_env: ExecutionEnvironment, post: Storage) -> int:

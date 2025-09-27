@@ -190,7 +190,6 @@ def sender_initial_balance(  # noqa: D103
 
 @pytest.fixture
 def sender(pre: Alloc, sender_initial_balance: int) -> Address:  # noqa: D103
-    print(f"Sender initial balance {sender_initial_balance}")
     return pre.fund_eoa(sender_initial_balance)
 
 
