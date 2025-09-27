@@ -35,11 +35,11 @@ def precompile_addresses(fork: Fork) -> Iterator[Tuple[Address, bool]]:
         yield (address, True)
         if address_int > 0 and (address_int - 1) not in supported_precompiles:
             # yield (Address(address_int - 1), False)
-            yield pytest.param(Address(address_int - 1), False, marks=pytest.mark.xfail)
+            yield pytest.param(Address(address_int - 1), False, marks=pytest.mark.xfail(reason="Calls to Hedera reserved accounts causes consumption differences"))
 
         if (address_int + 1) not in supported_precompiles:
             # yield (Address(address_int + 1), False)
-            yield pytest.param(Address(address_int + 1), False, marks=pytest.mark.xfail)
+            yield pytest.param(Address(address_int + 1), False, marks=pytest.mark.xfail(reason="Calls to Hedera reserved accounts causes consumption differences"))
 
 
 @pytest.mark.ported_from(
@@ -80,7 +80,6 @@ def test_precompiles(
 
     # Empty account to serve as reference
     empty_account = pre.fund_eoa(amount=0)
-    print(f"Empty account with no funds to serve as reference at {empty_account}")
 
     # Memory
     args_offset = 0
@@ -122,14 +121,10 @@ def test_precompiles(
         + Op.STOP,
         storage={0: 0xDEADBEEF},
     )
-    print(f"Caller contract deployed at {account}")
-
-    sender = pre.fund_eoa()
-    print(f"Sender account funded at {sender}")
 
     tx = Transaction(
         to=account,
-        sender=sender,
+        sender=pre.fund_eoa(),
         gas_limit=1_000_000,
         protected=True,
     )
