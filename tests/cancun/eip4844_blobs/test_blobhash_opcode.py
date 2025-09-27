@@ -148,7 +148,7 @@ class BlobhashScenario:
 
 @pytest.mark.parametrize("blobhash_index", blobhash_index_values)
 @pytest.mark.with_all_tx_types
-@pytest.mark.skip(reason="Unable to execute due to AssertionError: Transaction type 3 is not supported in execute mode.")
+@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_blobhash_gas_cost(
     pre: Alloc,
     fork: Fork,
@@ -213,7 +213,7 @@ def test_blobhash_gas_cost(
         "varied_valid",
     ],
 )
-@pytest.mark.skip(reason="Unable to execute due to AssertionError: Transaction type 3 is not supported in execute mode.")
+@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_blobhash_scenarios(
     pre: Alloc,
     fork: Fork,
@@ -273,7 +273,7 @@ def test_blobhash_scenarios(
         "invalid_calls",
     ],
 )
-@pytest.mark.skip(reason="Unable to execute due to AssertionError: Transaction type 3 is not supported in execute mode.")
+@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_blobhash_invalid_blob_index(
     pre: Alloc,
     fork: Fork,
@@ -334,7 +334,7 @@ def test_blobhash_invalid_blob_index(
     )
 
 
-@pytest.mark.skip(reason="Unable to execute due to AssertionError: Transaction type 3 is not supported in execute mode.")
+@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_blobhash_multiple_txs_in_block(
     pre: Alloc,
     fork: Fork,
