@@ -21,8 +21,6 @@ from ethereum_test_vm import Opcodes as Op
 from .common import Blake2bInput, ExpectedOutput
 from .spec import SpecTestVectors, ref_spec_152
 
-TINY_BAR = 10_000_000_000
-
 REFERENCE_SPEC_GIT_PATH = ref_spec_152.git_path
 REFERENCE_SPEC_VERSION = ref_spec_152.version
 
@@ -423,7 +421,7 @@ def test_blake2b(
         gas_limit=1_000_000,
         protected=True,
         sender=sender,
-        value=100000 * TINY_BAR,
+        value=100000,
     )
 
     post = {

@@ -6,8 +6,6 @@ from ethereum_test_forks import Cancun, Fork
 from ethereum_test_tools import Alloc, Environment, StateTestFiller, Transaction
 from ethereum_test_vm import Opcodes as Op
 
-MIN_GAS_PRICE = 710000000000
-
 REFERENCE_SPEC_GIT_PATH = "N/A"
 REFERENCE_SPEC_VERSION = "N/A"
 
@@ -27,8 +25,6 @@ def test_coverage(
 
     Modify this test to cover more Yul code if required in the future.
     """
-    print("Adjusted `MIN_GAS_PRICE` or `TINY_BAR`")
-
     missed_coverage = pre.deploy_contract(
         balance=0,
         code=Op.SHL(0x0000000000000000000000000000000000000000000000000000000000000001, 0x00)
@@ -67,8 +63,8 @@ def test_coverage(
             value=0,
             protected=False,
             access_list=[],
-            max_fee_per_gas=10 * MIN_GAS_PRICE,
-            max_priority_fee_per_gas=5 * MIN_GAS_PRICE,
+            max_fee_per_gas=10,
+            max_priority_fee_per_gas=5,
         )
     else:
         tx = Transaction(
