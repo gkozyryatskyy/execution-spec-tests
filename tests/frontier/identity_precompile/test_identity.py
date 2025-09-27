@@ -16,8 +16,6 @@ from ethereum_test_tools import Opcodes as Op
 
 from .common import CallArgs, generate_identity_call_bytecode
 
-MIN_GAS_PRICE = 710000000000
-TINY_BAR = 10_000_000_000
 
 @pytest.mark.ported_from(
     [
@@ -62,7 +60,7 @@ TINY_BAR = 10_000_000_000
         pytest.param(
             CallArgs(gas=0x30D40, value=0x1, args_size=0x0),
             (0x1,),
-            0x1 * TINY_BAR,
+            0x1,
             True,
             id="identity_1_nonzerovalue",
             marks=pytest.mark.skip(reason="Do we support value transfer to identity precompile?"),
@@ -138,14 +136,10 @@ def test_call_identity_precompile(
         storage=storage.canary(),
         balance=contract_balance,
     )
-    print(f"Contract account is {account}")
-
-    sender = pre.fund_eoa()
-    print(f"Sender account is {sender}")
 
     tx = Transaction(
         to=account,
-        sender=sender,
+        sender=pre.fund_eoa(),
         gas_limit=tx_gas_limit,
     )
 

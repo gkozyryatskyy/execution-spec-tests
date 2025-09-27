@@ -20,8 +20,6 @@ from ethereum_test_tools import (
 from ethereum_test_vm import Opcode, UndefinedOpcodes
 from ethereum_test_vm import Opcodes as Op
 
-TINY_BAR=10_000_000_000
-
 REFERENCE_SPEC_GIT_PATH = "N/A"
 REFERENCE_SPEC_VERSION = "N/A"
 
@@ -68,7 +66,7 @@ def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
     code_contract: Dict[Opcode, Address] = {}
     for opcode in sorted(set(Op) | set(UndefinedOpcodes)):
         code_contract[opcode] = pre.deploy_contract(
-            balance=10 * TINY_BAR,
+            balance=10,
             code=prepare_stack(opcode) + opcode + prepare_suffix(opcode),
             storage={},
         )
@@ -88,8 +86,6 @@ def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
         + Op.STOP,
     )
 
-    print(f"EVM code to make calls and store the results deployed at {contract_address}")
-
     post = {
         contract_address: Account(
             storage={
@@ -102,11 +98,8 @@ def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
         ),
     }
 
-    sender = pre.fund_eoa()
-    print(f"Sender account is {sender}")
-
     tx = Transaction(
-        sender=sender,
+        sender=pre.fund_eoa(),
         gas_limit=9_000_000,
         to=contract_address,
         data=b"",
@@ -121,18 +114,13 @@ def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
 @pytest.mark.xfail(reason="`eth_getTransactionByHash` does not include a `to` field for contract creation txs that reverts. Filed an issue in the JSON-RPC Relay https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4413.")
 def test_cover_revert(state_test: StateTestFiller, pre: Alloc):
     """Cover state revert from original tests for the coverage script."""
-
-    sender = pre.fund_eoa()
-    print(f"Sender account is {sender}")
-
     tx = Transaction(
-        sender=sender,
+        sender=pre.fund_eoa(),
         gas_limit=1_000_000,
         data=Op.SSTORE(1, 1) + Op.REVERT(0, 0),
         to=None,
         value=0,
         protected=False,
     )
-    print(f"Transaction sent is {tx}")
 
     state_test(env=Environment(), pre=pre, post={}, tx=tx)
