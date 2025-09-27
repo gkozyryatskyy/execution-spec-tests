@@ -17,8 +17,7 @@ def type_0_default_transaction(sender):
     return Transaction(
         ty=0,
         sender=sender,
-        # gas_price=10**9,
-        gas_price=710000000000,
+        gas_price=10**9,
         gas_limit=100_000,
         data=b"\x00" * 100,
         protected=True,
@@ -31,15 +30,14 @@ def type_1_default_transaction(sender):
     return Transaction(
         ty=1,
         sender=sender,
-        # gas_price=10**9,
-        gas_price=710000000000,
+        gas_price=10**9,
         gas_limit=100_000,
         data=b"\x00" * 100,
-        # access_list=[
-        #     AccessList(address=0x1234, storage_keys=[0, 1, 2]),
-        #     AccessList(address=0x5678, storage_keys=[3, 4, 5]),
-        #     AccessList(address=0x9ABC, storage_keys=[]),
-        # ],
+        access_list=[
+            AccessList(address=0x1234, storage_keys=[0, 1, 2]),
+            AccessList(address=0x5678, storage_keys=[3, 4, 5]),
+            AccessList(address=0x9ABC, storage_keys=[]),
+        ],
     )
 
 
@@ -49,16 +47,14 @@ def type_2_default_transaction(sender):
     return Transaction(
         ty=2,
         sender=sender,
-        # max_fee_per_gas=10**10,
-        # max_priority_fee_per_gas=10**9,
-        max_fee_per_gas=710000000000,
-        max_priority_fee_per_gas=10**10, 
+        max_fee_per_gas=10**10,
+        max_priority_fee_per_gas=10**9,
         gas_limit=100_000,
         data=b"\x00" * 200,
-        # access_list=[
-        #     AccessList(address=0x2468, storage_keys=[10, 20, 30]),
-        #     AccessList(address=0xACE0, storage_keys=[40, 50]),
-        # ],
+        access_list=[
+            AccessList(address=0x2468, storage_keys=[10, 20, 30]),
+            AccessList(address=0xACE0, storage_keys=[40, 50]),
+        ],
     )
 
 
