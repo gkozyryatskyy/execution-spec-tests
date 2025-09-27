@@ -287,7 +287,6 @@ class TestContractCreationGasUsage:
         return tx_intrinsic_gas_cost_calculator(
             calldata=initcode,
             contract_creation=True,
-            # TODO Glib: access_list commented because Hedera relay is not supporting it
             access_list=tx_access_list,
         )
 
@@ -333,9 +332,6 @@ class TestContractCreationGasUsage:
         else:
             pytest.fail("Invalid gas test case provided.")
 
-        # TODO Glib: tx changes
-        #  - gas_price override removed
-        #  - access_list commented because Hedera relay is not supporting it
         return Transaction(
             nonce=0,
             to=None,
@@ -481,9 +477,6 @@ class TestCreateInitcode:
     def tx(self, caller_contract_address: Address, initcode: Initcode, sender: EOA) -> Transaction:
         """Generate transaction that executes the caller contract."""
 
-        # TODO Glib: tx changes
-        #  - gas_limit changet for tests to pass.
-        #  - gas_price override removed
         return Transaction(
             nonce=0,
             to=caller_contract_address,
