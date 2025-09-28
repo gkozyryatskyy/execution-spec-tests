@@ -17,7 +17,7 @@ FORK=Cancun
 RPC_URL=http://localhost:7546/
 SEED_KEY=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106
 
-FORKS=frontier homestead byzantium constantinople istanbul paris shanghai cancun
+FORKS=frontier homestead byzantium constantinople istanbul berlin paris shanghai cancun
 
 .PHONY: all clean pods relay-edit relay-restart
 

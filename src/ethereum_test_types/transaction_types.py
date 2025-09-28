@@ -361,11 +361,8 @@ class Transaction(
             assert self.max_priority_fee_per_gas is None, "max_priority_fee_per_gas must be None"
 
         if not self.max_fee_per_gas is None and self.max_fee_per_gas < 710000000000:
-            self.max_fee_per_gas += 710000000000
+            self.max_fee_per_gas = 710000000000
             print(f"[DEBUG] Adjusted max_fee_per_gas {self.max_fee_per_gas }")
-        if not self.max_priority_fee_per_gas is None and self.max_priority_fee_per_gas < 710000000000:
-            self.max_priority_fee_per_gas += 710000000000
-            print(f"[DEBUG] Adjusted max_priority_fee_per_gas {self.max_priority_fee_per_gas  }")
 
         if self.ty == 3 and self.max_fee_per_blob_gas is None:
             self.max_fee_per_blob_gas = 1
