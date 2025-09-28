@@ -186,10 +186,10 @@ If you encounter issues during the installation process, please refer to the [In
 - **Byzantium** [html](./tests/byzantium/report.html)
 - **Constantinople** [html](./tests/constantinople/report.html)
 - **Istanbul** [html](./tests/istanbul/report.html)
-- **Berlin** _TBD_
+- **Berlin** [html](./tests/berlin/report.html)
 - **Paris** [html](./tests/paris/report.html)
 - **Shanghai** [html](./tests/shanghai/report.html)
-- **Cancun** _TBD_
+- **Cancun** [html](./tests/cancun/report.html)
 
 ## Contributing
 

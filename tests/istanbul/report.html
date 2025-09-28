@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">Execute Test Report</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">Execute Test Report</h1>
+    <p>Report generated on 28-Sep-2025 at 04:39:39 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.1.1</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="6">No results found. Check the filters.</th>
+        </tr>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="6">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left"><</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">></div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">120 tests took 00:12:23.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled/>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" />
+            <span class="passed">120 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" />
+            <span class="skipped">3 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled/>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled/>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled/>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled/>
+            <span class="rerun">0 Reruns</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th class="sortable" data-column-type="sender">Sender</th>
+          <th class="sortable" data-column-type="fundedAccounts">Funded Accounts</th>
+          <th class="sortable" data-column-type="fundedAccounts">Deployed Contracts</th>
+        </tr>
+      </thead>
+    </table>
+  </body>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.11.13&#34;, &#34;Platform&#34;: &#34;macOS-14.5-arm64-arm-64bit&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;8.4.1&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;regex&#34;: &#34;0.2.0&#34;, &#34;html&#34;: &#34;4.1.1&#34;, &#34;xdist&#34;: &#34;3.8.0&#34;, &#34;json-report&#34;: &#34;1.5.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;cov&#34;: &#34;4.1.0&#34;, &#34;custom-report&#34;: &#34;1.0.1&#34;}, &#34;Command-line args&#34;: &#34;&lt;code&gt;execute -c /Users/luismastrangelo/work/execution-spec-tests/src/cli/pytest_commands/pytest_ini_files/pytest-execute.ini --rootdir . -rA --verbose --fork=Cancun --rpc-endpoint=http://localhost:7546/ --rpc-seed-key=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106 --rpc-chain-id 298 --html=tests/istanbul/report.html --self-contained-html --sender-funding-txs-gas-price 710000000000 --default-gas-price 710000000000 --sender-fund-refund-gas-limit 1000000 --seed-account-sweep-amount=70000000000000000000000 --eoa-fund-amount-default=8000000000000000000000 tests/istanbul&lt;/code&gt;&#34;, &#34;Senders&#34;: {&#34;0xbe23a660b875a72974e19766da2acf26cdd58f0d&#34;: &#34;Used balance=348.210835600004202206&#34;}}, &#34;tests&#34;: {&#34;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_3-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Skipped&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_3-state_test]::setup&#34;, &#34;duration&#34;: &#34;0 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Skipped&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_3-state_test]::setup&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;0 ms&lt;/td&gt;&#34;, &#34;&lt;td&gt;Not available&lt;/td&gt;&#34;, &#34;&lt;td&gt;Not available&lt;/td&gt;&#34;], &#34;log&#34;: &#34;(&amp;#x27;/Users/luismastrangelo/work/execution-spec-tests/tests/istanbul/eip1344_chainid/test_chainid.py&amp;#x27;, 15, &amp;quot;Skipped: type 3 transactions aren&amp;#x27;t supported in execute mode&amp;quot;)\n&#34;}], &#34;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_2-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_2-state_test]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_2-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x4d3958edd3e5aa650617afc08af4f3e685e7cb6b&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\nStarting EOA index: 0x47c41d5d45f1b76d27ae812e96b5d6079ae054399994b519d789cddcade9962d\n[DEBUG] Adjusted max_fee_per_gas 0xa54f4c3c00\n\n----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 108446\n[DEBUG] Adjusted max_fee_per_gas 0xa54f4c3c00\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.148217469999999990\n&#34;}], &#34;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_1-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_1-state_test]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_1-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc6e2837a9efd7d7f93c0065ad45966eaaa3c8408&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\n[DEBUG] Adjusted gas_price 0xa58ae70600\n\n----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 108446\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.148217469999999990\n&#34;}], &#34;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_0-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_0-state_test]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip1344_chainid/test_chainid.py::test_chainid[fork_Cancun-typed_transaction_0-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe257ff3cdaae551ce5501a264af055d26226a21e&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\n[DEBUG] Adjusted gas_price 0xa58ae70600\n\n----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 108446\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.148217469999999990\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-empty-input-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-empty-input-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-empty-input-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xdbca7c5a25a79e41140cd59ce5be552717f296ca&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.828651260000000001\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-rounds-length-short-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-rounds-length-short-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-rounds-length-short-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x33cad1523a22fb9f4fac48e12c9e3fdcafebfb86&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.828669720000000054\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-rounds-length-long-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-rounds-length-long-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-rounds-length-long-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5ac5c20d58259271e433acb4766c7ec325933c4a&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.828669720000000054\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-final-block-flag-value-0x02-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-final-block-flag-value-0x02-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-invalid-final-block-flag-value-0x02-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x05fe80c682992d6d316ebe5fe686da4a83ab54de&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.828669720000000054\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-0-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-0-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-0-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x73136bd8aa8b298b397210fcc7861684c7de1436&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-12-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-12-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-12-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xb9fdab9a74d10c04aa815985ff0569d683493dfb&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-false-final-block-flag-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-false-final-block-flag-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-false-final-block-flag-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xb7714347ceba6d957213d0960ed458cc5718f645&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xd183a35d234f92f3c11a2b3b0a21ce73ed50031f&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-oog-rounds-4294967295-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-oog-rounds-4294967295-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-oog-rounds-4294967295-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xb66bdec6119886276c71d8628eba1b32577e3b51&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.828670429999999958\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-different-message-offset-0x05-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-different-message-offset-0x05-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-different-message-offset-0x05-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x1a134dd040bd47fda8b8f526a38c894e22d0393a&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xfd81befa94a957e1d276f223440008dc939bfa8f&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x8e64e3faaa2cc7a9780a7aab0d75c5e88b2e971b&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa6f0290518878a9b974b15ee8cf0f447105fd6c4&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-128-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-128-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-128-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xb78cdb646ea1f9ce26de42ca6c30af61bd4673e4&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-256-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-256-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-256-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x2e914ecfc76e3c2a6c603f9fe16deaa832e0f465&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-512-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-512-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-512-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xcd4621b65165b3b3fb97b9c9321e90d634728329&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1024-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1024-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1024-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x6c5c34e6c3743e7950e28abe8370087c1110d0dd&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-offset-0x10-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-offset-0x10-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-offset-0x10-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xfb6f8296bab72706c8dcfdae1c115d4f35e6c13c&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-offset-0x10-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-offset-0x10-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-offset-0x10-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbcadfaf3f5f60ab31db1803d1bc52501898feba0&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-offset-0x10-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-offset-0x10-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-offset-0x10-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x19562d7bf13118ab6b5ab5d95d0791e6d01ae5b7&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-128-offset-0x10-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-128-offset-0x10-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-128-offset-0x10-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc07692856c5dd522f5deabe606f31068cc3cb476&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-256-offset-0x10-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-256-offset-0x10-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-256-offset-0x10-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x368f9d328e21c7a9f6796365ef33626e7b083141&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-512-offset-0x10-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-512-offset-0x10-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-512-offset-0x10-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa3a55cb5e25f6a29bd3ac4dcf06af8640f3ee1a4&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1024-offset-0x10-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1024-offset-0x10-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-1024-offset-0x10-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x91d450eb6ad83f122d2aa9097beb3064ca889952&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-offset-0x78-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-offset-0x78-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-16-offset-0x78-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xca9b7b12c035c72176f6c2662aab3fb5025ad725&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-offset-0x78-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-offset-0x78-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-32-offset-0x78-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xdb09a4584eb02466f69b1f1ee8e1f2067d55f68b&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-offset-0x78-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-offset-0x78-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-valid-rounds-64-offset-0x78-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe5aefdc85078a2a0dc8c0ff932db2073b03397ef&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.694228379999999978\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-EIP-152-RFC-7693-zero-input-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-EIP-152-RFC-7693-zero-input-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b[fork_Cancun-state_test-EIP-152-RFC-7693-zero-input-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xb599d8cdbc190f45c6deefbb63d628e725ec03ee&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n[DEBUG] Transaction value 0x38d7ea4c68000 adjusted by TINY_BAR\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.828651970000000015\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa503eb18673d797b816c8e9bda05e4faf7a3a06a&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xfb5f0a0545cd20d56aea7556d1e8b7f76df2f5e3&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x56d82e7d727330b3ec2fe3760a9b3faeaa1710a6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x149c71037b6c14332de310ddabd5012ab2e266a1&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xdf4d5224aff3c9c42983d62eb9f3377cb04d24a3&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data0-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x9c61aa34d44ed6d87cc10bc6e9492cd37eed6ac5&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x594944432925a8e9083862dcc26e42a178a59322&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xb119272ca2e0f1798631765f3445095914db0c7f&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x961f293268397eaf7a8ed234f08f3f2c00c0a453&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x11575c0266e2d54148ad7a934994ac04c15db36c&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x3e5becf2e865ba7771be02866238b15654f5540b&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data1-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x6c292f4601fc104607c657eab186582053037c21&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5d92b15dd181b35be281374bfd362fffe8574c32&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x72bc82d5f2061571b190307d3d9fa656d7e4c738&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xf51b776486efbcfe9a29e5bb0c907cd5f8589f56&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xeb0a589298a6783350375ef3fa5e576e97ea6eda&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbf9927a550db7840c93a7ea51d43cd426e2268c3&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data2-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc3edb6e545550679bfd9cf1629d447e3e3194de1&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x4b3cc2c21726c7e47b59f1c325293f3ab31c50e6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x9215022cd39869a5b566cb0bc564235188a41024&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xaa4cff1b7f314110c7ee72cc725a3a3f65314ef5&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0331e06775a1d7fe0cd9870b33cd802963627b42&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xab17211fdda8e92ddf031eb0989bd2b6445c8df9&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data3-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x9c482dc5ea05cd0efcf5be170434e7f3c816da4d&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x3f98808e1fd3b1513e7ae8aaf0fd88cdf4029012&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x9081cf728bf8c36bb452a6d9c258a8a2588157be&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x27af7727e8fba44905182e7378b7efa3d816d868&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x42c6cfa9e0445cdcb37bb25c7273a686b98b2137&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc1cdfaae1b5a2329d60017ec6641e6b4d6978e4f&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data9-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe224f9114d4b2996b1d68aa9b4d1d83de0eea59d&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_90000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xf099a88bda0e95b25094d2d6dc476e91f202d95c&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_90000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x812e0de0650e88de1ccebd1c6a3c21dd3ee61dfe&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.189128380000000013\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_110000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x8c767ba49062710427fd1aedfbd50d800a291817&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_110000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc3978c649e468748a464cbb30303f1e5b3f38608&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.203328380000000003\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_200000-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x583149ff7d1d7b49434aa97807defa1ceb1ef6ec&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_invalid_gas[fork_Cancun-state_test-EIP-152-case1-data10-invalid-low-gas-gas_limit_200000-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x8dab41b6479efc1dc058ea3463a6fb9218b0466c&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.267228379999999988\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa55d6d214aa12cc572be69a3b4b8403524949958&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc0e058adb50ed3ab18f1b189eae510193a0cefd6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0a317d44aa7a6c87c1534cafa2aaf23aedab11f2&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x90cc55cc62ff8e0bd5188f53ad0b820a3875dcd3&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xd92b1f49a6c5e132892cc86f66f0c4d24f5103d0&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xd42a5267f65ac8e4475737fd4ae66abab951afe0&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xf043e57f516dcb8750a5fb7219bbf2a9f9721720&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x731013f0c84675d61049d7025834bd13f41b663d&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xd90025abf3020e217e4756f16bdf31057d26a459&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xd4d305527335527da338f55e5448fc6a6933e991&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xf53d4096b87e8ea67246cf1d22f2dfb2e08e33cc&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176423639999999993\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5e7324dec3dcc8d1b89f8773e076799cd8320a07&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176423639999999993\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x605cd3aaff68abec8cfef90c41fa27c013fe6c75&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176440679999999989\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x3faeac36d5710068f073e34b5000e93579374ee0&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176440679999999989\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x3c78afc76cb67bcafa450408f7a9126725629183&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176432160000000005\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa7a8e1e3eb4f0fd2a7ad152c521044554945be54&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176432160000000005\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x647c8c477d827aa6f5d1306527cc2ec10ca8a74e&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176432869999999992\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x814b642464cd5e2c351263889e62f82840ba09eb&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176432869999999992\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xed97023e81736eb3c44e4113e5595add83991b04&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176348379999999999\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_90000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x2dadbdbe3035775a621847d7ac3da87317f76612&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.176348379999999999\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x9164148568b5c9bc9f077bf5680d2fc9630beb67&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x41b1ab53c2815a8d1a625aeb53139cb2814ee176&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa49dd2276dc6361df0090be7f3fa36edc3987ed6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0e20bed6e2b44b96b120dfc09ff85dadff2427c6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x00fad715573aa2ace8cf3657e3b36b15ffc50ba5&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x3c14af358b46f1412da43fca101eddc92c9b3653&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x6bf250f1156ae17c3291e668e2415cf7be028e5f&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc63947e610fb209b2523c1080dad4cbf62fb0dfa&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x2c332c386d281a99716933103dca861fe7bdd5bd&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_110000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xb6161ee7254848e6efb1660fc830689f96971d3e&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.187708380000000008\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x606173fe72cf875e8e0a58afca77ab204621e8b6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case3-data4-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xdd873c4a677af9cb1f4d87faa42c59767b6c45c6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x291dac4d7ec11f78a2d5d7107e8da7124032f33a&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case4-data5-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x759c611037389d5aafa4537d7bdbc1ffb930c4b3&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x6e1208a000a5b646389752eca9bed647de08b09b&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case5-data6-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x92e7a82d6f9c496f0e925443cf0d2a527667e714&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x551ac42b017ebbd772d590a96fdbf6911d05a209&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case6-data7-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbf59e3352577b5c53604ef48cedb617675468ee8&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xde2eaeaf302355226f59b5b924ab6ac7369fdf82&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_gas_limit[fork_Cancun-gas_limit_200000-state_test-EIP-152-case7-data8-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xab3597c1231f153b1bb2d4d5d1f80b2f73898de0&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.238828380000000007\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case0-data0-large-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case0-data0-large-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case0-data0-large-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbefa8abeb57eeb6e40b6d294e9f2fd9af9f25512&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854135279999999497\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case0-data0-large-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case0-data0-large-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case0-data0-large-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eb6c7fd9fd18326a93ed1a6308fe5023bf04ec6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854135279999999497\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data1-large-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data1-large-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data1-large-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe091801442ec29db41346026abeed837b436bb7c&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854154449999999343\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data1-large-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data1-large-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data1-large-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xf124e5395669d6aad397a74f507a40c3a65d30be&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854154449999999343\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data2-large-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data2-large-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data2-large-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x7b257080b13caaaa428156f2901a7f03d7a3f78e&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854154449999999343\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data2-large-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data2-large-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data2-large-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x894263c3be0f33cb43bfbf3ba08217f45f1b7993&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854154449999999343\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data3-large-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data3-large-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data3-large-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xb8ca9780dc40504eb07fb6306b47c9a1f7b69115&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854154449999999343\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data3-large-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data3-large-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case2-data3-large-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x8f9f11410880dce9309f6ba897c017aa46584bdc&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854154449999999343\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-modified-case8-data9-large-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-modified-case8-data9-large-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-modified-case8-data9-large-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x8d668158ca5dec2839d5f5f3c1fee4f7f0ea9e7d&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-modified-case8-data9-large-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-modified-case8-data9-large-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-modified-case8-data9-large-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x03b4d1583ddde68b84102ee1b892d7b3625e3a82&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=12.905228380000000499\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case8-data9-large-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Skipped&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case8-data9-large-gas-limit-call_opcode_CALL]::setup&#34;, &#34;duration&#34;: &#34;0 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Skipped&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case8-data9-large-gas-limit-call_opcode_CALL]::setup&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;0 ms&lt;/td&gt;&#34;, &#34;&lt;td&gt;Not available&lt;/td&gt;&#34;, &#34;&lt;td&gt;Not available&lt;/td&gt;&#34;], &#34;log&#34;: &#34;(&amp;#x27;/Users/luismastrangelo/work/execution-spec-tests/tests/istanbul/eip152_blake2/test_blake2.py&amp;#x27;, 678, &amp;#x27;Skipped: Times-out during fill&amp;#x27;)\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case8-data9-large-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Skipped&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case8-data9-large-gas-limit-call_opcode_CALLCODE]::setup&#34;, &#34;duration&#34;: &#34;0 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Skipped&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case8-data9-large-gas-limit-call_opcode_CALLCODE]::setup&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;0 ms&lt;/td&gt;&#34;, &#34;&lt;td&gt;Not available&lt;/td&gt;&#34;, &#34;&lt;td&gt;Not available&lt;/td&gt;&#34;], &#34;log&#34;: &#34;(&amp;#x27;/Users/luismastrangelo/work/execution-spec-tests/tests/istanbul/eip152_blake2/test_blake2.py&amp;#x27;, 678, &amp;#x27;Skipped: Times-out during fill&amp;#x27;)\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case9-data10-large-gas-limit-call_opcode_CALL]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case9-data10-large-gas-limit-call_opcode_CALL]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case9-data10-large-gas-limit-call_opcode_CALL]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x85cfd2735dfb5558fe51686c62364f9f72dc4eb1&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854135279999999497\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case9-data10-large-gas-limit-call_opcode_CALLCODE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case9-data10-large-gas-limit-call_opcode_CALLCODE]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2.py::test_blake2b_large_gas_limit[fork_Cancun-gas_limit_0x015752a0-state_test-EIP-152-case9-data10-large-gas-limit-call_opcode_CALLCODE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x29cba183619038a9892f6b2635309dfb7f43e547&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 167972\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=15.854135279999999497\n&#34;}], &#34;tests/istanbul/eip152_blake2/test_blake2_delegatecall.py::test_blake2_precompile_delegatecall[fork_Cancun-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/istanbul/eip152_blake2/test_blake2_delegatecall.py::test_blake2_precompile_delegatecall[fork_Cancun-state_test]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/istanbul/eip152_blake2/test_blake2_delegatecall.py::test_blake2_precompile_delegatecall[fork_Cancun-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbe23a660b875a72974e19766da2acf26cdd58f0d&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x913ced3f06a227b445057a7a40d8e8a888359cbe&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 158948\n--------------------------- Captured stdout teardown ---------------------------\nUsed balance=0.171222889999999989\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;Execute Test Report&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > td')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > td')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+</html>
