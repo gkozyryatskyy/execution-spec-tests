@@ -19,7 +19,7 @@ SEED_KEY=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106
 
 FORKS=frontier homestead byzantium constantinople istanbul berlin paris shanghai cancun
 
-.PHONY: all clean pods relay-edit relay-restart
+.PHONY: all clean solo-pods relay-edit relay-restart
 
 all: $(FORKS:%=tests/%/report.html)
 
@@ -50,11 +50,11 @@ clean:
 #
 SOLO=$(shell kubectl get namespaces | grep solo-setup --invert-match | grep "solo-" | cut -f 1 -d " ")
 
-pods:
-	kubectl get pods -n $(SOLO)
+solo-pods:
+	kubectl get pods --namespace $(SOLO)
 
 relay-edit:
-	kubectl edit configmap -n $(SOLO) relay-node1
+	kubectl edit configmap --namespace $(SOLO) relay-node1
 
 relay-restart:
-	kubectl rollout restart deployment relay-node1 -n $(SOLO)
+	kubectl rollout restart deployment relay-node1 --namespace $(SOLO)
