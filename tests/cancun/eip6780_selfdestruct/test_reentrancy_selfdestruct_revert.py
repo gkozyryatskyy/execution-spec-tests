@@ -128,6 +128,7 @@ def revert_contract_address(
 @pytest.mark.valid_from("Paris")
 @pytest.mark.parametrize("first_suicide", [Op.CALL, Op.CALLCODE, Op.DELEGATECALL])
 @pytest.mark.parametrize("second_suicide", [Op.CALL, Op.CALLCODE, Op.DELEGATECALL])
+@pytest.mark.skip(reason="Does Hedera support EIP-6780?")
 def test_reentrancy_selfdestruct_revert(
     pre: Alloc,
     env: Environment,

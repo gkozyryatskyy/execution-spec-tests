@@ -323,6 +323,7 @@ def selfdestruct_with_transfer_initcode_copy_from_address(
     ],
 )
 @pytest.mark.valid_from("Cancun")
+@pytest.mark.skip(reason="Does Hedera support EIP-6780?")
 def test_selfdestruct_created_in_same_tx_with_revert(  # noqa SC200
     state_test: StateTestFiller,
     sender: EOA,
@@ -440,6 +441,7 @@ def test_selfdestruct_created_in_same_tx_with_revert(  # noqa SC200
     ],
 )
 @pytest.mark.valid_from("Cancun")
+@pytest.mark.skip(reason="Does Hedera support EIP-6780?")
 def test_selfdestruct_not_created_in_same_tx_with_revert(
     state_test: StateTestFiller,
     sender: EOA,
