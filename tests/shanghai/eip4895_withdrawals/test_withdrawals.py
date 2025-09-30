@@ -133,7 +133,7 @@ class TestUseValueInTx:
         blockchain_test(pre=pre, post=post, blocks=blocks)
 
 
-@pytest.mark.xfail(reason="Hedera is not supporting EIP-4895")
+@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 def test_use_value_in_contract(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
