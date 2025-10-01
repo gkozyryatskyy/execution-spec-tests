@@ -178,7 +178,8 @@ def pytest_html_results_table_header(cells):
     cells.insert(
         5, '<th class="sortable" data-column-type="fundedAccounts">Deployed Contracts</th>'
     )
-    cells.insert(6, '<th class="sortable" data-column-type="note">Note</th>')
+    cells.insert(6, '<th class="sortable" data-column-type="hint">Hint</th>')
+    cells.insert(7, '<th class="sortable" data-column-type="note">Note</th>')
     del cells[-1]  # Remove the "Links" column
 
 
@@ -199,7 +200,8 @@ def pytest_html_results_table_row(report, cells):
             cells.insert(4, "<td>Not available</td>")
 
         cells.insert(5, f"<td></td>")
-        cells.insert(6, f"<td>&#128221;</td>" if "note" in user_props else "<td></td>")
+        cells.insert(6, f"<td>{'&#128221;' if 'hint' in user_props else ''}</td>")
+        cells.insert(7, f"<td>{'&#128221;' if 'note' in user_props else ''}</td>")
 
     del cells[-1]  # Remove the "Links" column
 
@@ -221,8 +223,11 @@ def pytest_html_results_table_html(report, data):
     if hasattr(report, "user_properties"):
         user_props = dict(report.user_properties)
         if "note" in user_props:
-            reason = user_props["note"]
-            data.insert(0, f"<div style='color: blue;'><strong>{reason}</strong></div>")
+            desc = user_props["note"]
+            data.insert(0, f"<div style='color: blue;'><strong>{desc}</strong></div>")
+        if "hint" in user_props:
+            desc = user_props["hint"]
+            data.insert(0, f"<div style='color: green;'><strong>{desc}</strong></div>")
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -241,10 +246,9 @@ def pytest_runtest_makereport(item, call):
                 report.user_properties.append((property_name, getattr(item.config, property_name)))
 
         for marker in item.iter_markers():
-            reason = marker.kwargs.get("reason", None)
-            print(f"iter_mark {marker.name} {reason}")
-            if marker.name in "note":
-                report.user_properties.append((marker.name, reason))
+            if marker.name in ["hint", "note"]:
+                desc = marker.args[0]
+                report.user_properties.append((marker.name, desc))
 
 
 def pytest_html_report_title(report):

@@ -29,11 +29,13 @@ tests/%/report.html: CHAIN_ID=$(shell cat .chain-id)
 tests/%/report.html: tests/%/*/test_*.py .chain-id
 	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id $(CHAIN_ID) \
 		--html=$@ --self-contained-html \
-		--sender-funding-txs-gas-price 710000000000 \
-		--default-gas-price 710000000000 \
-		--sender-fund-refund-gas-limit 1000000 \
-		--seed-account-sweep-amount=70000000000000000000000 \
-		--eoa-fund-amount-default=8000000000000000000000 $(PYTEST_OPTS) tests/$*
+		--sender-funding-txs-gas-price='710 gwei' \
+		--default-gas-price=710_000_000_000 \
+		--sender-fund-refund-gas-limit=1_000_000 \
+		--seed-account-sweep-amount='70000 ether' \
+		--eoa-fund-amount-default=8_000_000_000_000_000_000_000 \
+		--transaction-gas-limit=15_000_000 \
+		$(PYTEST_OPTS) tests/$*
 
 clean:
 	-rm -v tests/*/report.html .chain-id
