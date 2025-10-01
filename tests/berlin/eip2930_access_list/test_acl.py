@@ -34,7 +34,7 @@ pytestmark = pytest.mark.valid_from("Berlin")
         (False, False),
     ],
 )
-@pytest.mark.skip(reason="Access list is not yet in the JSON-RPC Relay nor in the Mirror Node")
+@pytest.mark.skip(reason="Access list is not yet in the JSON-RPC Relay nor in the Mirror Node. Filed issue https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4430")
 def test_account_storage_warm_cold_state(
     state_test: StateTestFiller,
     pre: Alloc,
@@ -199,7 +199,7 @@ def test_account_storage_warm_cold_state(
         pytest.param(False, id="not_enough_gas", marks=pytest.mark.exception_test),
     ],
 )
-@pytest.mark.skip(reason="Access list is not yet in the JSON-RPC Relay nor in the Mirror Node")
+@pytest.mark.skip(reason="Access list is not yet in the JSON-RPC Relay nor in the Mirror Node. Filed issue https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4430")
 def test_transaction_intrinsic_gas_cost(
     state_test: StateTestFiller,
     pre: Alloc,
