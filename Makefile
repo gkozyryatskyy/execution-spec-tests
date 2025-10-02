@@ -25,9 +25,9 @@ all: $(FORKS:%=tests/%/report.html)
 
 $(FORKS): %: tests/%/report.html
 
-tests/%/report.html: CHAIN_ID=$(shell cat .chain-id)
-tests/%/report.html: tests/%/*/test_*.py .chain-id
-	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id $(CHAIN_ID) \
+# https://github.com/ethereum/execution-spec-tests/issues/2246
+tests/%/report.html: tests/%/*/test_*.py
+	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 \
 		--html=$@ --self-contained-html \
 		--sender-funding-txs-gas-price='710 gwei' \
 		--default-gas-price=710_000_000_000 \
@@ -38,14 +38,7 @@ tests/%/report.html: tests/%/*/test_*.py .chain-id
 		$(PYTEST_OPTS) tests/$*
 
 clean:
-	-rm -v tests/*/report.html .chain-id
-
-# Determines the network's chain ID from the JSON-RPC url
-# Using `curl` and `jq` instead of `cast` to avoid dependency on Foundry
-# Using Foundry's `cast` command
-# cast chain-id --rpc-url $(RPC_URL) > .chain-id
-.chain-id:
-	echo $$((`curl --request POST --url $(RPC_URL) --data '{ "method":"eth_chainId", "id":1, "jsonrpc":"2.0"}' | jq --raw-output .result`)) > .chain-id
+	-rm -v tests/*/report.html
 
 #
 # Solo commands to view and manage deployment nodes

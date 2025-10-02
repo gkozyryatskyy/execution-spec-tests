@@ -135,8 +135,6 @@ def pytest_configure(config):
     if is_help_or_collectonly_mode(config):
         return
 
-    config.addinivalue_line("markers", "note: attach notes to tests or test parameters.")
-
     config.engine_rpc_supported = False
     if config.getoption("disable_html") and config.getoption("htmlpath") is None:
         # generate an html report by default, unless explicitly disabled
@@ -178,8 +176,6 @@ def pytest_html_results_table_header(cells):
     cells.insert(
         5, '<th class="sortable" data-column-type="fundedAccounts">Deployed Contracts</th>'
     )
-    cells.insert(6, '<th class="sortable" data-column-type="hint">Hint</th>')
-    cells.insert(7, '<th class="sortable" data-column-type="note">Note</th>')
     del cells[-1]  # Remove the "Links" column
 
 
@@ -199,35 +195,8 @@ def pytest_html_results_table_row(report, cells):
         else:
             cells.insert(4, "<td>Not available</td>")
 
-        cells.insert(5, f"<td></td>")
-        cells.insert(6, f"<td>{'&#128221;' if 'hint' in user_props else ''}</td>")
-        cells.insert(7, f"<td>{'&#128221;' if 'note' in user_props else ''}</td>")
-
     del cells[-1]  # Remove the "Links" column
 
-def pytest_html_results_table_html(report, data):
-    """
-    Insert the reason for an `xfail` into the HTML report's log if any.
-
-    See pytest-html hook definition
-    https://pytest-html.readthedocs.io/en/latest/api_reference.html#pytest_html.hooks.pytest_html_results_table_html
-    """
-
-    # Adapted from
-    # https://github.com/pytest-dev/pytest-html/blob/4e9f0df201e342bd636883af590d0b6448e7aae8/src/pytest_html/basereport.py#L349-L353
-    # https://docs.pytest.org/en/stable/_modules/_pytest/reports.html#TestReport
-    if hasattr(report, "wasxfail") and report.outcome == "skipped":
-        reason = getattr(report, "wasxfail")
-        data.insert(0, f"<div style='color: orange;'><strong>XFailed reason: {reason}</strong></div>")
-
-    if hasattr(report, "user_properties"):
-        user_props = dict(report.user_properties)
-        if "note" in user_props:
-            desc = user_props["note"]
-            data.insert(0, f"<div style='color: blue;'><strong>{desc}</strong></div>")
-        if "hint" in user_props:
-            desc = user_props["hint"]
-            data.insert(0, f"<div style='color: green;'><strong>{desc}</strong></div>")
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -244,11 +213,6 @@ def pytest_runtest_makereport(item, call):
         for property_name in ["sender_address", "funded_accounts"]:
             if hasattr(item.config, property_name):
                 report.user_properties.append((property_name, getattr(item.config, property_name)))
-
-        for marker in item.iter_markers():
-            if marker.name in ["hint", "note"]:
-                desc = marker.args[0]
-                report.user_properties.append((marker.name, desc))
 
 
 def pytest_html_report_title(report):

@@ -1,5 +1,3 @@
-/.chain-id
-
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -75,7 +73,7 @@ __pycache__/
 
 # pytest report
 assets
-# *.html
+*.html
 
 # Environment
 env.yaml

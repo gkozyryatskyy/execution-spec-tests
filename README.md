@@ -179,18 +179,6 @@ The available test cases can be browsed in the [Test Case Reference doc](https:/
 
 If you encounter issues during the installation process, please refer to the [Installation Troubleshooting](https://eest.ethereum.org/main/getting_started/installation_troubleshooting/) page.
 
-## Client Spec Test Reports
-
-- **Frontier** [html](./tests/frontier/report.html)
-- **Homestead** [html](./tests/homestead/report.html)
-- **Byzantium** [html](./tests/byzantium/report.html)
-- **Constantinople** [html](./tests/constantinople/report.html)
-- **Istanbul** [html](./tests/istanbul/report.html)
-- **Berlin** [html](./tests/berlin/report.html)
-- **Paris** [html](./tests/paris/report.html)
-- **Shanghai** [html](./tests/shanghai/report.html)
-- **Cancun** [html](./tests/cancun/report.html)
-
 ## Contributing
 
 Contributions and feedback are welcome. Please see our [Contributing Guidelines](CONTRIBUTING.md) for detailed information on how to contribute, and the [online documentation](https://eest.ethereum.org/main/writing_tests/) for this repository's coding standards and help on implementing new tests.

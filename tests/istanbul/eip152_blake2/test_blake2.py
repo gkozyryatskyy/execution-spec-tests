@@ -554,7 +554,7 @@ def max_tx_gas_limit(fork: Fork) -> int:
     tx_limit = fork.transaction_gas_limit_cap()
     if tx_limit is not None:
         return tx_limit
-    return pytest.param(Environment().gas_limit, marks=pytest.mark.hint("The `MAX_TRANSACTION_FEE_THRESHOLD` setting in the Relay needs to be at least `Environment().gas_limit` for the tests to pass; alternatively, this value can be configured using the `--transaction-gas-limit` flag"))
+    return Environment().gas_limit
 
 
 def tx_gas_limits(fork: Fork) -> List[int]:
