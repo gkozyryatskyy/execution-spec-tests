@@ -79,10 +79,12 @@ class TransactionByHashResponse(Transaction):
         us.
         """
         Transaction.model_post_init(self, __context)
+        # NOTICE Tracking issue https://github.com/gkozyryatskyy/execution-spec-tests/issues/7
         # TODO Glib: hashes are not matching because of:
         #  - https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4318
         #  - https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4327
         #  - https://github.com/hiero-ledger/hiero-mirror-node/issues/11860
+        #  - https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4436
         # assert self.transaction_hash == self.hash
         if self.transaction_hash == self.hash:
             print(f"Transaction hash {self.transaction_hash} matches hash calculated from the RLP transaction data")

@@ -32,7 +32,6 @@ from ethereum_test_types import compute_create_address
 )
 @pytest.mark.valid_from("Frontier")
 @pytest.mark.with_all_create_opcodes
-@pytest.mark.note("CN config variable `consensus.handle.maxFollowingRecord` needs to be greater than 255 (default 50). Otherwise this test fails with `MAX_CHILD_RECORDS_EXCEEDED` when creating too many contracts within the same transaction. This test generates initcode for 50 contracts to make the test pass without changing the CN configuration.")
 def test_create_one_byte(
     state_test: StateTestFiller,
     fork: Fork,
@@ -42,6 +41,10 @@ def test_create_one_byte(
     """Run create deploys with single bytes for each byte."""
 
     initcode: dict[int, Bytecode] = {}
+    # NOTICE CN config variable `consensus.handle.maxFollowingRecord` needs to be greater than 255 (default 50).
+    # Otherwise this test fails with `MAX_CHILD_RECORDS_EXCEEDED` when creating too many contracts within the same transaction.
+    # This test generates initcode for **50** contracts to make the test pass without changing the CN configuration.
+    # https://github.com/gkozyryatskyy/execution-spec-tests/issues/18
     for byte in range(50):
         initcode[byte] = Op.MSTORE8(0, byte) + Op.RETURN(0, 1)
     initcode_length = 10

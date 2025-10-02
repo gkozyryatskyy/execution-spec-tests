@@ -111,7 +111,7 @@ def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
 
 
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.xfail(reason="`eth_getTransactionByHash` does not include a `to` field for contract creation txs that reverts. Filed an issue in the JSON-RPC Relay https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4413.")
+@pytest.mark.xfail(reason="`eth_getTransactionByHash` does not include a `to` field for contract creation txs that reverts https://github.com/gkozyryatskyy/execution-spec-tests/issues/4")
 def test_cover_revert(state_test: StateTestFiller, pre: Alloc):
     """Cover state revert from original tests for the coverage script."""
     tx = Transaction(
