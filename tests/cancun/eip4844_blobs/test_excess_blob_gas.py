@@ -46,6 +46,8 @@ from ethereum_test_tools import Opcodes as Op
 
 from .spec import Spec, SpecHelpers, ref_spec_4844
 
+pytest.skip("Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode https://github.com/gkozyryatskyy/execution-spec-tests/issues/21", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_4844.git_path
 REFERENCE_SPEC_VERSION = ref_spec_4844.version
 
@@ -138,13 +140,7 @@ def destination_account(  # noqa: D103
 
 @pytest.fixture
 def sender(pre: Alloc, tx_exact_cost: int) -> Address:  # noqa: D103
-    # The cost to fund the EOA needs to be adjusted,
-    # otherwise it fails at Relay’s precheck with "Insufficient funds for transfer".
-    #
-    # This can be checked only when `new_blobs` is 0.
-    # In other cases, the tests fail due to transaction type 3 not being supported in execute mode.
-    # That's why they are skipped.
-    return pre.fund_eoa(tx_exact_cost * 15)
+    return pre.fund_eoa(tx_exact_cost)
 
 
 @pytest.fixture
@@ -301,7 +297,6 @@ def post(  # noqa: D103
     lambda fork: range(0, fork.target_blobs_per_block() + 1),
 )
 @pytest.mark.parametrize("new_blobs", [1])
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_correct_excess_blob_gas_calculation(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -363,7 +358,6 @@ def generate_blob_gas_cost_increases_tests(delta: int) -> Callable[[Fork], List[
     lambda fork: [fork.target_blobs_per_block() + 1],
 )
 @pytest.mark.parametrize("new_blobs", [1])
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_correct_increasing_blob_gas_costs(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -401,7 +395,6 @@ def test_correct_increasing_blob_gas_costs(
     lambda fork: [fork.target_blobs_per_block() - 1],
 )
 @pytest.mark.parametrize("new_blobs", [1])
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_correct_decreasing_blob_gas_costs(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -432,7 +425,6 @@ def test_correct_decreasing_blob_gas_costs(
     lambda fork: range(0, fork.max_blobs_per_block() + 1),
 )
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_zero_excess_blob_gas_in_header(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -482,7 +474,6 @@ def all_invalid_blob_gas_used_combinations(fork: Fork) -> Iterator[Tuple[int, in
 )
 @pytest.mark.parametrize("parent_blobs", [0])
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_blob_gas_used_in_header(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -529,7 +520,6 @@ def generate_invalid_excess_blob_gas_above_target_change_tests(fork: Fork) -> Li
 )
 @pytest.mark.parametrize("new_blobs", [1])
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_excess_blob_gas_above_target_change(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -575,7 +565,6 @@ def test_invalid_excess_blob_gas_above_target_change(
 )
 @pytest.mark.parametrize("new_blobs", [1])
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_static_excess_blob_gas(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -618,7 +607,6 @@ def test_invalid_static_excess_blob_gas(
 @pytest.mark.parametrize("parent_excess_blobs", [0])  # Start at 0
 @pytest.mark.parametrize("new_blobs", [1])
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_excess_blob_gas_target_blobs_increase_from_zero(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -661,7 +649,6 @@ def test_invalid_excess_blob_gas_target_blobs_increase_from_zero(
 @pytest.mark.parametrize("parent_excess_blobs", [0])  # Start at 0
 @pytest.mark.parametrize("new_blobs", [1])
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_static_excess_blob_gas_from_zero_on_blobs_above_target(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -711,7 +698,6 @@ def test_invalid_static_excess_blob_gas_from_zero_on_blobs_above_target(
 )
 @pytest.mark.parametrize("new_blobs", [1])
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_excess_blob_gas_change(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -764,7 +750,6 @@ def test_invalid_excess_blob_gas_change(
     lambda fork: range(fork.target_blobs_per_block()),
 )
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_negative_excess_blob_gas(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
@@ -815,7 +800,6 @@ def test_invalid_negative_excess_blob_gas(
     lambda fork: [fork.target_blobs_per_block() + 1],
 )
 @pytest.mark.exception_test
-@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode.")
 def test_invalid_non_multiple_excess_blob_gas(
     blockchain_test: BlockchainTestFiller,
     env: Environment,
