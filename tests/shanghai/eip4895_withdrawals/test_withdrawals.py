@@ -27,6 +27,8 @@ from ethereum_test_vm import Opcodes as Op
 
 from .spec import ref_spec_4895
 
+pytest.skip("Hedera is not supporting EIP-4895; these tests can be safely skipped https://github.com/gkozyryatskyy/execution-spec-tests/issues/23", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_4895.git_path
 REFERENCE_SPEC_VERSION = ref_spec_4895.version
 
@@ -35,7 +37,6 @@ pytestmark = pytest.mark.valid_from("Shanghai")
 ONE_GWEI = 10**9
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 @pytest.mark.parametrize(
     "test_case",
     [
@@ -133,7 +134,6 @@ class TestUseValueInTx:
         blockchain_test(pre=pre, post=post, blocks=blocks)
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 def test_use_value_in_contract(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
@@ -189,7 +189,6 @@ def test_use_value_in_contract(
     blockchain_test(pre=pre, post=post, blocks=blocks)
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 def test_balance_within_block(blockchain_test: BlockchainTestFiller, pre: Alloc):
     """
     Test Withdrawal balance increase within the same block,
@@ -246,7 +245,6 @@ def test_balance_within_block(blockchain_test: BlockchainTestFiller, pre: Alloc)
     blockchain_test(pre=pre, post=post, blocks=blocks)
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 @pytest.mark.parametrize("test_case", ["single_block", "multiple_blocks"])
 class TestMultipleWithdrawalsSameAddress:
     """
@@ -322,7 +320,6 @@ class TestMultipleWithdrawalsSameAddress:
         blockchain_test(pre=pre, post=post, blocks=blocks, tag=test_case)
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 def test_many_withdrawals(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
@@ -360,7 +357,6 @@ def test_many_withdrawals(
     blockchain_test(pre=pre, post=post, blocks=blocks)
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 def test_self_destructing_account(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
@@ -414,7 +410,6 @@ def test_self_destructing_account(
     blockchain_test(pre=pre, post=post, blocks=[block])
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 @pytest.mark.parametrize(
     "include_value_in_tx",
     [False, True],
@@ -466,7 +461,6 @@ def test_newly_created_contract(
     blockchain_test(pre=pre, post=post, blocks=[block])
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 def test_no_evm_execution(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
@@ -551,7 +545,6 @@ class ZeroAmountTestCases(Enum):  # noqa: D101
     FOUR_ONE_WITH_MAX_REVERSED = "four_withdrawals_one_with_value_one_with_max_reversed_order"
 
 
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 @pytest.mark.parametrize(
     "test_case",
     list(ZeroAmountTestCases),
@@ -661,7 +654,6 @@ def test_zero_amount(
 
 
 @pytest.mark.xdist_group(name="bigmem")
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 def test_large_amount(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
@@ -702,7 +694,6 @@ def test_large_amount(
 
 
 @pytest.mark.xdist_group(name="bigmem")
-@pytest.mark.skip(reason="Hedera is not supporting EIP-4895")
 @pytest.mark.parametrize("amount", [0, 1])
 @pytest.mark.with_all_precompiles
 def test_withdrawing_to_precompiles(
