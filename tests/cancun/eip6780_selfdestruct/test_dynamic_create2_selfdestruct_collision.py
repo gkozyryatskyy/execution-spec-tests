@@ -23,6 +23,8 @@ from ethereum_test_tools import (
 )
 from ethereum_test_vm import Opcodes as Op
 
+pytest.skip("Hedera does not support EIP-6780 https://github.com/gkozyryatskyy/execution-spec-tests/issues/24", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = "EIPS/eip-6780.md"
 REFERENCE_SPEC_VERSION = "1b6a0e94cc47e859b9866e570391cf37dc55059a"
 
@@ -40,7 +42,6 @@ REFERENCE_SPEC_VERSION = "1b6a0e94cc47e859b9866e570391cf37dc55059a"
         (False, True),
     ],
 )
-@pytest.mark.skip(reason="Does Hedera support EIP-6780?")
 def test_dynamic_create2_selfdestruct_collision(
     fork: Fork,
     create2_dest_already_in_state: bool,
@@ -215,7 +216,6 @@ def test_dynamic_create2_selfdestruct_collision(
     "call_create2_contract_at_the_end",
     (True, False),
 )
-@pytest.mark.skip(reason="Does Hedera support EIP-6780?")
 def test_dynamic_create2_selfdestruct_collision_two_different_transactions(
     fork: Fork,
     create2_dest_already_in_state: bool,
@@ -442,7 +442,6 @@ def test_dynamic_create2_selfdestruct_collision_two_different_transactions(
         (True, True),
     ],
 )
-@pytest.mark.skip(reason="Does Hedera support EIP-6780?")
 def test_dynamic_create2_selfdestruct_collision_multi_tx(
     fork: Fork,
     selfdestruct_on_first_tx: bool,
