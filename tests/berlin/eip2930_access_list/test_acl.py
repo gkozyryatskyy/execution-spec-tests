@@ -19,6 +19,8 @@ from ethereum_test_tools import (
 )
 from ethereum_test_tools import Opcodes as Op
 
+pytest.skip("Access list is not yet supported in the JSON-RPC Relay https://github.com/gkozyryatskyy/execution-spec-tests/issues/6", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = "EIPS/eip-2930.md"
 REFERENCE_SPEC_VERSION = "c9db53a936c5c9cbe2db32ba0d1b86c4c6e73534"
 
@@ -34,7 +36,6 @@ pytestmark = pytest.mark.valid_from("Berlin")
         (False, False),
     ],
 )
-@pytest.mark.skip(reason="Access list is not yet in the JSON-RPC Relay nor in the Mirror Node. Filed issue https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4430")
 def test_account_storage_warm_cold_state(
     state_test: StateTestFiller,
     pre: Alloc,
@@ -199,7 +200,6 @@ def test_account_storage_warm_cold_state(
         pytest.param(False, id="not_enough_gas", marks=pytest.mark.exception_test),
     ],
 )
-@pytest.mark.skip(reason="Access list is not yet in the JSON-RPC Relay nor in the Mirror Node. Filed issue https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4430")
 def test_transaction_intrinsic_gas_cost(
     state_test: StateTestFiller,
     pre: Alloc,

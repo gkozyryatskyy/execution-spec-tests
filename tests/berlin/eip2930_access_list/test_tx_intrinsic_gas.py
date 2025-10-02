@@ -22,6 +22,8 @@ from ethereum_test_tools import Opcodes as Op
 
 from .spec import ref_spec_2930
 
+pytest.skip("Access list is not yet supported in the JSON-RPC Relay https://github.com/gkozyryatskyy/execution-spec-tests/issues/6", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_2930.git_path
 REFERENCE_SPEC_VERSION = ref_spec_2930.version
 
@@ -139,7 +141,7 @@ tx_intrinsic_gas_access_list_vectors = [
     "below_intrinsic",
     [
         pytest.param(False),
-        pytest.param(True, marks=[pytest.mark.exception_test, pytest.mark.skip(reason="Access list is not yet in the JSON-RPC Relay nor in the Mirror Node")]),
+        pytest.param(True, marks=[pytest.mark.exception_test]),
     ],
 )
 @pytest.mark.with_all_tx_types(selector=lambda tx_type: tx_type in [1, 2])
