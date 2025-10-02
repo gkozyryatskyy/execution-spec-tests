@@ -136,7 +136,7 @@ def scenarios(fork: Fork, pre: Alloc, test_program: ScenarioTestProgram) -> List
         ProgramSstoreSload(),
         ProgramTstoreTload(),
         ProgramLogs(),
-        pytest.param(ProgramSuicide(), marks=pytest.mark.skip(reason="Do we support `SELFDESTRUCT` in these scenarios?")),
+        pytest.param(ProgramSuicide(), marks=pytest.mark.skip(reason="Do we support `SELFDESTRUCT` in these scenarios? https://github.com/gkozyryatskyy/execution-spec-tests/issues/5")),
         pytest.param(ProgramInvalidOpcode(), marks=[pytest.mark.slow()]),
         ProgramAddress(),
         ProgramBalance(),
@@ -155,7 +155,7 @@ def scenarios(fork: Fork, pre: Alloc, test_program: ScenarioTestProgram) -> List
         pytest.param(ProgramBlockhash(), marks=[pytest.mark.slow()]),
         ProgramCoinbase(),
         ProgramTimestamp(),
-        pytest.param(ProgramNumber(), marks=pytest.mark.skip(reason="It compares network's current block number against hardcoded value 1")),
+        pytest.param(ProgramNumber(), marks=pytest.mark.skip(reason="It compares network's current block number against hardcoded value 1 https://github.com/gkozyryatskyy/execution-spec-tests/issues/26")),
         ProgramDifficultyRandao(),
         ProgramGasLimit(),
         ProgramChainid(),
@@ -218,11 +218,13 @@ def test_scenarios(
 
             # NOTICE The `gaslimit` needs to be adjusted for `ProgramGasLimit`.
             # This is because it needs to match the `gas_limit` in the transaction sent.
+            # https://github.com/gkozyryatskyy/execution-spec-tests/issues/27
             # gaslimit=tx_env.gas_limit,
             gaslimit=tx_max_gas + 100_000,
 
             # NOTICE The `coinbase` needs to be adjusted for `ProgramCoinbase`.
             # This is because the default coinbase in Hedera is account `0x0000000000000000000000000000000000000062`.
+            # https://github.com/gkozyryatskyy/execution-spec-tests/issues/28
             # coinbase=tx_env.fee_recipient,
             coinbase="0x0000000000000000000000000000000000000062",
         )
