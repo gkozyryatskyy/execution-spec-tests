@@ -141,7 +141,7 @@ tx_intrinsic_gas_access_list_vectors = [
     "below_intrinsic",
     [
         pytest.param(False),
-        pytest.param(True, marks=[pytest.mark.exception_test]),
+        pytest.param(True, marks=pytest.mark.exception_test),
     ],
 )
 @pytest.mark.with_all_tx_types(selector=lambda tx_type: tx_type in [1, 2])
