@@ -35,11 +35,11 @@ def precompile_addresses(fork: Fork) -> Iterator[Tuple[Address, bool]]:
         yield (address, True)
         if address_int > 0 and (address_int - 1) not in supported_precompiles:
             # yield (Address(address_int - 1), False)
-            yield pytest.param(Address(address_int - 1), False, marks=pytest.mark.xfail(reason="Calls to Hedera reserved accounts causes consumption differences"))
+            yield pytest.param(Address(address_int - 1), False, marks=pytest.mark.xfail(reason="Calls to Hedera reserved accounts causes gas consumption differences https://github.com/gkozyryatskyy/execution-spec-tests/issues/25"))
 
         if (address_int + 1) not in supported_precompiles:
             # yield (Address(address_int + 1), False)
-            yield pytest.param(Address(address_int + 1), False, marks=pytest.mark.xfail(reason="Calls to Hedera reserved accounts causes consumption differences"))
+            yield pytest.param(Address(address_int + 1), False, marks=pytest.mark.xfail(reason="Calls to Hedera reserved accounts causes gas consumption differences https://github.com/gkozyryatskyy/execution-spec-tests/issues/25"))
 
 
 @pytest.mark.ported_from(
