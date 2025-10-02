@@ -39,6 +39,8 @@ from ethereum_test_vm import Opcodes as Op
 
 from .spec import Spec, ref_spec_4788
 
+pytest.skip("There is no beacon root contract in Hedera https://github.com/gkozyryatskyy/execution-spec-tests/issues/19", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_4788.git_path
 REFERENCE_SPEC_VERSION = ref_spec_4788.version
 
@@ -71,7 +73,6 @@ pytestmark = pytest.mark.pre_alloc_group(
     ],
 )
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.skip(reason="There is no beacon root contract in Hedera")
 def test_beacon_root_contract_calls(
     blockchain_test: BlockchainTestFiller,
     beacon_root: bytes,
@@ -145,7 +146,6 @@ def test_beacon_root_contract_calls(
     ],
 )
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.skip(reason="There is no beacon root contract in Hedera")
 def test_beacon_root_contract_timestamps(
     blockchain_test: BlockchainTestFiller,
     beacon_root: bytes,
@@ -181,7 +181,6 @@ def test_beacon_root_contract_timestamps(
 @pytest.mark.parametrize("valid_call,valid_input", [(False, False)])
 @pytest.mark.parametrize("timestamp", [12])
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.skip(reason="There is no beacon root contract in Hedera")
 def test_calldata_lengths(
     blockchain_test: BlockchainTestFiller,
     beacon_root: bytes,
@@ -210,7 +209,6 @@ def test_calldata_lengths(
 )
 @pytest.mark.parametrize("auto_access_list", [False, True])
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.skip(reason="There is no beacon root contract in Hedera")
 def test_beacon_root_equal_to_timestamp(
     blockchain_test: BlockchainTestFiller,
     beacon_root: bytes,
@@ -236,7 +234,6 @@ def test_beacon_root_equal_to_timestamp(
 @pytest.mark.parametrize("call_beacon_root_contract", [True])
 @pytest.mark.with_all_tx_types
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.skip(reason="There is no beacon root contract in Hedera")
 def test_tx_to_beacon_root_contract(
     blockchain_test: BlockchainTestFiller,
     beacon_root: bytes,
@@ -262,7 +259,6 @@ def test_tx_to_beacon_root_contract(
 @pytest.mark.parametrize("valid_call,valid_input", [(False, False)])
 @pytest.mark.parametrize("timestamp", [12])
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.skip(reason="There is no beacon root contract in Hedera")
 def test_invalid_beacon_root_calldata_value(
     blockchain_test: BlockchainTestFiller,
     beacon_root: bytes,
@@ -286,7 +282,6 @@ def test_invalid_beacon_root_calldata_value(
 
 @pytest.mark.parametrize("timestamp", [12])
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.skip(reason="There is no beacon root contract in Hedera")
 def test_beacon_root_selfdestruct(
     blockchain_test: BlockchainTestFiller,
     beacon_root: bytes,
@@ -370,7 +365,6 @@ def test_beacon_root_selfdestruct(
 )
 @pytest.mark.parametrize("block_count", [10])  # All tests use 10 blocks
 @pytest.mark.valid_from("Cancun")
-@pytest.mark.skip(reason="There is no beacon root contract in Hedera")
 def test_multi_block_beacon_root_timestamp_calls(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
