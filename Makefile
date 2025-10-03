@@ -8,8 +8,7 @@
 #
 
 # The following environment variables were set in the Relay configmap
-# MAX_TRANSACTION_FEE_THRESHOLD: "22500000"                                         
-# RATE_LIMIT_DISABLED: "true"                                                       
+# RATE_LIMIT_DISABLED: "true"
 
 UV=~/.local/bin/uv
 
@@ -25,7 +24,11 @@ all: $(FORKS:%=tests/%/report.html)
 
 $(FORKS): %: tests/%/report.html
 
-# https://github.com/ethereum/execution-spec-tests/issues/2246
+# To avoid hardcoding the chain-id https://github.com/ethereum/execution-spec-tests/issues/2246
+# --transaction-gas-limit
+#   Some tests use `Environment().gas_limit` when setting the gas limit for transactions.
+#   This value needs to be less than or equal to the Relay's `MAX_TRANSACTION_FEE_THRESHOLD` setting for the tests to pass.
+#   The default value for `MAX_TRANSACTION_FEE_THRESHOLD` is `15_000_000`.
 tests/%/report.html: tests/%/*/test_*.py
 	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 \
 		--html=$@ --self-contained-html \
