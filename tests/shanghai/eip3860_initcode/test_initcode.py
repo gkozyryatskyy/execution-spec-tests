@@ -27,10 +27,14 @@ from ethereum_test_tools import (
     ceiling_division,
     compute_create_address,
 )
+from ethereum_test_types import TransactionDefaults
 from ethereum_test_vm import Opcodes as Op
 
 from .helpers import INITCODE_RESULTING_DEPLOYED_CODE, get_create_id, get_initcode_name
 from .spec import Spec, ref_spec_3860
+
+if not TransactionDefaults.adjust_tx_values:
+    pytest.skip(reason="Skipping because `TransactionDefaults.adjust_tx_values` is True", allow_module_level=True)
 
 # TODO Glib: seems like Hedera has no INITCODE limit check.
 #  Hedera has just Jumbo tx payload check = 131072

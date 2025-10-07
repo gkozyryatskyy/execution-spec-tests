@@ -131,6 +131,9 @@ def pytest_configure(config):
        called before the pytest-html plugin's pytest_configure to ensure that
        it uses the modified `htmlpath` option.
     """
+
+    TransactionDefaults.adjust_tx_values = True
+
     # Modify the block gas limit if specified.
     if config.getoption("transaction_gas_limit"):
         EnvironmentDefaults.gas_limit = config.getoption("transaction_gas_limit")

@@ -62,6 +62,8 @@ class TransactionDefaults:
     max_fee_per_gas = 7
     max_priority_fee_per_gas: int = 0
 
+    adjust_tx_values = False
+
 
 class AuthorizationTupleGeneric(CamelModel, Generic[NumberBoundTypeVar], SignableRLPSerializable):
     """Authorization tuple for transactions."""
@@ -320,7 +322,7 @@ class Transaction(
         # due to differences in decimal precision between Hedera and Ethereum.
         # https://github.com/gkozyryatskyy/execution-spec-tests/issues/17
         tinybar_to_weibar = 10_000_000_000
-        if 0 < self.value < tinybar_to_weibar:
+        if TransactionDefaults.adjust_tx_values and 0 < self.value < tinybar_to_weibar:
             self.value = self.value * tinybar_to_weibar
             print(f"[DEBUG] Transaction value {self.value} scaled by `TINYBAR_TO_WEIBAR`")
 
@@ -361,8 +363,10 @@ class Transaction(
             self.gas_price = TransactionDefaults.gas_price
         # NOTICE Sending access list is currently not supported
         # https://github.com/gkozyryatskyy/execution-spec-tests/issues/6
-        # if self.ty >= 1: and self.access_list is None:
-        if self.ty >= 1:
+        if TransactionDefaults.adjust_tx_values and self.ty >= 1:
+            self.access_list = []
+
+        if self.ty >= 1 and self.access_list is None:
             self.access_list = []
         if self.ty < 1:
             assert self.access_list is None, "access_list must be None"
@@ -371,7 +375,7 @@ class Transaction(
         # the JSON-RPC Relay rejects the transaction.
         # https://github.com/gkozyryatskyy/execution-spec-tests/issues/16
         min_gas_price = 71 * tinybar_to_weibar
-        if self.gas_price is not None and self.gas_price < min_gas_price:
+        if TransactionDefaults.adjust_tx_values and self.gas_price is not None and self.gas_price < min_gas_price:
             self.gas_price += min_gas_price
             print(f"[DEBUG] Adjusted gas_price {self.gas_price}")
 
@@ -383,7 +387,7 @@ class Transaction(
             assert self.max_fee_per_gas is None, "max_fee_per_gas must be None"
             assert self.max_priority_fee_per_gas is None, "max_priority_fee_per_gas must be None"
 
-        if self.max_fee_per_gas is not None and self.max_fee_per_gas < min_gas_price:
+        if TransactionDefaults.adjust_tx_values and self.max_fee_per_gas is not None and self.max_fee_per_gas < min_gas_price:
             self.max_fee_per_gas = min_gas_price
             print(f"[DEBUG] Adjusted max_fee_per_gas {self.max_fee_per_gas}")
 
