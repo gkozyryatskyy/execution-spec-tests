@@ -235,7 +235,7 @@ def test_scenarios(
             # This is because the default coinbase in Hedera is account `0x0000000000000000000000000000000000000062`.
             # https://github.com/gkozyryatskyy/execution-spec-tests/issues/28
             # coinbase=tx_env.fee_recipient,
-            coinbase="0x0000000000000000000000000000000000000062",
+            coinbase=Address("0x0000000000000000000000000000000000000062"),
         )
 
         def make_result(scenario: Scenario, exec_env: ExecutionEnvironment, post: Storage) -> int:

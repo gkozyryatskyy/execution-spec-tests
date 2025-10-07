@@ -36,12 +36,10 @@ def precompile_addresses(fork: Fork) -> Iterator[Tuple[Address, bool]]:
         address_int = int.from_bytes(address, byteorder="big")
         yield (address, True)
         if address_int > 0 and (address_int - 1) not in supported_precompiles:
-            # yield (Address(address_int - 1), False)
-            yield pytest.param(Address(address_int - 1), False, marks=pytest.mark.xfail(reason="Calls to Hedera reserved accounts causes gas consumption differences https://github.com/gkozyryatskyy/execution-spec-tests/issues/25"))
+            yield (Address(address_int - 1), False)
 
         if (address_int + 1) not in supported_precompiles:
-            # yield (Address(address_int + 1), False)
-            yield pytest.param(Address(address_int + 1), False, marks=pytest.mark.xfail(reason="Calls to Hedera reserved accounts causes gas consumption differences https://github.com/gkozyryatskyy/execution-spec-tests/issues/25"))
+            yield (Address(address_int + 1), False)
 
 
 @pytest.mark.ported_from(
@@ -80,6 +78,9 @@ def test_precompiles(
     precompiled contract exists at the given address.
 
     """
+    if not precompile_exists:
+        pytest.skip(reason="Calls to Hedera reserved accounts causes gas consumption differences https://github.com/gkozyryatskyy/execution-spec-tests/issues/25")
+
     env = Environment()
 
     # Empty account to serve as reference
