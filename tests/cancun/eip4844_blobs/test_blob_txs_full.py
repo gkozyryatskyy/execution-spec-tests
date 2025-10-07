@@ -26,6 +26,8 @@ from ethereum_test_tools import (
 
 from .spec import Spec, ref_spec_4844
 
+pytest.skip("Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode https://github.com/gkozyryatskyy/execution-spec-tests/issues/21", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_4844.git_path
 REFERENCE_SPEC_VERSION = ref_spec_4844.version
 

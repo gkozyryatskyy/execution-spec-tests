@@ -52,7 +52,9 @@ def caller_code(
     callee_address: Address,
 ) -> Bytecode:
     """Bytecode used to call the bytecode containing the BLOBBASEFEE opcode."""
-    return Op.SSTORE(Op.NUMBER, Op.CALL(gas=call_gas, address=callee_address))
+    # NOTICE The storage slot to write the `CALL` result is `1`
+    # https://github.com/gkozyryatskyy/execution-spec-tests/issues/11
+    return Op.SSTORE(1, Op.CALL(gas=call_gas, address=callee_address))
 
 
 @pytest.fixture

@@ -27,6 +27,8 @@ from ethereum_test_vm import Opcodes as Op
 
 from .spec import ref_spec_4895
 
+pytest.skip("Hedera is not supporting EIP-4895; these tests can be safely skipped https://github.com/gkozyryatskyy/execution-spec-tests/issues/23", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_4895.git_path
 REFERENCE_SPEC_VERSION = ref_spec_4895.version
 

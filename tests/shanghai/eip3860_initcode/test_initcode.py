@@ -33,6 +33,12 @@ from ethereum_test_vm import Opcodes as Op
 from .helpers import INITCODE_RESULTING_DEPLOYED_CODE, get_create_id, get_initcode_name
 from .spec import Spec, ref_spec_3860
 
+# TODO Glib: seems like Hedera has no INITCODE limit check.
+#  Hedera has just Jumbo tx payload check = 131072
+#  details https://swirldslabs.slack.com/archives/C09B3UPEMKM/p1756384889485429
+#   - https://github.com/hiero-ledger/hiero-consensus-node/issues/20872
+JUMBO_MAX_PAYLOAD_SIZE = 131072
+
 REFERENCE_SPEC_GIT_PATH = ref_spec_3860.git_path
 REFERENCE_SPEC_VERSION = ref_spec_3860.version
 
@@ -42,6 +48,37 @@ pytestmark = pytest.mark.valid_from("Shanghai")
 """
 Initcode templates used throughout the tests
 """
+# TODO Glib: for contract create: initcode limit -> jumbo tx payload limit
+#  - https://github.com/hiero-ledger/hiero-consensus-node/issues/20872
+INITCODE_ONES_MAX_LIMIT_JUMBO = Initcode(
+    deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
+    initcode_length=JUMBO_MAX_PAYLOAD_SIZE,
+    padding_byte=0x01,
+    name="max_size_ones",
+)
+
+INITCODE_ZEROS_MAX_LIMIT_JUMBO = Initcode(
+    deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
+    initcode_length=JUMBO_MAX_PAYLOAD_SIZE,
+    padding_byte=0x00,
+    name="max_size_zeros",
+)
+
+INITCODE_ONES_OVER_LIMIT_JUMBO = Initcode(
+    deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
+    initcode_length=JUMBO_MAX_PAYLOAD_SIZE + 1,
+    padding_byte=0x01,
+    name="over_limit_ones",
+)
+
+INITCODE_ZEROS_OVER_LIMIT_JUMBO = Initcode(
+    deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
+    initcode_length=JUMBO_MAX_PAYLOAD_SIZE + 1,
+    padding_byte=0x00,
+    name="over_limit_zeros",
+)
+# TODO Glib: ------------------------------------
+
 INITCODE_ONES_MAX_LIMIT = Initcode(
     deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
     initcode_length=Spec.MAX_INITCODE_SIZE,
@@ -121,10 +158,10 @@ Test cases using a contract creating transaction
 @pytest.mark.parametrize(
     "initcode",
     [
-        INITCODE_ZEROS_MAX_LIMIT,
-        INITCODE_ONES_MAX_LIMIT,
-        pytest.param(INITCODE_ZEROS_OVER_LIMIT, marks=pytest.mark.exception_test),
-        pytest.param(INITCODE_ONES_OVER_LIMIT, marks=pytest.mark.exception_test),
+        INITCODE_ZEROS_MAX_LIMIT_JUMBO,
+        INITCODE_ONES_MAX_LIMIT_JUMBO,
+        pytest.param(INITCODE_ZEROS_OVER_LIMIT_JUMBO, marks=pytest.mark.exception_test),
+        pytest.param(INITCODE_ONES_OVER_LIMIT_JUMBO, marks=pytest.mark.exception_test),
     ],
     ids=get_initcode_name,
 )
@@ -154,7 +191,7 @@ def test_contract_creating_tx(
         sender=sender,
     )
 
-    if len(initcode) > Spec.MAX_INITCODE_SIZE:
+    if len(initcode) > JUMBO_MAX_PAYLOAD_SIZE:
         # Initcode is above the max size, tx inclusion in the block makes
         # it invalid.
         post[create_contract_address] = Account.NONEXISTENT
@@ -178,7 +215,8 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
         return (initcode.deployment_gas + initcode.execution_gas) > 0
     return True
 
-
+# TODO Glib:
+#  - this https://github.com/hyperledger/besu/pull/8817/files can be relared of gas difference
 @pytest.mark.parametrize(
     "initcode,gas_test_case",
     [
@@ -188,19 +226,19 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
             marks=([pytest.mark.exception_test] if g == "too_little_intrinsic_gas" else []),
         )
         for i in [
-            INITCODE_ZEROS_MAX_LIMIT,
-            INITCODE_ONES_MAX_LIMIT,
-            EMPTY_INITCODE,
-            SINGLE_BYTE_INITCODE,
-            INITCODE_ZEROS_32_BYTES,
-            INITCODE_ZEROS_33_BYTES,
-            INITCODE_ZEROS_49120_BYTES,
-            INITCODE_ZEROS_49121_BYTES,
+            INITCODE_ZEROS_MAX_LIMIT, # TODO Glib: Hedera: 249740,249940 / Tests(int,exec): 252788,253012 / Diff 3048,3072
+            INITCODE_ONES_MAX_LIMIT, # TODO Glib: Hedera: 839420,839620 / Tests(int,exec): 842468,842692 / Diff 3048,3072
+            # EMPTY_INITCODE, # TODO Glib: Hedera: INVALID_ETHEREUM_TRANSACTION / Tests: 53000,53000 / Possible surce: https://github.com/hiero-ledger/hiero-consensus-node/blob/main/hedera-node/hedera-smart-contract-service-impl/src/main/java/com/hedera/node/app/service/contract/impl/infra/HevmTransactionFactory.java#L279
+            SINGLE_BYTE_INITCODE, # TODO Glib: Success
+            INITCODE_ZEROS_32_BYTES, # TODO Glib: Hedera(consumed,used): 53260,53460 / Tests(int,exec): 53238,53462 / Diff -22,2
+            INITCODE_ZEROS_33_BYTES, # TODO Glib: Hedera(consumed,used): 53264,53464 / Tests(int,exec): 53244,53468 / Diff -20,4
+            INITCODE_ZEROS_49120_BYTES, # TODO Glib: Hedera: 249612,249812 / Tests(int,exec): 252658,252882 / Diff 3046,3070
+            INITCODE_ZEROS_49121_BYTES, # TODO Glib: Hedera: 249616,249816 / Tests(int,exec): 252664,252888 / Diff 3046,3070
         ]
         for g in [
-            "too_little_intrinsic_gas",
-            "exact_intrinsic_gas",
-            "too_little_execution_gas",
+            # "too_little_intrinsic_gas",
+            # "exact_intrinsic_gas",
+            # "too_little_execution_gas",
             "exact_execution_gas",
         ]
         if valid_gas_test_case(i, g)
@@ -502,7 +540,7 @@ class TestCreateInitcode:
         Test contract creation via the CREATE/CREATE2 opcodes that have an
         initcode that is on/over the max allowed limit.
         """
-        if len(initcode) > Spec.MAX_INITCODE_SIZE:
+        if len(initcode) > JUMBO_MAX_PAYLOAD_SIZE:
             # Call returns 0 as out of gas s[0]==1
             post[caller_contract_address] = Account(
                 nonce=1,

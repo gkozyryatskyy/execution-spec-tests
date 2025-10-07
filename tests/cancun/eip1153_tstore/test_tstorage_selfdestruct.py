@@ -217,6 +217,7 @@ class SelfDestructCases(PytestParameterEnum):
 
 
 @SelfDestructCases.parametrize()
+@pytest.mark.skip(reason="Not supported in Hedera https://github.com/gkozyryatskyy/execution-spec-tests/issues/20")
 def test_reentrant_selfdestructing_call(
     state_test: StateTestFiller,
     pre: Alloc,

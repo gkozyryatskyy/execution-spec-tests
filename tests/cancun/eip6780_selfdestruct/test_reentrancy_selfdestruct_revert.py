@@ -20,6 +20,8 @@ from ethereum_test_tools import (
 )
 from ethereum_test_vm import Opcodes as Op
 
+pytest.skip("Hedera does not support EIP-6780 https://github.com/gkozyryatskyy/execution-spec-tests/issues/24", allow_module_level=True)
+
 REFERENCE_SPEC_GIT_PATH = "EIPS/eip-6780.md"
 REFERENCE_SPEC_VERSION = "1b6a0e94cc47e859b9866e570391cf37dc55059a"
 

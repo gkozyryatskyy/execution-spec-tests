@@ -54,6 +54,7 @@ def prepare_suffix(opcode: Opcode) -> Bytecode:
     pr=["https://github.com/ethereum/execution-spec-tests/pull/748"],
 )
 @pytest.mark.valid_from("Frontier")
+@pytest.mark.xfail(reason="`CALL` and `CALLCODE` contracts make the whole transaction fail because they send a non-zero value to precompile 0x1 https://github.com/gkozyryatskyy/execution-spec-tests/issues/12")
 def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
     """
     Test each possible opcode on the fork with a single contract that
@@ -110,6 +111,7 @@ def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
 
 
 @pytest.mark.valid_from("Cancun")
+@pytest.mark.xfail(reason="`eth_getTransactionByHash` does not include a `to` field for contract creation txs that reverts https://github.com/gkozyryatskyy/execution-spec-tests/issues/4")
 def test_cover_revert(state_test: StateTestFiller, pre: Alloc):
     """Cover state revert from original tests for the coverage script."""
     tx = Transaction(

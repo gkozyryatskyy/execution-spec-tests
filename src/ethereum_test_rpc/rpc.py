@@ -110,6 +110,12 @@ class BaseRPC:
 
         logger.debug(f"Sending RPC request, timeout is set to {timeout}...")
         response = requests.post(self.url, json=payload, headers=headers, timeout=timeout)
+
+        # NOTICE Useful for viewing and debugging JSON-RPC Relay errors
+        # This error check is equivalent to `raise_for_status`'s
+        if 400 <= response.status_code < 500 or 500 <= response.status_code < 600:
+            print(f"post_request: {response.json()} payload: {payload}")
+
         response.raise_for_status()
         response_json = response.json()
 

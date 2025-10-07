@@ -40,6 +40,10 @@ def test_create_one_byte(
 ):
     """Run create deploys with single bytes for each byte."""
     initcode: dict[int, Bytecode] = {}
+
+    # NOTICE CN config variable `consensus.handle.maxFollowingRecord` needs to be greater than 255 (default 50).
+    # Otherwise this test fails with `MAX_CHILD_RECORDS_EXCEEDED` when creating too many contracts within the same transaction.
+    # https://github.com/gkozyryatskyy/execution-spec-tests/issues/18
     for byte in range(256):
         initcode[byte] = Op.MSTORE8(0, byte) + Op.RETURN(0, 1)
     initcode_length = 10

@@ -168,6 +168,7 @@ def simple_blob_hashes(
     ],
     ids=lambda x: x,
 )
+@pytest.mark.skip(reason="Unable to run test due to AssertionError: Transaction type 3 is not supported in execute mode https://github.com/gkozyryatskyy/execution-spec-tests/issues/21")
 def test_blobhash_opcode_contexts(
     pre: Alloc,
     test_case: str,

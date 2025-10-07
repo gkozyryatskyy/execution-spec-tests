@@ -427,7 +427,9 @@ class ProgramChainid(ScenarioTestProgram):
 
     def result(self) -> ProgramResult:
         """Test result."""
-        return ProgramResult(result=1, from_fork=Istanbul)
+        # NOTICE Needs to be changed because chainid was hardcoded to 1.
+        # https://github.com/gkozyryatskyy/execution-spec-tests/issues/3
+        return ProgramResult(result=298, from_fork=Istanbul)
 
 
 class ProgramSelfbalance(ScenarioTestProgram):
