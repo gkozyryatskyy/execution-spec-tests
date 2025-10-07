@@ -29,7 +29,6 @@ from ethereum_test_vm import Opcodes as Op
 
 
 @pytest.mark.valid_from("Constantinople")
-@pytest.mark.skip(reason="`SELFDESTRUCT`ing a contract with funds is not supported in Hedera https://github.com/gkozyryatskyy/execution-spec-tests/issues/29")
 def test_tx_selfdestruct_balance_bug(blockchain_test: BlockchainTestFiller, pre: Alloc):
     """
     Test that the vulnerability is not present by checking the balance of the

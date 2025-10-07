@@ -24,8 +24,6 @@ from ethereum_test_tools import Opcodes as Op
 
 from .spec import ref_spec_2930
 
-pytest.skip("Access list is not yet supported in the JSON-RPC Relay https://github.com/gkozyryatskyy/execution-spec-tests/issues/6", allow_module_level=True)
-
 REFERENCE_SPEC_GIT_PATH = ref_spec_2930.git_path
 REFERENCE_SPEC_VERSION = ref_spec_2930.version
 

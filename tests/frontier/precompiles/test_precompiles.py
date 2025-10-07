@@ -37,7 +37,6 @@ def precompile_addresses(fork: Fork) -> Iterator[Tuple[Address, bool]]:
         yield (address, True)
         if address_int > 0 and (address_int - 1) not in supported_precompiles:
             yield (Address(address_int - 1), False)
-
         if (address_int + 1) not in supported_precompiles:
             yield (Address(address_int + 1), False)
 
