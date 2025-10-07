@@ -38,8 +38,6 @@ from ethereum_test_vm import Opcodes as Op
 
 from .spec import Spec, ref_spec_4788
 
-pytest.skip("There is no beacon root contract in Hedera https://github.com/gkozyryatskyy/execution-spec-tests/issues/19", allow_module_level=True)
-
 REFERENCE_SPEC_GIT_PATH = ref_spec_4788.git_path
 REFERENCE_SPEC_VERSION = ref_spec_4788.version
 
