@@ -34,7 +34,7 @@ from .helpers import INITCODE_RESULTING_DEPLOYED_CODE, get_create_id, get_initco
 from .spec import Spec, ref_spec_3860
 
 if not TransactionDefaults.adjust_tx_values:
-    pytest.skip(reason="Skipping because `TransactionDefaults.adjust_tx_values` is True", allow_module_level=True)
+    pytest.skip(reason="TransactionDefaults.adjust_tx_values is set", allow_module_level=True)
 
 # TODO Glib: seems like Hedera has no INITCODE limit check.
 #  Hedera has just Jumbo tx payload check = 131072

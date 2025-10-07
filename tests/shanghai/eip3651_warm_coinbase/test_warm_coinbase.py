@@ -24,7 +24,7 @@ from ethereum_test_vm import Opcodes as Op
 from .spec import ref_spec_3651
 
 if not TransactionDefaults.adjust_tx_values:
-    pytest.skip(reason="Skipping because `TransactionDefaults.adjust_tx_values` is True", allow_module_level=True)
+    pytest.skip(reason="TransactionDefaults.adjust_tx_values is set", allow_module_level=True)
 
 REFERENCE_SPEC_GIT_PATH = ref_spec_3651.git_path
 REFERENCE_SPEC_VERSION = ref_spec_3651.version
