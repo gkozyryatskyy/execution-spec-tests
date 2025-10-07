@@ -1,4 +1,7 @@
-"""Library of Python wrappers for the different implementations of transition tools."""
+"""
+Library of Python wrappers for the different implementations of transition
+tools.
+"""
 
 from .cli_types import (
     BlockExceptionWithMessage,
@@ -9,7 +12,12 @@ from .cli_types import (
 )
 from .clis.besu import BesuTransitionTool
 from .clis.ethereumjs import EthereumJSTransitionTool
-from .clis.evmone import EvmoneExceptionMapper, EvmOneTransitionTool
+from .clis.evmone import (
+    EvmOneBlockchainFixtureConsumer,
+    EvmoneExceptionMapper,
+    EvmOneStateFixtureConsumer,
+    EvmOneTransitionTool,
+)
 from .clis.execution_specs import ExecutionSpecsTransitionTool
 from .clis.geth import GethFixtureConsumer, GethTransitionTool
 from .clis.nethermind import Nethtest, NethtestFixtureConsumer
@@ -28,6 +36,8 @@ __all__ = (
     "EthereumJSTransitionTool",
     "EvmoneExceptionMapper",
     "EvmOneTransitionTool",
+    "EvmOneStateFixtureConsumer",
+    "EvmOneBlockchainFixtureConsumer",
     "ExecutionSpecsTransitionTool",
     "FixtureConsumerTool",
     "GethFixtureConsumer",

@@ -1,4 +1,4 @@
-"""tests for selfdestruct interaction with revert."""
+"""Tests for selfdestruct interaction with revert."""
 
 from typing import Dict
 
@@ -66,9 +66,10 @@ def recursive_revert_contract_code(
 ) -> Bytecode:
     """
     Contract code that:
-        Given selfdestructable contract A, transfer value to A and call A.selfdestruct.
-        Then, recurse into a new call which transfers value to A,
-        call A.selfdestruct, and reverts.
+      Given selfdestructable contract A, transfer value to A
+      and call A.selfdestruct.
+      Then, recurse into a new call which transfers value to A,
+      call A.selfdestruct, and reverts.
     """
     # Common prefix for all three cases:
     #   case 1: selfdestruct_on_outer_call=1
@@ -246,7 +247,9 @@ def selfdestruct_with_transfer_contract_address(
     selfdestruct_with_transfer_contract_code: Bytecode,
     same_tx: bool,
 ) -> Address:
-    """Contract address for contract that can selfdestruct and receive value."""
+    """
+    Contract address for contract that can selfdestruct and receive value.
+    """
     if same_tx:
         return compute_create_address(address=entry_code_address, nonce=1)
     # We need to deploy the contract before.
@@ -305,7 +308,9 @@ def selfdestruct_with_transfer_initcode_copy_from_address(
     pre: Alloc,
     selfdestruct_with_transfer_contract_initcode: Bytecode,
 ) -> Address:
-    """Address of a pre-existing contract we use to simply copy initcode from."""
+    """
+    Address of a pre-existing contract we use to simply copy initcode from.
+    """
     addr = pre.deploy_contract(selfdestruct_with_transfer_contract_initcode)
     return addr
 
@@ -342,11 +347,13 @@ def test_selfdestruct_created_in_same_tx_with_revert(  # noqa SC200
 ):
     """
     Given:
-        Contract A which has methods to receive balance and selfdestruct, and was created in current tx
+      Contract A which has methods to receive balance and selfdestruct,
+      and was created in current tx.
+
     Test the following call sequence:
-         Transfer value to A and call A.selfdestruct.
-         Recurse into a new call from transfers value to A, calls A.selfdestruct, and reverts.
-    """  # noqa: E501
+      Transfer value to A and call A.selfdestruct. Recurse into a new call
+      from transfers value to A, calls A.selfdestruct, and reverts.
+    """
     entry_code = Op.EXTCODECOPY(
         selfdestruct_with_transfer_initcode_copy_from_address,
         0,
@@ -359,7 +366,8 @@ def test_selfdestruct_created_in_same_tx_with_revert(  # noqa SC200
         Op.CREATE(
             0,
             0,
-            len(bytes(selfdestruct_with_transfer_contract_initcode)),  # Value  # Offset
+            # Value Offset
+            len(bytes(selfdestruct_with_transfer_contract_initcode)),
         ),
     )
 
@@ -402,7 +410,8 @@ def test_selfdestruct_created_in_same_tx_with_revert(  # noqa SC200
             code=selfdestruct_with_transfer_contract_code,
             storage=Storage(
                 {
-                    # 2 value transfers (1 in outer call, 1 in reverted inner call)
+                    # 2 value transfers (1 in outer call, 1 in reverted inner
+                    # call)
                     0: 1,  # type: ignore
                     # 1 selfdestruct in reverted inner call
                     1: 0,  # type: ignore
@@ -456,8 +465,8 @@ def test_selfdestruct_not_created_in_same_tx_with_revert(
     recursive_revert_contract_code: Bytecode,
 ):
     """
-    Same test as selfdestruct_created_in_same_tx_with_revert except selfdestructable contract
-    is pre-existing.
+    Same test as selfdestruct_created_in_same_tx_with_revert except
+    selfdestructable contract is pre-existing.
     """
     entry_code = Op.CALL(
         Op.GASLIMIT(),
@@ -479,7 +488,8 @@ def test_selfdestruct_not_created_in_same_tx_with_revert(
             code=selfdestruct_with_transfer_contract_code,
             storage=Storage(
                 {
-                    # 2 value transfers: 1 in outer call, 1 in reverted inner call
+                    # 2 value transfers: 1 in outer call, 1 in reverted inner
+                    # call
                     0: 1,  # type: ignore
                     # 1 selfdestruct in reverted inner call
                     1: 1,  # type: ignore
@@ -495,9 +505,11 @@ def test_selfdestruct_not_created_in_same_tx_with_revert(
             code=selfdestruct_with_transfer_contract_code,
             storage=Storage(
                 {
-                    # 2 value transfers: 1 in outer call, 1 in reverted inner call
+                    # 2 value transfers:
+                    #   1 in outer call, 1 in reverted inner call
                     0: 1,  # type: ignore
-                    # 2 selfdestructs: 1 in outer call, 1 in reverted inner call # noqa SC100
+                    # 2 selfdestructs:
+                    #   1 in outer call, 1 in reverted inner call
                     1: 0,  # type: ignore
                 }
             ),

@@ -1,8 +1,8 @@
 """
-abstract: Tests [EIP-7516: BLOBBASEFEE opcode](https://eips.ethereum.org/EIPS/eip-7516)
-    Test BLOBGASFEE opcode [EIP-7516: BLOBBASEFEE opcode](https://eips.ethereum.org/EIPS/eip-7516).
+BLOBBASEFEE opcode tests.
 
-"""  # noqa: E501
+Tests for [EIP-7516: BLOBBASEFEE opcode](https://eips.ethereum.org/EIPS/eip-7516).
+"""
 
 from itertools import count
 
@@ -52,20 +52,24 @@ def caller_code(
     callee_address: Address,
 ) -> Bytecode:
     """Bytecode used to call the bytecode containing the BLOBBASEFEE opcode."""
-    # NOTICE The storage slot to write the `CALL` result is `1`
-    # https://github.com/gkozyryatskyy/execution-spec-tests/issues/11
-    return Op.SSTORE(1, Op.CALL(gas=call_gas, address=callee_address))
+    return Op.SSTORE(Op.SELFBALANCE, Op.CALL(gas=call_gas, address=callee_address))
 
 
 @pytest.fixture
 def caller_pre_storage() -> Storage:
-    """Storage of the account containing the bytecode that calls the test contract."""
+    """
+    Storage of the account containing the bytecode that calls the test
+    contract.
+    """
     return Storage()
 
 
 @pytest.fixture
 def caller_address(pre: Alloc, caller_code: Bytecode, caller_pre_storage) -> Address:
-    """Address of the account containing the bytecode that calls the test contract."""
+    """
+    Address of the account containing the bytecode that calls the test
+    contract.
+    """
     return pre.deploy_contract(caller_code)
 
 
@@ -79,6 +83,7 @@ def tx(pre: Alloc, caller_address: Address) -> Transaction:
         sender=pre.fund_eoa(),
         gas_limit=1_000_000,
         to=caller_address,
+        value=1,
     )
 
 
@@ -98,7 +103,10 @@ def test_blobbasefee_stack_overflow(
     tx: Transaction,
     call_fails: bool,
 ):
-    """Tests that the BLOBBASEFEE opcode produces a stack overflow by using it repeatedly."""
+    """
+    Tests that the BLOBBASEFEE opcode produces a stack overflow by using it
+    repeatedly.
+    """
     post = {
         caller_address: Account(
             storage={1: 0 if call_fails else 1},
@@ -157,7 +165,10 @@ def test_blobbasefee_before_fork(
     callee_address: Address,
     tx: Transaction,
 ):
-    """Tests that the BLOBBASEFEE opcode results on exception when called before the fork."""
+    """
+    Tests that the BLOBBASEFEE opcode results on exception when called before
+    the fork.
+    """
     # Fork happens at timestamp 15_000
     timestamp = 7_500
     post = {
@@ -195,8 +206,8 @@ def test_blobbasefee_during_fork(
     tx: Transaction,
 ):
     """
-    Tests that the BLOBBASEFEE opcode results on exception when called before the fork and
-    succeeds when called after the fork.
+    Tests that the BLOBBASEFEE opcode results on exception when called before
+    the fork and succeeds when called after the fork.
     """
     code_caller_post_storage = Storage()
 

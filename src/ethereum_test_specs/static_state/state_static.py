@@ -4,7 +4,7 @@ from typing import Callable, ClassVar, List, Self, Set, Union
 
 import pytest
 from _pytest.mark.structures import ParameterSet
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ethereum_test_forks import Fork
 from ethereum_test_types import Alloc
@@ -37,10 +37,7 @@ class StateStaticTest(BaseStaticTest):
     transaction: GeneralTransactionInFiller
     expect: List[ExpectSectionInStateTestFiller]
 
-    class Config:
-        """Model Config."""
-
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
     def model_post_init(self, context):
         """Initialize StateStaticTest."""
@@ -69,7 +66,9 @@ class StateStaticTest(BaseStaticTest):
             indexes: Union[int, str, list[Union[int, str]], list[str], list[int]],
             do_hint: bool = False,
         ) -> List[int] | int:
-            """Parse indexes and replace all ranges and labels into tx indexes."""
+            """
+            Parse indexes and replace all ranges and labels into tx indexes.
+            """
             result: List[int] | int = []
 
             if do_hint:
@@ -129,8 +128,9 @@ class StateStaticTest(BaseStaticTest):
                     for expect in self.expect:
                         if expect.has_index(d.index, g, v) and expect.expect_exception is not None:
                             exception_test = True
-                    # TODO: This does not take into account exceptions that only happen on
-                    #       specific forks, but this requires a covariant parametrize
+                    # TODO: This does not take into account exceptions that
+                    # only happen on specific forks, but this requires a
+                    # covariant parametrize
                     marks = [pytest.mark.exception_test] if exception_test else []
                     id_label = ""
                     if len(self.transaction.data) > 1 or d.label is not None:

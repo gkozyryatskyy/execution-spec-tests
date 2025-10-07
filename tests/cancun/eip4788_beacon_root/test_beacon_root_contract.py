@@ -1,21 +1,20 @@
 """
-abstract: Tests beacon block root for [EIP-4788: Beacon block root in the EVM](https://eips.ethereum.org/EIPS/eip-4788)
-    Test the exposed beacon chain root in the EVM for [EIP-4788: Beacon block root in the EVM](https://eips.ethereum.org/EIPS/eip-4788).
+Tests beacon block root for [EIP-4788: Beacon block root in the EVM](https://eips.ethereum.org/EIPS/eip-4788).
 
-note: Adding a new test
-    Add a function that is named `test_<test_name>` and takes at least the following arguments:
+Note: To add a new test, add a function that is named `test_<test_name>`.
 
-    - state_test
-    - env
-    - pre
-    - tx
-    - post
-    - valid_call
+It must take at least the following arguments:
 
-    All other `pytest.fixtures` can be parametrized to generate new combinations and test
-    cases.
+- `state_test`
+- `env`
+- `pre`
+- `tx`
+- `post`
+- `valid_call`
 
-"""  # noqa: E501
+All other `pytest.fixtures` can be parametrized to generate new
+combinations and test cases.
+"""
 
 from itertools import count
 from typing import Callable, Dict, Iterator, List
@@ -46,7 +45,10 @@ REFERENCE_SPEC_VERSION = ref_spec_4788.version
 
 
 def count_factory(start: int, step: int = 1) -> Callable[[], Iterator[int]]:
-    """Create a factory that returns fresh count iterators to avoid state persistence."""
+    """
+    Create a factory that returns fresh count iterators to avoid state
+    persistence.
+    """
     return lambda: count(start, step)
 
 
@@ -82,7 +84,9 @@ def test_beacon_root_contract_calls(
     post: Dict,
 ):
     """
-    Tests the beacon root contract call using various call contexts:
+    Test calling the beacon root contract in various call contexts.
+
+    These call contexts are tested:
     - `CALL`
     - `DELEGATECALL`
     - `CALLCODE`
@@ -92,10 +96,10 @@ def test_beacon_root_contract_calls(
     - extra gas (valid call)
     - insufficient gas (invalid call).
 
-    The expected result is that the contract call will be executed if the gas amount is met
-    and return the correct`parent_beacon_block_root`. Otherwise the call will be invalid, and not
-    be executed. This is highlighted within storage by storing the return value of each call
-    context.
+    The expected result is that the contract call will be executed if the gas
+    amount is met and return the correct`parent_beacon_block_root`. Otherwise
+    the call will be invalid, and not be executed. This is highlighted within
+    storage by storing the return value of each call context.
     """
     blockchain_test(
         pre=pre,
@@ -155,11 +159,12 @@ def test_beacon_root_contract_timestamps(
     post: Dict,
 ):
     """
-    Tests the beacon root contract call across for various valid and invalid timestamps.
+    Tests the beacon root contract call across for various valid and invalid
+    timestamps.
 
     The expected result is that the contract call will return the correct
-    `parent_beacon_block_root` for a valid input timestamp and return the zero'd 32 bytes value
-    for an invalid input timestamp.
+    `parent_beacon_block_root` for a valid input timestamp and return the
+    zero'd 32 bytes value for an invalid input timestamp.
     """
     blockchain_test(
         pre=pre,
@@ -189,7 +194,9 @@ def test_calldata_lengths(
     tx: Transaction,
     post: Dict,
 ):
-    """Tests the beacon root contract call using multiple invalid input lengths."""
+    """
+    Tests the beacon root contract call using multiple invalid input lengths.
+    """
     blockchain_test(
         pre=pre,
         blocks=[Block(txs=[tx], parent_beacon_block_root=beacon_root, timestamp=timestamp)],
@@ -218,10 +225,11 @@ def test_beacon_root_equal_to_timestamp(
     post: Dict,
 ):
     """
-    Tests the beacon root contract call where the beacon root is equal to the timestamp.
+    Tests the beacon root contract call where the beacon root is equal to the
+    timestamp.
 
-    The expected result is that the contract call will return the `parent_beacon_block_root`,
-    as all timestamps used are valid.
+    The expected result is that the contract call will return the
+    `parent_beacon_block_root`, as all timestamps used are valid.
     """
     blockchain_test(
         pre=pre,
@@ -242,7 +250,10 @@ def test_tx_to_beacon_root_contract(
     tx: Transaction,
     post: Dict,
 ):
-    """Tests the beacon root contract using a transaction with different types and data lengths."""
+    """
+    Tests the beacon root contract using a transaction with different types and
+    data lengths.
+    """
     blockchain_test(
         pre=pre,
         blocks=[Block(txs=[tx], parent_beacon_block_root=beacon_root, timestamp=timestamp)],
@@ -290,7 +301,10 @@ def test_beacon_root_selfdestruct(
     tx: Transaction,
     post: Dict,
 ):
-    """Tests that self destructing the beacon root address transfers actors balance correctly."""
+    """
+    Tests that self destructing the beacon root address transfers actors
+    balance correctly.
+    """
     # self destruct actor
     self_destruct_actor_address = pre.deploy_contract(
         Op.SELFDESTRUCT(Spec.BEACON_ROOTS_ADDRESS),
@@ -375,17 +389,20 @@ def test_multi_block_beacon_root_timestamp_calls(
     call_value: int,
 ):
     """
-    Tests multiple blocks where each block writes a timestamp to storage and contains one
-    transaction that calls the beacon root contract multiple times.
+    Tests multiple blocks where each block writes a timestamp to storage and
+    contains one transaction that calls the beacon root contract multiple
+    times.
 
-    The blocks might overwrite the historical roots buffer, or not, depending on the `timestamps`,
-    and whether they increment in multiples of `Spec.HISTORY_BUFFER_LENGTH` or not.
+    The blocks might overwrite the historical roots buffer, or not, depending
+    on the `timestamps`, and whether they increment in multiples of
+    `Spec.HISTORY_BUFFER_LENGTH` or not.
 
     By default, the beacon roots are the keccak of the block number.
 
-    Each transaction checks the current timestamp and also all previous timestamps, and verifies
-    that the beacon root is correct for all of them if the timestamp is supposed to be in the
-    buffer, which might have been overwritten by a later block.
+    Each transaction checks the current timestamp and also all previous
+    timestamps, and verifies that the beacon root is correct for all of them if
+    the timestamp is supposed to be in the buffer, which might have been
+    overwritten by a later block.
     """
     # Create fresh iterator to avoid state persistence between test phases
     timestamps = timestamps_factory()
@@ -417,9 +434,9 @@ def test_multi_block_beacon_root_timestamp_calls(
         current_call_account_code = Bytecode()
         current_call_account_expected_storage = Storage()
 
-        # We are going to call the beacon roots contract once for every timestamp of the current
-        # and all previous blocks, and check that the returned beacon root is still correct only
-        # if it was not overwritten.
+        # We are going to call the beacon roots contract once for every
+        # timestamp of the current and all previous blocks, and check that the
+        # returned beacon root is still correct only if it was not overwritten.
         for t in all_timestamps:
             current_call_account_code += Op.MSTORE(0, t)
             call_valid = (
@@ -464,7 +481,8 @@ def test_multi_block_beacon_root_timestamp_calls(
                 parent_beacon_block_root=beacon_root,
                 timestamp=timestamp,
                 withdrawals=[
-                    # Also withdraw to the beacon root contract and the system address
+                    # Also withdraw to the beacon root contract and the system
+                    # address
                     Withdrawal(
                         address=Spec.BEACON_ROOTS_ADDRESS,
                         amount=1,
@@ -505,8 +523,9 @@ def test_beacon_root_transition(
     fork: Fork,
 ):
     """
-    Tests the fork transition to cancun and verifies that blocks with timestamp lower than the
-    transition timestamp do not contain beacon roots in the pre-deployed contract.
+    Tests the fork transition to cancun and verifies that blocks with timestamp
+    lower than the transition timestamp do not contain beacon roots in the
+    pre-deployed contract.
     """
     # Create fresh iterator to avoid state persistence between test phases
     timestamps = timestamps_factory()
@@ -527,9 +546,10 @@ def test_beacon_root_transition(
     ):
         timestamp_index = timestamp % Spec.HISTORY_BUFFER_LENGTH
 
-        transitioned = fork.header_beacon_root_required(i, timestamp)
+        transitioned = fork.header_beacon_root_required(block_number=i, timestamp=timestamp)
         if transitioned:
-            # We've transitioned, the current timestamp must contain a value in the contract
+            # We've transitioned, the current timestamp must contain a value in
+            # the contract
             timestamps_in_beacon_root_contract.append(timestamp)
             timestamps_storage[timestamp_index] = timestamp
             roots_storage[timestamp_index] = beacon_root
@@ -541,9 +561,10 @@ def test_beacon_root_transition(
         current_call_account_code = Bytecode()
         current_call_account_expected_storage = Storage()
 
-        # We are going to call the beacon roots contract once for every timestamp of the current
-        # and all previous blocks, and check that the returned beacon root is correct only
-        # if it was after the transition timestamp.
+        # We are going to call the beacon roots contract once for every
+        # timestamp of the current and all previous blocks, and check that the
+        # returned beacon root is correct only if it was after the transition
+        # timestamp.
         for t in all_timestamps:
             current_call_account_code += Op.MSTORE(0, t)
             call_valid = (
@@ -588,7 +609,8 @@ def test_beacon_root_transition(
                 parent_beacon_block_root=beacon_root if transitioned else None,
                 timestamp=timestamp,
                 withdrawals=[
-                    # Also withdraw to the beacon root contract and the system address
+                    # Also withdraw to the beacon root contract and the system
+                    # address
                     Withdrawal(
                         address=Spec.BEACON_ROOTS_ADDRESS,
                         amount=1,
@@ -627,17 +649,18 @@ def test_no_beacon_root_contract_at_transition(
     fork: Fork,
 ):
     """
-    Tests the fork transition to cancun in the case where the beacon root pre-deploy was not
-    deployed in time for the fork.
+    Tests the fork transition to cancun in the case where the beacon root
+    pre-deploy was not deployed in time for the fork.
     """
-    assert fork.header_beacon_root_required(1, timestamp)
+    assert fork.header_beacon_root_required(block_number=1, timestamp=timestamp)
     blocks: List[Block] = [
         Block(
             txs=[tx],
             parent_beacon_block_root=next(beacon_roots),
             timestamp=timestamp,
             withdrawals=[
-                # Also withdraw to the beacon root contract and the system address
+                # Also withdraw to the beacon root contract and the system
+                # address
                 Withdrawal(
                     address=Spec.BEACON_ROOTS_ADDRESS,
                     amount=1,
@@ -654,7 +677,8 @@ def test_no_beacon_root_contract_at_transition(
         )
     ]
     pre[Spec.BEACON_ROOTS_ADDRESS] = Account(
-        code=b"",  # Remove the code that is automatically allocated on Cancun fork
+        code=b"",  # Remove the code that is automatically allocated on Cancun
+        # fork
         nonce=0,
         balance=0,
     )
@@ -669,9 +693,8 @@ def test_no_beacon_root_contract_at_transition(
             balance=int(1e9),
         ),
         caller_address: Account(
-            storage={
-                0: 1
-            },  # Successful call because the contract is not there, but nothing else is stored
+            storage={0: 1},  # Successful call because the contract is not there, but
+            # nothing else is stored
         ),
     }
     blockchain_test(
@@ -706,10 +729,10 @@ def test_beacon_root_contract_deploy(
     fork: Fork,
 ):
     """
-    Tests the fork transition to cancun deploying the contract during Shanghai and verifying the
-    code deployed and its functionality after Cancun.
+    Tests the fork transition to cancun deploying the contract during Shanghai
+    and verifying the code deployed and its functionality after Cancun.
     """
-    assert fork.header_beacon_root_required(1, timestamp)
+    assert fork.header_beacon_root_required(block_number=1, timestamp=timestamp)
     tx_gas_limit = 0x3D090
     tx_gas_price = 0xE8D4A51000
     deployer_required_balance = tx_gas_limit * tx_gas_price
@@ -743,12 +766,15 @@ def test_beacon_root_contract_deploy(
                     txs=[deploy_tx],
                     parent_beacon_block_root=(
                         beacon_root
-                        if fork.header_beacon_root_required(1, current_timestamp)
+                        if fork.header_beacon_root_required(
+                            block_number=1, timestamp=current_timestamp
+                        )
                         else None
                     ),
                     timestamp=timestamp // 2,
                     withdrawals=[
-                        # Also withdraw to the beacon root contract and the system address
+                        # Also withdraw to the beacon root contract and the
+                        # system address
                         Withdrawal(
                             address=Spec.BEACON_ROOTS_ADDRESS,
                             amount=1,
@@ -775,7 +801,8 @@ def test_beacon_root_contract_deploy(
                     parent_beacon_block_root=beacon_root,
                     timestamp=timestamp,
                     withdrawals=[
-                        # Also withdraw to the beacon root contract and the system address
+                        # Also withdraw to the beacon root contract and the
+                        # system address
                         Withdrawal(
                             address=Spec.BEACON_ROOTS_ADDRESS,
                             amount=1,
@@ -802,7 +829,8 @@ def test_beacon_root_contract_deploy(
 
     expected_code = fork.pre_allocation_blockchain()[Spec.BEACON_ROOTS_ADDRESS]["code"]
     pre[Spec.BEACON_ROOTS_ADDRESS] = Account(
-        code=b"",  # Remove the code that is automatically allocated on Cancun fork
+        code=b"",  # Remove the code that is automatically allocated on Cancun
+        # fork
         nonce=0,
         balance=0,
     )
