@@ -1,5 +1,8 @@
-"""JSON-RPC methods and helper functions for EEST consume based hive simulators."""
+"""
+JSON-RPC methods and helper functions for EEST consume based hive simulators.
+"""
 
+import logging
 import time
 from itertools import count
 from pprint import pprint
@@ -8,6 +11,13 @@ from typing import Any, ClassVar, Dict, List, Literal
 import requests
 from jwt import encode
 from pydantic import ValidationError
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from ethereum_test_base_types import Address, Bytes, Hash, to_json
 from ethereum_test_types import Transaction
@@ -30,13 +40,18 @@ BlockNumberType = int | Literal["latest", "earliest", "pending"]
 
 
 class SendTransactionExceptionError(Exception):
-    """Represent an exception that is raised when a transaction fails to be sent."""
+    """
+    Represent an exception that is raised when a transaction fails to be sent.
+    """
 
     tx: Transaction | None = None
     tx_rlp: Bytes | None = None
 
     def __init__(self, *args, tx: Transaction | None = None, tx_rlp: Bytes | None = None):
-        """Initialize SendTransactionExceptionError class with the given transaction."""
+        """
+        Initialize SendTransactionExceptionError class with the given
+        transaction.
+        """
         super().__init__(*args)
         self.tx = tx
         self.tx_rlp = tx_rlp
@@ -51,7 +66,10 @@ class SendTransactionExceptionError(Exception):
 
 
 class BaseRPC:
-    """Represents a base RPC class for every RPC call used within EEST based hive simulators."""
+    """
+    Represents a base RPC class for every RPC call used within EEST based hive
+    simulators.
+    """
 
     namespace: ClassVar[str]
     response_validation_context: Any | None
@@ -68,13 +86,43 @@ class BaseRPC:
         self.response_validation_context = response_validation_context
 
     def __init_subclass__(cls, namespace: str | None = None) -> None:
-        """Set namespace of the RPC class to the lowercase of the class name."""
+        """
+        Set namespace of the RPC class to the lowercase of the class name.
+        """
         if namespace is None:
             namespace = cls.__name__
             if namespace.endswith("RPC"):
                 namespace = namespace.removesuffix("RPC")
             namespace = namespace.lower()
         cls.namespace = namespace
+
+    @retry(
+        retry=retry_if_exception_type((requests.ConnectionError, ConnectionRefusedError)),
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=0.5, min=0.5, max=4.0),
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+        reraise=True,
+    )
+    def _make_request(
+        self,
+        url: str,
+        json_payload: dict,
+        headers: dict,
+        timeout: int | None,
+    ) -> requests.Response:
+        """
+        Make HTTP POST request with retry logic for connection errors only.
+
+        This method only retries network-level connection failures
+        (ConnectionError, ConnectionRefusedError). HTTP status errors (4xx/5xx)
+        are handled by the caller using response.raise_for_status() WITHOUT
+        retries because:
+        - 4xx errors are client errors (permanent failures, no point retrying)
+        - 5xx errors are server errors that typically indicate
+          application-level issues rather than transient network problems
+        """
+        logger.debug(f"Making HTTP request to {url}, timeout={timeout}")
+        return requests.post(url, json=json_payload, headers=headers, timeout=timeout)
 
     def post_request(
         self,
@@ -85,7 +133,10 @@ class BaseRPC:
         request_id: int | str | None = None,
         timeout: int | None = None,
     ) -> Any:
-        """Send JSON-RPC POST request to the client RPC server at port defined in the url."""
+        """
+        Send JSON-RPC POST request to the client RPC server at port defined in
+        the url.
+        """
         if extra_headers is None:
             extra_headers = {}
         if params is None:
@@ -108,14 +159,12 @@ class BaseRPC:
         }
         headers = base_header | extra_headers
 
-        logger.debug(f"Sending RPC request, timeout is set to {timeout}...")
-        response = requests.post(self.url, json=payload, headers=headers, timeout=timeout)
+        logger.debug(
+            f"Sending RPC request to {self.url}, method={self.namespace}_{method}, "
+            f"timeout={timeout}..."
+        )
 
-        # NOTICE Useful for viewing and debugging JSON-RPC Relay errors
-        # This error check is equivalent to `raise_for_status`'s
-        if 400 <= response.status_code < 500 or 500 <= response.status_code < 600:
-            print(f"post_request: {response.json()} payload: {payload}")
-
+        response = self._make_request(self.url, payload, headers, timeout)
         response.raise_for_status()
         response_json = response.json()
 
@@ -129,8 +178,8 @@ class BaseRPC:
 
 class EthRPC(BaseRPC):
     """
-    Represents an `eth_X` RPC class for every default ethereum RPC method used within EEST based
-    hive simulators.
+    Represents an `eth_X` RPC class for every default ethereum RPC method used
+    within EEST based hive simulators.
     """
 
     transaction_wait_timeout: int = 60
@@ -143,12 +192,18 @@ class EthRPC(BaseRPC):
         transaction_wait_timeout: int = 60,
         **kwargs,
     ):
-        """Initialize EthRPC class with the given url and transaction wait timeout."""
+        """
+        Initialize EthRPC class with the given url and transaction wait
+        timeout.
+        """
         super().__init__(*args, **kwargs)
         self.transaction_wait_timeout = transaction_wait_timeout
 
     def config(self, timeout: int | None = None):
-        """`eth_config`: Returns information about a fork configuration of the client."""
+        """
+        `eth_config`: Returns information about a fork configuration of the
+        client.
+        """
         try:
             response = self.post_request(method="config", timeout=timeout)
             if response is None:
@@ -171,7 +226,10 @@ class EthRPC(BaseRPC):
         return int(response, 16)
 
     def get_block_by_number(self, block_number: BlockNumberType = "latest", full_txs: bool = True):
-        """`eth_getBlockByNumber`: Returns information about a block by block number."""
+        """
+        `eth_getBlockByNumber`: Returns information about a block by block
+        number.
+        """
         block = hex(block_number) if isinstance(block_number, int) else block_number
         params = [block, full_txs]
         response = self.post_request(method="getBlockByNumber", params=params)
@@ -186,7 +244,9 @@ class EthRPC(BaseRPC):
         return response
 
     def get_balance(self, address: Address, block_number: BlockNumberType = "latest") -> int:
-        """`eth_getBalance`: Returns the balance of the account of given address."""
+        """
+        `eth_getBalance`: Returns the balance of the account of given address.
+        """
         block = hex(block_number) if isinstance(block_number, int) else block_number
         params = [f"{address}", block]
 
@@ -206,7 +266,10 @@ class EthRPC(BaseRPC):
     def get_transaction_count(
         self, address: Address, block_number: BlockNumberType = "latest"
     ) -> int:
-        """`eth_getTransactionCount`: Returns the number of transactions sent from an address."""
+        """
+        `eth_getTransactionCount`: Returns the number of transactions sent from
+        an address.
+        """
         block = hex(block_number) if isinstance(block_number, int) else block_number
         params = [f"{address}", block]
 
@@ -229,10 +292,25 @@ class EthRPC(BaseRPC):
             pprint(e.errors())
             raise e
 
+    def get_transaction_receipt(self, transaction_hash: Hash) -> dict | None:
+        """
+        `eth_getTransactionReceipt`: Returns transaction receipt.
+
+        Used to get the actual gas used by a transaction for gas validation
+        in benchmark tests.
+        """
+        response = self.post_request(
+            method="getTransactionReceipt", params=[f"{transaction_hash}"]
+        )
+        return response
+
     def get_storage_at(
         self, address: Address, position: Hash, block_number: BlockNumberType = "latest"
     ) -> Hash:
-        """`eth_getStorageAt`: Returns the value from a storage position at a given address."""
+        """
+        `eth_getStorageAt`: Returns the value from a storage position at a
+        given address.
+        """
         block = hex(block_number) if isinstance(block_number, int) else block_number
         params = [f"{address}", f"{position}", block]
 
@@ -240,7 +318,10 @@ class EthRPC(BaseRPC):
         return Hash(response)
 
     def gas_price(self) -> int:
-        """`eth_gasPrice`: Returns the number of transactions sent from an address."""
+        """
+        `eth_gasPrice`: Returns the number of transactions sent from an
+        address.
+        """
         response = self.post_request(method="gasPrice")
 
         return int(response, 16)
@@ -253,7 +334,7 @@ class EthRPC(BaseRPC):
             response = self.post_request(
                 method="sendRawTransaction",
                 params=[transaction_rlp.hex()],
-                request_id=request_id,  # noqa: E501
+                request_id=request_id,
             )
 
             result_hash = Hash(response)
@@ -269,7 +350,7 @@ class EthRPC(BaseRPC):
             response = self.post_request(
                 method="sendRawTransaction",
                 params=[transaction.rlp().hex()],
-                request_id=transaction.metadata_string(),  # noqa: E501
+                request_id=transaction.metadata_string(),
             )
 
             result_hash = Hash(response)
@@ -280,15 +361,18 @@ class EthRPC(BaseRPC):
             raise SendTransactionExceptionError(str(e), tx=transaction) from e
 
     def send_transactions(self, transactions: List[Transaction]) -> List[Hash]:
-        """Use `eth_sendRawTransaction` to send a list of transactions to the client."""
+        """
+        Use `eth_sendRawTransaction` to send a list of transactions to the
+        client.
+        """
         return [self.send_transaction(tx) for tx in transactions]
 
     def storage_at_keys(
         self, account: Address, keys: List[Hash], block_number: BlockNumberType = "latest"
     ) -> Dict[Hash, Hash]:
         """
-        Retrieve the storage values for the specified keys at a given address and block
-        number.
+        Retrieve the storage values for the specified keys at a given address
+        and block number.
         """
         results: Dict[Hash, Hash] = {}
         for key in keys:
@@ -297,7 +381,10 @@ class EthRPC(BaseRPC):
         return results
 
     def wait_for_transaction(self, transaction: Transaction) -> TransactionByHashResponse:
-        """Use `eth_getTransactionByHash` to wait until a transaction is included in a block."""
+        """
+        Use `eth_getTransactionByHash` to wait until a transaction is included
+        in a block.
+        """
         tx_hash = transaction.hash
         start_time = time.time()
         while True:
@@ -316,8 +403,8 @@ class EthRPC(BaseRPC):
         self, transactions: List[Transaction]
     ) -> List[TransactionByHashResponse]:
         """
-        Use `eth_getTransactionByHash` to wait until all transactions in list are included in a
-        block.
+        Use `eth_getTransactionByHash` to wait until all transactions in list
+        are included in a block.
         """
         tx_hashes = [tx.hash for tx in transactions]
         responses: List[TransactionByHashResponse] = []
@@ -351,15 +438,18 @@ class EthRPC(BaseRPC):
         return self.wait_for_transaction(transaction)
 
     def send_wait_transactions(self, transactions: List[Transaction]):
-        """Send list of transactions and waits until all of them are included in a block."""
+        """
+        Send list of transactions and waits until all of them are included in a
+        block.
+        """
         self.send_transactions(transactions)
         return self.wait_for_transactions(transactions)
 
 
 class DebugRPC(EthRPC):
     """
-    Represents an `debug_X` RPC class for every default ethereum RPC method used within EEST based
-    hive simulators.
+    Represents an `debug_X` RPC class for every default ethereum RPC method
+    used within EEST based hive simulators.
     """
 
     def trace_call(self, tr: dict[str, str], block_number: str):
@@ -370,8 +460,8 @@ class DebugRPC(EthRPC):
 
 class EngineRPC(BaseRPC):
     """
-    Represents an Engine API RPC class for every Engine API method used within EEST based hive
-    simulators.
+    Represents an Engine API RPC class for every Engine API method used within
+    EEST based hive simulators.
     """
 
     jwt_secret: bytes
@@ -395,7 +485,10 @@ class EngineRPC(BaseRPC):
         request_id: int | str | None = None,
         timeout: int | None = None,
     ) -> Any:
-        """Send JSON-RPC POST request to the client RPC server at port defined in the url."""
+        """
+        Send JSON-RPC POST request to the client RPC server at port defined in
+        the url.
+        """
         if extra_headers is None:
             extra_headers = {}
         jwt_token = encode(
@@ -416,7 +509,10 @@ class EngineRPC(BaseRPC):
         )
 
     def new_payload(self, *params: Any, version: int) -> PayloadStatus:
-        """`engine_newPayloadVX`: Attempts to execute the given payload on an execution client."""
+        """
+        `engine_newPayloadVX`: Attempts to execute the given payload on an
+        execution client.
+        """
         method = f"newPayloadV{version}"
         params_list = [to_json(param) for param in params]
 
@@ -432,7 +528,10 @@ class EngineRPC(BaseRPC):
         *,
         version: int,
     ) -> ForkchoiceUpdateResponse:
-        """`engine_forkchoiceUpdatedVX`: Updates the forkchoice state of the execution client."""
+        """
+        `engine_forkchoiceUpdatedVX`: Updates the forkchoice state of the
+        execution client.
+        """
         method = f"forkchoiceUpdatedV{version}"
 
         if payload_attributes is None:
@@ -474,7 +573,9 @@ class EngineRPC(BaseRPC):
         *,
         version: int,
     ) -> GetBlobsResponse | None:
-        """`engine_getBlobsVX`: Retrieves blobs from an execution layers tx pool."""
+        """
+        `engine_getBlobsVX`: Retrieves blobs from an execution layers tx pool.
+        """
         method = f"getBlobsV{version}"
         params = [f"{h}" for h in versioned_hashes]
 

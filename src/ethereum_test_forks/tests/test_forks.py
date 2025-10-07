@@ -64,30 +64,45 @@ def test_transition_forks():
     assert BerlinToLondonAt5.transitions_to() == London
     assert BerlinToLondonAt5.transitions_from() == Berlin
 
-    assert BerlinToLondonAt5.transition_tool_name(4, 0) == "Berlin"
-    assert BerlinToLondonAt5.transition_tool_name(5, 0) == "London"
+    assert BerlinToLondonAt5.transition_tool_name(block_number=4, timestamp=0) == "Berlin"
+    assert BerlinToLondonAt5.transition_tool_name(block_number=5, timestamp=0) == "London"
     # Default values of transition forks is the transition block
     assert BerlinToLondonAt5.transition_tool_name() == "London"
 
-    assert ParisToShanghaiAtTime15k.transition_tool_name(0, 14_999) == "Merge"
-    assert ParisToShanghaiAtTime15k.transition_tool_name(0, 15_000) == "Shanghai"
+    assert (
+        ParisToShanghaiAtTime15k.transition_tool_name(block_number=0, timestamp=14_999) == "Merge"
+    )
+    assert (
+        ParisToShanghaiAtTime15k.transition_tool_name(block_number=0, timestamp=15_000)
+        == "Shanghai"
+    )
     assert ParisToShanghaiAtTime15k.transition_tool_name() == "Shanghai"
 
-    assert BerlinToLondonAt5.header_base_fee_required(4, 0) is False
-    assert BerlinToLondonAt5.header_base_fee_required(5, 0) is True
+    assert BerlinToLondonAt5.header_base_fee_required(block_number=4, timestamp=0) is False
+    assert BerlinToLondonAt5.header_base_fee_required(block_number=5, timestamp=0) is True
 
-    assert ParisToShanghaiAtTime15k.header_withdrawals_required(0, 14_999) is False
-    assert ParisToShanghaiAtTime15k.header_withdrawals_required(0, 15_000) is True
+    assert (
+        ParisToShanghaiAtTime15k.header_withdrawals_required(block_number=0, timestamp=14_999)
+        is False
+    )
+    assert (
+        ParisToShanghaiAtTime15k.header_withdrawals_required(block_number=0, timestamp=15_000)
+        is True
+    )
 
-    assert ParisToShanghaiAtTime15k.engine_new_payload_version(0, 14_999) == 1
-    assert ParisToShanghaiAtTime15k.engine_new_payload_version(0, 15_000) == 2
+    assert (
+        ParisToShanghaiAtTime15k.engine_new_payload_version(block_number=0, timestamp=14_999) == 1
+    )
+    assert (
+        ParisToShanghaiAtTime15k.engine_new_payload_version(block_number=0, timestamp=15_000) == 2
+    )
 
-    assert BerlinToLondonAt5.fork_at(4, 0) == Berlin
-    assert BerlinToLondonAt5.fork_at(5, 0) == London
-    assert ParisToShanghaiAtTime15k.fork_at(0, 14_999) == Paris
-    assert ParisToShanghaiAtTime15k.fork_at(0, 15_000) == Shanghai
+    assert BerlinToLondonAt5.fork_at(block_number=4, timestamp=0) == Berlin
+    assert BerlinToLondonAt5.fork_at(block_number=5, timestamp=0) == London
+    assert ParisToShanghaiAtTime15k.fork_at(block_number=0, timestamp=14_999) == Paris
+    assert ParisToShanghaiAtTime15k.fork_at(block_number=0, timestamp=15_000) == Shanghai
     assert ParisToShanghaiAtTime15k.fork_at() == Paris
-    assert ParisToShanghaiAtTime15k.fork_at(10_000_000, 14_999) == Paris
+    assert ParisToShanghaiAtTime15k.fork_at(block_number=10_000_000, timestamp=14_999) == Paris
 
 
 def test_forks_from():  # noqa: D103
@@ -96,7 +111,8 @@ def test_forks_from():  # noqa: D103
     assert forks_from(Paris, deployed_only=True)[0] == Paris
     assert forks_from(Paris, deployed_only=True)[-1] == LAST_DEPLOYED
     assert forks_from(Paris, deployed_only=False)[0] == Paris
-    # assert forks_from(Paris, deployed_only=False)[-1] == LAST_DEVELOPMENT  # Too flaky
+    # Too flaky
+    # assert forks_from(Paris, deployed_only=False)[-1] == LAST_DEVELOPMENT
 
 
 def test_forks():
@@ -115,8 +131,8 @@ def test_forks():
     assert f"{London}" == "London"
     assert f"{ParisToShanghaiAtTime15k}" == "ParisToShanghaiAtTime15k"
 
-    # Merge name will be changed to paris, but we need to check the inheriting fork name is still
-    # the default
+    # Merge name will be changed to paris, but we need to check the inheriting
+    # fork name is still the default
     assert Paris.transition_tool_name() == "Merge"
     assert Shanghai.transition_tool_name() == "Shanghai"
     assert f"{Paris}" == "Paris"
@@ -124,17 +140,32 @@ def test_forks():
     assert f"{ParisToShanghaiAtTime15k}" == "ParisToShanghaiAtTime15k"
 
     # Test some fork properties
-    assert Berlin.header_base_fee_required(0, 0) is False
-    assert London.header_base_fee_required(0, 0) is True
-    assert Paris.header_base_fee_required(0, 0) is True
+    assert Berlin.header_base_fee_required(block_number=0, timestamp=0) is False
+    assert London.header_base_fee_required(block_number=0, timestamp=0) is True
+    assert Paris.header_base_fee_required(block_number=0, timestamp=0) is True
     # Default values of normal forks if the genesis block
     assert Paris.header_base_fee_required() is True
 
     # Transition forks too
-    assert cast(Fork, BerlinToLondonAt5).header_base_fee_required(4, 0) is False
-    assert cast(Fork, BerlinToLondonAt5).header_base_fee_required(5, 0) is True
-    assert cast(Fork, ParisToShanghaiAtTime15k).header_withdrawals_required(0, 14_999) is False
-    assert cast(Fork, ParisToShanghaiAtTime15k).header_withdrawals_required(0, 15_000) is True
+    assert (
+        cast(Fork, BerlinToLondonAt5).header_base_fee_required(block_number=4, timestamp=0)
+        is False
+    )
+    assert (
+        cast(Fork, BerlinToLondonAt5).header_base_fee_required(block_number=5, timestamp=0) is True
+    )
+    assert (
+        cast(Fork, ParisToShanghaiAtTime15k).header_withdrawals_required(
+            block_number=0, timestamp=14_999
+        )
+        is False
+    )
+    assert (
+        cast(Fork, ParisToShanghaiAtTime15k).header_withdrawals_required(
+            block_number=0, timestamp=15_000
+        )
+        is True
+    )
     assert cast(Fork, ParisToShanghaiAtTime15k).header_withdrawals_required() is True
 
 
@@ -208,8 +239,8 @@ def test_transition_fork_comparison():
 
     The comparison logic is based on the logic we use to generate the tests.
 
-    E.g. given transition fork A->B, when filling, and given the from/until markers,
-    we expect the following logic:
+    E.g. given transition fork A->B, when filling, and given the from/until
+    markers, we expect the following logic:
 
     Marker    Comparison   A->B Included
     --------- ------------ ---------------
@@ -223,7 +254,8 @@ def test_transition_fork_comparison():
     assert BerlinToLondonAt5 >= London
     assert BerlinToLondonAt5 <= London
 
-    # Comparisons between transition forks is done against the `transitions_to` fork
+    # Comparisons between transition forks is done against the `transitions_to`
+    # fork
     assert BerlinToLondonAt5 < ParisToShanghaiAtTime15k
     assert ParisToShanghaiAtTime15k > BerlinToLondonAt5
     assert BerlinToLondonAt5 == BerlinToLondonAt5
@@ -264,7 +296,7 @@ class PrePreAllocFork(Shanghai):
     """Dummy fork used for testing."""
 
     @classmethod
-    def pre_allocation(cls) -> Dict:
+    def pre_allocation(cls, *, block_number: int = 0, timestamp: int = 0) -> Dict:
         """Return some starting point for allocation."""
         return {"test": "test"}
 
@@ -273,7 +305,7 @@ class PreAllocFork(PrePreAllocFork):
     """Dummy fork used for testing."""
 
     @classmethod
-    def pre_allocation(cls) -> Dict:
+    def pre_allocation(cls, *, block_number: int = 0, timestamp: int = 0) -> Dict:
         """Add allocation to the pre-existing one from previous fork."""
         return {"test2": "test2"} | super(PreAllocFork, cls).pre_allocation()
 
@@ -353,8 +385,9 @@ class FutureFork(Osaka):
     """
     Dummy fork used for testing.
 
-    Contains no changes to the blob parameters from the parent fork in order to confirm that
-    it's added to the blob schedule even if it doesn't have any changes.
+    Contains no changes to the blob parameters from the parent fork in order to
+    confirm that it's added to the blob schedule even if it doesn't have any
+    changes.
     """
 
     pass

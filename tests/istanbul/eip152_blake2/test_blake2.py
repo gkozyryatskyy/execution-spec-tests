@@ -1,6 +1,5 @@
 """
-abstract: Tests [EIP-152: BLAKE2b compression precompile](https://eips.ethereum.org/EIPS/eip-152)
-    Test cases for [EIP-152: BLAKE2b compression precompile](https://eips.ethereum.org/EIPS/eip-152).
+Tests [EIP-152: BLAKE2b compression precompile](https://eips.ethereum.org/EIPS/eip-152).
 """
 
 from typing import List
@@ -390,6 +389,7 @@ pytestmark = pytest.mark.ported_from(
         ),
     ],
 )
+@pytest.mark.slow()
 def test_blake2b(
     state_test: StateTestFiller,
     pre: Alloc,

@@ -1,6 +1,8 @@
 """
-abstract: Tests [EIP-2930: Access list transaction](https://eips.ethereum.org/EIPS/eip-2930).
-Original test by Ori: https://github.com/ethereum/tests/blob/v15.0/src/GeneralStateTestsFiller/stEIP1559/intrinsicGen.js.
+Tests [EIP-2930: Access list transaction](https://eips.ethereum.org/EIPS/eip-2930).
+
+Original test by Ori:
+https://github.com/ethereum/tests/blob/v15.0/src/GeneralStateTestsFiller/stEIP1559/intrinsicGen.js.
 """
 
 from typing import List
@@ -145,6 +147,7 @@ tx_intrinsic_gas_access_list_vectors = [
     ],
 )
 @pytest.mark.with_all_tx_types(selector=lambda tx_type: tx_type in [1, 2])
+@pytest.mark.slow()
 def test_tx_intrinsic_gas(
     state_test: StateTestFiller,
     tx_type: int,
@@ -165,7 +168,8 @@ def test_tx_intrinsic_gas(
         if data_floor_gas_cost > intrinsic_gas_cost:
             exception = TransactionException.INTRINSIC_GAS_BELOW_FLOOR_GAS_COST
         elif data_floor_gas_cost == intrinsic_gas_cost:
-            # Depending on the implementation, client might raise either exception.
+            # Depending on the implementation, client might raise either
+            # exception.
             exception = [
                 TransactionException.INTRINSIC_GAS_TOO_LOW,
                 TransactionException.INTRINSIC_GAS_BELOW_FLOOR_GAS_COST,

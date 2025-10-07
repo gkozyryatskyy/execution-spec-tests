@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Mapping, Set, Tuple
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from ethereum_test_base_types import Bytes, EthereumTestRootModel, HexNumber, Storage
 from ethereum_test_types import Alloc
@@ -54,11 +54,7 @@ class AccountInFiller(BaseModel, TagDependentData):
     nonce: ValueInFiller | None = None
     storage: StorageInPre | None = None
 
-    class Config:
-        """Model Config."""
-
-        extra = "forbid"
-        arbitrary_types_allowed = True  # For CodeInFiller
+    model_config = ConfigDict(arbitrary_types_allowed=True, extra="forbid")
 
     def tag_dependencies(self) -> Mapping[str, Tag]:
         """Get tag dependencies."""
@@ -169,7 +165,8 @@ class PreInFiller(EthereumTestRootModel):
         # Step 3: Get topological order
         resolution_order = self._topological_sort(dep_graph)
 
-        # Step 4: Pre-deploy all contract tags and pre-fund EOAs to get addresses
+        # Step 4: Pre-deploy all contract tags and pre-fund EOAs to get
+        # addresses
         for tag_name in resolution_order:
             if tag_name in tag_to_address:
                 tag = tag_to_address[tag_name]
@@ -181,7 +178,8 @@ class PreInFiller(EthereumTestRootModel):
                     )
                     resolved_accounts[tag_name] = deployed_address
                 elif isinstance(tag, SenderTag):
-                    # Create EOA to get address - use amount=1 to ensure account is created
+                    # Create EOA to get address - use amount=1 to ensure
+                    # account is created
                     eoa = pre.fund_eoa(amount=1, label=tag_name)
                     # Store the EOA object for SenderKeyTag resolution
                     resolved_accounts[tag_name] = eoa
@@ -247,7 +245,8 @@ class PreInFiller(EthereumTestRootModel):
                 if all_dependencies[extra_dependency].type != "eoa":
                     raise ValueError(f"Contract dependency {extra_dependency} not found in pre")
 
-                # Create new EOA - this will have a dynamically generated key and address
+                # Create new EOA - this will have a dynamically generated key
+                # and address
                 eoa = pre.fund_eoa(amount=0, label=extra_dependency)
                 resolved_accounts[extra_dependency] = eoa
 

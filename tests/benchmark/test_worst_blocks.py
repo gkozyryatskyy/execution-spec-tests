@@ -1,31 +1,34 @@
 """
-abstract: Tests that benchmark EVMs in worst-case block scenarios.
-    Tests that benchmark EVMs in worst-case block scenarios.
-
-Tests running worst-case block scenarios for EVMs.
+Tests that benchmark EVMs in worst-case block scenarios.
 """
 
 import random
 
 import pytest
 
+from ethereum_test_base_types import Account
 from ethereum_test_forks import Fork
 from ethereum_test_tools import (
     AccessList,
-    Account,
     Address,
     Alloc,
+    AuthorizationTuple,
     Block,
     BlockchainTestFiller,
+    Environment,
     Hash,
     StateTestFiller,
     Transaction,
 )
+from ethereum_test_vm import Opcodes as Op
 
 
 @pytest.fixture
 def iteration_count(intrinsic_cost: int, gas_benchmark_value: int):
-    """Calculate the number of iterations based on the gas limit and intrinsic cost."""
+    """
+    Calculate the number of iterations based on the gas limit and intrinsic
+    cost.
+    """
     return gas_benchmark_value // intrinsic_cost
 
 
@@ -112,11 +115,13 @@ def ether_transfer_case(
 def test_block_full_of_ether_transfers(
     blockchain_test: BlockchainTestFiller,
     pre: Alloc,
+    env: Environment,
     case_id: str,
     ether_transfer_case,
     iteration_count: int,
     transfer_amount: int,
     intrinsic_cost: int,
+    gas_benchmark_value: int,
 ):
     """
     Single test for ether transfer scenarios.
@@ -153,10 +158,10 @@ def test_block_full_of_ether_transfers(
     )
 
     blockchain_test(
+        genesis_environment=env,
         pre=pre,
         post=post_state,
         blocks=[Block(txs=txs)],
-        exclude_full_post_state_in_output=True,
         expected_benchmark_gas_used=iteration_count * intrinsic_cost,
     )
 
@@ -183,12 +188,14 @@ def test_block_full_data(
     gas_benchmark_value: int,
 ):
     """Test a block with empty payload."""
-    # Gas cost calculation based on EIP-7683: (https://eips.ethereum.org/EIPS/eip-7683)
+    # Gas cost calculation based on EIP-7683:
+    # (https://eips.ethereum.org/EIPS/eip-7683)
     #
     #   tx.gasUsed = 21000 + max(
     #       STANDARD_TOKEN_COST * tokens_in_calldata
     #       + execution_gas_used
-    #       + isContractCreation * (32000 + INITCODE_WORD_COST * words(calldata)),
+    #       + isContractCreation * (32000 +
+    #                                 INITCODE_WORD_COST * words(calldata)),
     #       TOTAL_COST_FLOOR_PER_TOKEN * tokens_in_calldata)
     #
     # Simplified in this test case:
@@ -205,7 +212,8 @@ def test_block_full_data(
     # Token accounting:
     #   tokens_in_calldata = zero_bytes + 4 * non_zero_bytes
     #
-    # So we calculate how many bytes we can fit into calldata based on available gas.
+    # So we calculate how many bytes we can fit into calldata based on
+    # available gas.
 
     gas_available = gas_benchmark_value - intrinsic_cost
 
@@ -237,7 +245,10 @@ def test_block_full_access_list_and_data(
     fork: Fork,
     gas_benchmark_value: int,
 ):
-    """Test a block with access lists (60% gas) and calldata (40% gas) using random mixed bytes."""
+    """
+    Test a block with access lists (60% gas) and calldata (40% gas) using
+    random mixed bytes.
+    """
     attack_gas_limit = gas_benchmark_value
     gas_available = attack_gas_limit - intrinsic_cost
 
@@ -268,7 +279,8 @@ def test_block_full_access_list_and_data(
         )
     ]
 
-    # Calculate calldata with 29% of gas for zero bytes and 71% for non-zero bytes
+    # Calculate calldata with 29% of gas for zero bytes and 71% for non-zero
+    # bytes
     # Token accounting: tokens_in_calldata = zero_bytes + 4 * non_zero_bytes
     # We want to split the gas budget:
     # - 29% of gas_for_calldata for zero bytes
@@ -284,7 +296,8 @@ def test_block_full_access_list_and_data(
     # Zero bytes: 1 token per byte
     # Non-zero bytes: 4 tokens per byte
     num_zero_bytes = tokens_for_zero_bytes  # 1 token = 1 zero byte
-    num_non_zero_bytes = tokens_for_non_zero_bytes // 4  # 4 tokens = 1 non-zero byte
+    # 4 tokens = 1 non-zero byte
+    num_non_zero_bytes = tokens_for_non_zero_bytes // 4
 
     # Create calldata with mixed bytes
     calldata = bytearray()
@@ -318,4 +331,60 @@ def test_block_full_access_list_and_data(
             calldata=shuffled_calldata,
             access_list=access_list,
         ),
+    )
+
+
+@pytest.mark.parametrize("empty_authority", [True, False])
+@pytest.mark.parametrize("zero_delegation", [True, False])
+def test_worst_case_auth_block(
+    blockchain_test: BlockchainTestFiller,
+    pre: Alloc,
+    intrinsic_cost: int,
+    gas_benchmark_value: int,
+    fork: Fork,
+    empty_authority: bool,
+    zero_delegation: bool,
+):
+    """Test an auth block."""
+    gas_costs = fork.gas_costs()
+
+    iteration_count = (gas_benchmark_value - intrinsic_cost) // gas_costs.G_AUTHORIZATION
+
+    code = Op.STOP * fork.max_code_size()
+    auth_target = Address(0) if zero_delegation else pre.deploy_contract(code=code)
+
+    auth_tuples = []
+    for _ in range(iteration_count):
+        signer = (
+            pre.fund_eoa(amount=0, delegation=None)
+            if empty_authority
+            else pre.fund_eoa(amount=0, delegation=auth_target)
+        )
+        auth_tuple = AuthorizationTuple(address=auth_target, nonce=signer.nonce, signer=signer)
+        auth_tuples.append(auth_tuple)
+
+    tx = Transaction(
+        to=pre.empty_account(),
+        gas_limit=gas_benchmark_value,
+        sender=pre.fund_eoa(),
+        authorization_list=auth_tuples,
+    )
+
+    gas_used = fork.transaction_intrinsic_cost_calculator()(
+        authorization_list_or_count=auth_tuples
+    )
+
+    refund = 0
+    if not empty_authority:
+        refund = min(
+            gas_used // 5,
+            (gas_costs.G_AUTHORIZATION - gas_costs.R_AUTHORIZATION_EXISTING_AUTHORITY)
+            * iteration_count,
+        )
+
+    blockchain_test(
+        pre=pre,
+        post={},
+        blocks=[Block(txs=[tx])],
+        expected_benchmark_gas_used=gas_used - refund,
     )

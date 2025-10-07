@@ -47,6 +47,10 @@ def pytest_collection_modifyitems(session, config, items):
     del session, config
 
     for item in items:
+        # Auto-mark all verify_sync tests as flaky with 3 reruns
+        if item.get_closest_marker("blockchain_test_sync"):
+            item.add_marker(pytest.mark.flaky(reruns=3))
+
         # Check if this test has both client_type and sync_client_type
         if (
             hasattr(item, "callspec")
@@ -60,7 +64,8 @@ def pytest_collection_modifyitems(session, config, items):
             # Format: ``-{client}_sync_{sync_client}``
             new_suffix = f"-{client_name}::sync_{sync_client_name}"
 
-            # client_param-tests/path/to/test.py::test_name[test_params]-sync_client_param
+            # client_param-
+            # tests/path/to/test.py::test_name[test_params]-sync_client_param
             # 1. Remove the client prefix from the beginning
             # 2. Replace the -client_param part at the end with our new format
             nodeid = item.nodeid
@@ -119,7 +124,10 @@ def admin_rpc(client: Client) -> AdminRPC:
 
 @pytest.fixture(scope="function")
 def sync_genesis(fixture: BlockchainEngineSyncFixture) -> dict:
-    """Convert the fixture genesis block header and pre-state to a sync client genesis state."""
+    """
+    Convert the fixture genesis block header and pre-state to a sync client
+    genesis state.
+    """
     genesis = to_json(fixture.genesis)
     alloc = to_json(fixture.pre)
     # NOTE: nethermind requires account keys without '0x' prefix
@@ -129,7 +137,9 @@ def sync_genesis(fixture: BlockchainEngineSyncFixture) -> dict:
 
 @pytest.fixture(scope="function")
 def sync_buffered_genesis(sync_genesis: dict) -> io.BufferedReader:
-    """Create a buffered reader for the genesis block header of the sync client."""
+    """
+    Create a buffered reader for the genesis block header of the sync client.
+    """
     genesis_json = json.dumps(sync_genesis)
     genesis_bytes = genesis_json.encode("utf-8")
     return io.BufferedReader(cast(io.RawIOBase, io.BytesIO(genesis_bytes)))

@@ -19,6 +19,7 @@ from ethereum_test_vm import Opcodes as Op
     [0, 2, 16, 33, 257],
 )
 @pytest.mark.parametrize("calldata_source", ["contract", "tx"])
+@pytest.mark.slow()
 def test_calldatasize(
     state_test: StateTestFiller,
     fork: Fork,
@@ -30,10 +31,15 @@ def test_calldatasize(
     Test `CALLDATASIZE` opcode.
 
     Tests two scenarios:
-    - calldata_source is "contract": CALLDATASIZE reads from calldata passed by another contract
-    - calldata_source is "tx": CALLDATASIZE reads directly from transaction calldata
+    - calldata_source is "contract": CALLDATASIZE reads from calldata
+                                     passed by another contract
+    - calldata_source is "tx": CALLDATASIZE reads directly from
+                               transaction calldata
 
-    Based on https://github.com/ethereum/tests/blob/81862e4848585a438d64f911a19b3825f0f4cd95/src/GeneralStateTestsFiller/VMTests/vmTests/calldatasizeFiller.yml
+    Based on
+    https://github.com/ethereum/tests/blob/
+    81862e4848585a438d64f911a19b3825f0f4cd95/src/
+    GeneralStateTestsFiller/VMTests/vmTests/calldatasizeFiller.yml
     """
     contract_address = pre.deploy_contract(Op.SSTORE(key=0x0, value=Op.CALLDATASIZE))
     calldata = b"\x01" * args_size

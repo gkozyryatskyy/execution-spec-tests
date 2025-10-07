@@ -55,10 +55,8 @@ def post_state_validator(alternate_field: str | None = None, mode: str = "after"
     """
     Create a validator to ensure exactly one post-state field is provided.
 
-    Args:
-        alternate_field: Alternative field name to post_state_hash (e.g., 'post_state_diff').
-        mode: Pydantic validation mode.
-
+    Args: alternate_field: Alternative field name to post_state_hash (e.g.,
+    'post_state_diff'). mode: Pydantic validation mode.
     """
 
     def decorator(cls):
@@ -68,10 +66,12 @@ def post_state_validator(alternate_field: str | None = None, mode: str = "after"
             if mode == "after":
                 # Determine which fields to check
                 if alternate_field:
-                    # For engine x fixtures: check post_state vs post_state_diff
+                    # For engine x fixtures: check post_state vs
+                    # post_state_diff
                     field1_name, field2_name = "post_state", alternate_field
                 else:
-                    # For standard fixtures: check post_state vs post_state_hash
+                    # For standard fixtures: check post_state vs
+                    # post_state_hash
                     field1_name, field2_name = "post_state", "post_state_hash"
 
                 field1_value = getattr(self, field1_name, None)
@@ -93,8 +93,8 @@ def post_state_validator(alternate_field: str | None = None, mode: str = "after"
 
 class HeaderForkRequirement(str):
     """
-    Fork requirement class that specifies the name of the method that should be called
-    to check if the field is required.
+    Fork requirement class that specifies the name of the method that should be
+    called to check if the field is required.
     """
 
     def __new__(cls, value: str) -> "HeaderForkRequirement":
@@ -103,7 +103,9 @@ class HeaderForkRequirement(str):
 
     def required(self, fork: Fork, block_number: int, timestamp: int) -> bool:
         """Check if the field is required for the given fork."""
-        return getattr(fork, f"header_{self}_required")(block_number, timestamp)
+        return getattr(fork, f"header_{self}_required")(
+            block_number=block_number, timestamp=timestamp
+        )
 
     @classmethod
     def get_from_annotation(cls, field_hints: Any) -> "HeaderForkRequirement | None":
@@ -173,7 +175,10 @@ class FixtureHeader(CamelModel):
     fork: Fork | None = Field(None, exclude=True)
 
     def model_post_init(self, __context):
-        """Model post init method used to check for required fields of a given fork."""
+        """
+        Model post init method used to check for required fields of a given
+        fork.
+        """
         super().model_post_init(__context)
 
         if self.fork is None:
@@ -184,8 +189,9 @@ class FixtureHeader(CamelModel):
         block_number = self.number
         timestamp = self.timestamp
 
-        # For each field, check if any of the annotations are of type HeaderForkRequirement and
-        # if so, check if the field is required for the given fork.
+        # For each field, check if any of the annotations are of type
+        # HeaderForkRequirement and if so, check if the field is required for
+        # the given fork.
         annotated_hints = get_type_hints(self, include_extras=True)
 
         for field in self.__class__.model_fields:
@@ -234,9 +240,13 @@ class FixtureHeader(CamelModel):
         environment_values["extra_data"] = env.extra_data
         extras = {
             "state_root": state_root,
-            "requests_hash": Requests() if fork.header_requests_required(0, 0) else None,
+            "requests_hash": Requests()
+            if fork.header_requests_required(block_number=0, timestamp=0)
+            else None,
             "block_access_list_hash": (
-                BlockAccessList().rlp_hash if fork.header_bal_hash_required(0, 0) else None
+                BlockAccessList().rlp_hash
+                if fork.header_bal_hash_required(block_number=0, timestamp=0)
+                else None
             ),
             "fork": fork,
         }
@@ -244,7 +254,9 @@ class FixtureHeader(CamelModel):
 
 
 class FixtureExecutionPayload(CamelModel):
-    """Representation of an Ethereum execution payload within a test Fixture."""
+    """
+    Representation of an Ethereum execution payload within a test Fixture.
+    """
 
     parent_hash: Hash
     fee_recipient: Address
@@ -282,8 +294,8 @@ class FixtureExecutionPayload(CamelModel):
         block_access_list: Bytes | None = None,
     ) -> "FixtureExecutionPayload":
         """
-        Return FixtureExecutionPayload from a FixtureHeader, a list
-        of transactions, a list of withdrawals, and an optional block access list.
+        Return FixtureExecutionPayload from a FixtureHeader, a list of
+        transactions, a list of withdrawals, and an optional block access list.
         """
         return cls(
             **header.model_dump(exclude={"rlp"}, exclude_none=True),
@@ -303,8 +315,8 @@ EngineNewPayloadV4Parameters = Tuple[
 ]
 EngineNewPayloadV5Parameters = EngineNewPayloadV4Parameters
 
-# Important: We check EngineNewPayloadV3Parameters first as it has more fields, and pydantic
-# has a weird behavior when the smaller tuple is checked first.
+# Important: We check EngineNewPayloadV3Parameters first as it has more fields,
+# and pydantic has a weird behavior when the smaller tuple is checked first.
 EngineNewPayloadParameters = Union[
     EngineNewPayloadV5Parameters,
     EngineNewPayloadV4Parameters,
@@ -315,8 +327,8 @@ EngineNewPayloadParameters = Union[
 
 class FixtureEngineNewPayload(CamelModel):
     """
-    Representation of the `engine_newPayloadVX` information to be
-    sent using the block information.
+    Representation of the `engine_newPayloadVX` information to be sent using
+    the block information.
     """
 
     params: EngineNewPayloadParameters
@@ -350,14 +362,18 @@ class FixtureEngineNewPayload(CamelModel):
         **kwargs,
     ) -> "FixtureEngineNewPayload":
         """Create `FixtureEngineNewPayload` from a `FixtureHeader`."""
-        new_payload_version = fork.engine_new_payload_version(header.number, header.timestamp)
+        new_payload_version = fork.engine_new_payload_version(
+            block_number=header.number, timestamp=header.timestamp
+        )
         forkchoice_updated_version = fork.engine_forkchoice_updated_version(
-            header.number, header.timestamp
+            block_number=header.number, timestamp=header.timestamp
         )
 
         assert new_payload_version is not None, "Invalid header for engine_newPayload"
 
-        if fork.engine_execution_payload_block_access_list(header.number, header.timestamp):
+        if fork.engine_execution_payload_block_access_list(
+            block_number=header.number, timestamp=header.timestamp
+        ):
             if block_access_list is None:
                 raise ValueError(
                     f"`block_access_list` is required in engine `ExecutionPayload` for >={fork}."
@@ -371,19 +387,25 @@ class FixtureEngineNewPayload(CamelModel):
         )
 
         params: List[Any] = [execution_payload]
-        if fork.engine_new_payload_blob_hashes(header.number, header.timestamp):
+        if fork.engine_new_payload_blob_hashes(
+            block_number=header.number, timestamp=header.timestamp
+        ):
             blob_hashes = Transaction.list_blob_versioned_hashes(transactions)
             if blob_hashes is None:
                 raise ValueError(f"Blob hashes are required for ${fork}.")
             params.append(blob_hashes)
 
-        if fork.engine_new_payload_beacon_root(header.number, header.timestamp):
+        if fork.engine_new_payload_beacon_root(
+            block_number=header.number, timestamp=header.timestamp
+        ):
             parent_beacon_block_root = header.parent_beacon_block_root
             if parent_beacon_block_root is None:
                 raise ValueError(f"Parent beacon block root is required for ${fork}.")
             params.append(parent_beacon_block_root)
 
-        if fork.engine_new_payload_requests(header.number, header.timestamp):
+        if fork.engine_new_payload_requests(
+            block_number=header.number, timestamp=header.timestamp
+        ):
             if requests is None:
                 raise ValueError(f"Requests are required for ${fork}.")
             params.append(requests)
@@ -445,7 +467,10 @@ class WitnessChunk(CamelModel):
 
 
 class FixtureBlockBase(CamelModel):
-    """Representation of an Ethereum block within a test Fixture without RLP bytes."""
+    """
+    Representation of an Ethereum block within a test Fixture without RLP
+    bytes.
+    """
 
     header: FixtureHeader = Field(..., alias="blockHeader")
     txs: List[FixtureTransaction] = Field(default_factory=list, alias="transactions")
@@ -467,7 +492,9 @@ class FixtureBlockBase(CamelModel):
         block = [
             self.header.rlp_encode_list,
             [tx.serializable_list for tx in txs],
-            self.ommers,  # TODO: This is incorrect, and we probably need to serialize the ommers
+            # TODO: This is incorrect, and we probably
+            # need to serialize the ommers
+            self.ommers,
         ]
 
         if self.withdrawals is not None:
@@ -519,15 +546,16 @@ class BlockchainFixtureCommon(BaseFixture):
     pre: Alloc
     post_state: Alloc | None = Field(None)
     post_state_hash: Hash | None = Field(None)
-    last_block_hash: Hash = Field(..., alias="lastblockhash")  # FIXME: lastBlockHash
+    # FIXME: lastBlockHash
+    last_block_hash: Hash = Field(..., alias="lastblockhash")
     config: FixtureConfig
 
     @model_validator(mode="before")
     @classmethod
     def config_defaults_for_backwards_compatibility(cls, data: Any) -> Any:
         """
-        Check if the config field is populated, otherwise use the root-level field values for
-        backwards compatibility.
+        Check if the config field is populated, otherwise use the root-level
+        field values for backwards compatibility.
         """
         if isinstance(data, dict):
             if "config" not in data:
@@ -566,7 +594,8 @@ class BlockchainEngineFixtureCommon(BaseFixture):
 
     fork: Fork = Field(..., alias="network")
     post_state_hash: Hash | None = Field(None)
-    last_block_hash: Hash = Field(..., alias="lastblockhash")  # FIXME: lastBlockHash
+    # FIXME: lastBlockHash
+    last_block_hash: Hash = Field(..., alias="lastblockhash")
     config: FixtureConfig
 
     def get_fork(self) -> Fork | None:
@@ -616,7 +645,10 @@ class BlockchainEngineXFixture(BlockchainEngineFixtureCommon):
     """Hash of the pre-allocation group this test belongs to."""
 
     post_state_diff: Alloc | None = None
-    """State difference from genesis after test execution (efficiency optimization)."""
+    """
+    State difference from genesis after test execution (efficiency
+    optimization).
+    """
 
     payloads: List[FixtureEngineNewPayload] = Field(..., alias="engineNewPayloads")
     """Engine API payloads for blockchain execution."""

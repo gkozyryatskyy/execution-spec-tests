@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, Generator, List, Mapping
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from ethereum_test_base_types import Address, CamelModel, EthereumTestRootModel, Hash
 from ethereum_test_exceptions import TransactionExceptionInstanceOrList
@@ -86,7 +86,9 @@ class LabeledDataList(EthereumTestRootModel):
         raise KeyError(f"Label/index {label_or_index} not found in data indexes")
 
     def __contains__(self, label_or_index: int | str):
-        """Return True if the LabeledDataList contains the given label/index."""
+        """
+        Return True if the LabeledDataList contains the given label/index.
+        """
         if isinstance(label_or_index, int):
             return label_or_index < len(self.root)
         if isinstance(label_or_index, str):
@@ -125,10 +127,7 @@ class GeneralTransactionInFiller(BaseModel, TagDependentData):
     max_fee_per_blob_gas: ValueInFiller | None = Field(None, alias="maxFeePerBlobGas")
     blob_versioned_hashes: List[Hash] | None = Field(None, alias="blobVersionedHashes")
 
-    class Config:
-        """Model Config."""
-
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
     def tag_dependencies(self) -> Mapping[str, Tag]:
         """Get tag dependencies."""
