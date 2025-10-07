@@ -211,8 +211,9 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
         return (initcode.deployment_gas + initcode.execution_gas) > 0
     return True
 
-# TODO Glib:
-#  - this https://github.com/hyperledger/besu/pull/8817/files can be relared of gas difference
+
+# TODO Glib: this can be related to gas difference
+# https://github.com/hyperledger/besu/pull/8817/files
 @pytest.mark.parametrize(
     "initcode,gas_test_case",
     [
@@ -222,14 +223,23 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
             marks=([pytest.mark.exception_test] if g == "too_little_intrinsic_gas" else []),
         )
         for i in [
-            INITCODE_ZEROS_MAX_LIMIT, # TODO Glib: Hedera: 249740,249940 / Tests(int,exec): 252788,253012 / Diff 3048,3072
-            INITCODE_ONES_MAX_LIMIT, # TODO Glib: Hedera: 839420,839620 / Tests(int,exec): 842468,842692 / Diff 3048,3072
-            # EMPTY_INITCODE, # TODO Glib: Hedera: INVALID_ETHEREUM_TRANSACTION / Tests: 53000,53000 / Possible surce: https://github.com/hiero-ledger/hiero-consensus-node/blob/main/hedera-node/hedera-smart-contract-service-impl/src/main/java/com/hedera/node/app/service/contract/impl/infra/HevmTransactionFactory.java#L279
-            SINGLE_BYTE_INITCODE, # TODO Glib: Success
-            INITCODE_ZEROS_32_BYTES, # TODO Glib: Hedera(consumed,used): 53260,53460 / Tests(int,exec): 53238,53462 / Diff -22,2
-            INITCODE_ZEROS_33_BYTES, # TODO Glib: Hedera(consumed,used): 53264,53464 / Tests(int,exec): 53244,53468 / Diff -20,4
-            INITCODE_ZEROS_49120_BYTES, # TODO Glib: Hedera: 249612,249812 / Tests(int,exec): 252658,252882 / Diff 3046,3070
-            INITCODE_ZEROS_49121_BYTES, # TODO Glib: Hedera: 249616,249816 / Tests(int,exec): 252664,252888 / Diff 3046,3070
+            # Glib: 249740,249940/Tests(int,exec): 252788,253012/Diff 3048,3072
+            INITCODE_ZEROS_MAX_LIMIT,
+            # Glib: 839420,839620 / Tests: 842468,842692/Diff 3048,3072
+            INITCODE_ONES_MAX_LIMIT,
+            # Glib: INVALID_ETHEREUM_TRANSACTION/Tests: 53000,53000 see
+            # https://github.com/hiero-ledger/hiero-consensus-node/blob/main/hedera-node/hedera-smart-contract-service-impl/src/main/java/com/hedera/node/app/service/contract/impl/infra/HevmTransactionFactory.java#L279
+            # EMPTY_INITCODE,
+            # TODO Glib: Success
+            SINGLE_BYTE_INITCODE,
+            # Glib: (consumed,used): 53260,53460/Tests: 53238,53462/Diff -22,2
+            INITCODE_ZEROS_32_BYTES,
+            # Glib: (consumed,used): 53264,53464/Tests: 53244,53468/Diff -20,4
+            INITCODE_ZEROS_33_BYTES,
+            # Glib: 249612,249812 / Tests: 252658,252882/Diff 3046,3070
+            INITCODE_ZEROS_49120_BYTES,
+            # Glib: 249616,249816 / Tests: 252664,252888/Diff 3046,3070
+            INITCODE_ZEROS_49121_BYTES,
         ]
         for g in [
             # "too_little_intrinsic_gas",

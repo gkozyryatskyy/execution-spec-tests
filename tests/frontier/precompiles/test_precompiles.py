@@ -78,7 +78,9 @@ def test_precompiles(
 
     """
     if not precompile_exists:
-        pytest.skip(reason="Calls to Hedera reserved accounts causes gas consumption differences https://github.com/gkozyryatskyy/execution-spec-tests/issues/25")
+        pytest.skip(
+            reason="Calls to Hedera reserved accounts causes gas consumption differences https://github.com/gkozyryatskyy/execution-spec-tests/issues/25"
+        )
 
     env = Environment()
 

@@ -319,9 +319,9 @@ class Transaction(
         # NOTICE Transaction value needs to be scaled up by `TINYBAR_TO_WEIBAR`
         # due to differences in decimal precision between Hedera and Ethereum.
         # https://github.com/gkozyryatskyy/execution-spec-tests/issues/17
-        TINYBAR_TO_WEIBAR = 10_000_000_000
-        if 0 < self.value < TINYBAR_TO_WEIBAR:
-            self.value = self.value * TINYBAR_TO_WEIBAR
+        tinybar_to_weibar = 10_000_000_000
+        if 0 < self.value < tinybar_to_weibar:
+            self.value = self.value * tinybar_to_weibar
             print(f"[DEBUG] Transaction value {self.value} scaled by `TINYBAR_TO_WEIBAR`")
 
         if self.gas_price is not None and (
@@ -359,7 +359,7 @@ class Transaction(
         # Set default values for fields that are required for certain tx types
         if self.ty <= 1 and self.gas_price is None:
             self.gas_price = TransactionDefaults.gas_price
-        # NOTICE Sending access list is currently not supported due to an issue in the Relay/SDK
+        # NOTICE Sending access list is currently not supported
         # https://github.com/gkozyryatskyy/execution-spec-tests/issues/6
         # if self.ty >= 1: and self.access_list is None:
         if self.ty >= 1:
@@ -367,13 +367,13 @@ class Transaction(
         if self.ty < 1:
             assert self.access_list is None, "access_list must be None"
 
-        # NOTICE Gas price needs to be at least `71 * TINYBAR_TO_WEIBAR` otherwise
+        # NOTICE Gas price needs to be at least 71*tinybar_to_weibar otherwise
         # the JSON-RPC Relay rejects the transaction.
         # https://github.com/gkozyryatskyy/execution-spec-tests/issues/16
-        MIN_GAS_PRICE = 71 * TINYBAR_TO_WEIBAR
-        if not self.gas_price is None and self.gas_price < MIN_GAS_PRICE:
-            self.gas_price += MIN_GAS_PRICE
-            print(f"[DEBUG] Adjusted gas_price {self.gas_price }")
+        min_gas_price = 71 * tinybar_to_weibar
+        if self.gas_price is not None and self.gas_price < min_gas_price:
+            self.gas_price += min_gas_price
+            print(f"[DEBUG] Adjusted gas_price {self.gas_price}")
 
         if self.ty >= 2 and self.max_fee_per_gas is None:
             self.max_fee_per_gas = TransactionDefaults.max_fee_per_gas
@@ -383,9 +383,9 @@ class Transaction(
             assert self.max_fee_per_gas is None, "max_fee_per_gas must be None"
             assert self.max_priority_fee_per_gas is None, "max_priority_fee_per_gas must be None"
 
-        if not self.max_fee_per_gas is None and self.max_fee_per_gas < MIN_GAS_PRICE:
-            self.max_fee_per_gas = MIN_GAS_PRICE
-            print(f"[DEBUG] Adjusted max_fee_per_gas {self.max_fee_per_gas }")
+        if self.max_fee_per_gas is not None and self.max_fee_per_gas < min_gas_price:
+            self.max_fee_per_gas = min_gas_price
+            print(f"[DEBUG] Adjusted max_fee_per_gas {self.max_fee_per_gas}")
 
         if self.ty == 3 and self.max_fee_per_blob_gas is None:
             self.max_fee_per_blob_gas = 1
