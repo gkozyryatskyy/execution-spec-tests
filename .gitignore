@@ -73,7 +73,7 @@ __pycache__/
 
 # pytest report
 assets
-*.html
+# *.html
 
 # Environment
 env.yaml

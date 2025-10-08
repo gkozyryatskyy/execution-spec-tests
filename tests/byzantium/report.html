@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">Execute Test Report</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">Execute Test Report</h1>
+    <p>Report generated on 08-Oct-2025 at 21:28:59 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.1.1</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="6">No results found. Check the filters.</th>
+        </tr>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="6">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left"><</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">></div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">17 tests took 00:01:41.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled/>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" />
+            <span class="passed">17 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled/>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled/>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled/>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled/>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled/>
+            <span class="rerun">0 Reruns</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th class="sortable" data-column-type="sender">Sender</th>
+          <th class="sortable" data-column-type="fundedAccounts">Funded Accounts</th>
+          <th class="sortable" data-column-type="fundedAccounts">Deployed Contracts</th>
+        </tr>
+      </thead>
+    </table>
+  </body>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.11.13&#34;, &#34;Platform&#34;: &#34;macOS-14.5-arm64-arm-64bit&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;8.4.1&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;regex&#34;: &#34;0.2.0&#34;, &#34;html&#34;: &#34;4.1.1&#34;, &#34;xdist&#34;: &#34;3.8.0&#34;, &#34;json-report&#34;: &#34;1.5.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;cov&#34;: &#34;4.1.0&#34;, &#34;rerunfailures&#34;: &#34;16.0.1&#34;, &#34;custom-report&#34;: &#34;1.0.1&#34;}, &#34;Command-line args&#34;: &#34;&lt;code&gt;execute -c /Users/luismastrangelo/work/execution-spec-tests/src/cli/pytest_commands/pytest_ini_files/pytest-execute.ini --rootdir . -rA --verbose --fork=Cancun --rpc-endpoint=http://localhost:7546/ --rpc-seed-key=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106 --rpc-chain-id 298 --html=tests/byzantium/report.html --self-contained-html --sender-funding-txs-gas-price=710 gwei --default-gas-price=710_000_000_000 --sender-fund-refund-gas-limit=1_000_000 --seed-account-sweep-amount=70000 ether --eoa-fund-amount-default=8_000_000_000_000_000_000_000 --transaction-gas-limit=15_000_000 --tx-wait-timeout 15 tests/byzantium&lt;/code&gt;&#34;, &#34;Senders&#34;: {&#34;0x5eda95be2263c483be3a813e3ae059edbe50201f&#34;: &#34;Used balance=6.805315919999999963&#34;}}, &#34;tests&#34;: {&#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x02-ModExpOutput_returned_data_0x01]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x02-ModExpOutput_returned_data_0x01]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x02-ModExpOutput_returned_data_0x01]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa31ad3934372b47adb8b4b41971187964134218b&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\nStarting EOA index: 0x3a233d570843ad31d1016d4cdacda25f3d1a767457888e74bc012d03366814d5\nTx hash 0x4d7b23f673d80f6a6258b21a343637a8174d54560022d03d93bcf6ddfc161883 doesn&amp;#x27;t match hash from RLP data 0x0d3bf87cdadc3abaa42ba662ce996717684011e917975567781c84beb3d3ce3e\n\n----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0xfb78ffa2ddb0d93000a6b793773657649552f4776fbe481c1de7e1d4c1608b77 matches hash from RLP data\nTx hash 0x99ed07ed45109f516b32c979dc84904a469d7282ad67ab3667fbc609855638fd doesn&amp;#x27;t match hash from RLP data 0x88ef608a1422312057d3c03f785f2393874c439046aa4a42dfefcdef2503f5ed\nTx hash 0xd2150beb1fa6e3b79c0a4cb98b78e4ad234fe0c4251304506d546b7109516b24 doesn&amp;#x27;t match hash from RLP data 0x2efc5c75fc2cb7b64c8451bfe66c5f378d8336e8ed0831d95020ae1662dcdc4b\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x61ee34cbc4f71e70222401adeed3e6d49bbd703f7924c5ce95e497486b121a6c doesn&amp;#x27;t match hash from RLP data 0x297e983e3d9aaeb5101211c1ba43a30d2ce60579008ff9bd19766ce08fd56f5d\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x0002-ModExpOutput_returned_data_0x0001]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x0002-ModExpOutput_returned_data_0x0001]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x0002-ModExpOutput_returned_data_0x0001]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xcb662be244b93b93c6627256f34271330d3db9e7&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x42c8337a40cd38f431bc7813ddde7b405e3dff4682fb637daa1dd8a9189c101c matches hash from RLP data\nTx hash 0xd2a4ced23a04c0b8f8a1e8c1cc5344809e03d4a7b4d8ee61d53e2841c90ffe32 doesn&amp;#x27;t match hash from RLP data 0x12d88fbb353e54ff74cd3fefe22bf1cd56acea5f82bb5f6328ca7f8e894da375\nTx hash 0xd9191fdb49f5218f09b57dd3a0c59f98b232b1991e561e50cb3fe39e14db0d65 doesn&amp;#x27;t match hash from RLP data 0x089f99ae9f27cee16d6c5623f0e9313b61912ad2c374606aeea7e1d1d0bb29bf\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x81309ca1e0351fb2d56c03b406658d11ee0ddfa4804bd4ed293e0a1c97c9aa87 doesn&amp;#x27;t match hash from RLP data 0x0433989ee3df660c39580672f13e7b7eca4dde1d09bb6d7d1d83add877f41344\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x00-exponent_0x00-modulus_0x02-ModExpOutput_returned_data_0x01]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x00-exponent_0x00-modulus_0x02-ModExpOutput_returned_data_0x01]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x00-exponent_0x00-modulus_0x02-ModExpOutput_returned_data_0x01]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x016219109d4f1f788efb68f4d435099d7c9a2a30&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x92cf61c4fde814ea55faafbae3818512416447d2af9cc7ce184f899811df4499 matches hash from RLP data\nTx hash 0x0116e03cb6ee3a01e82658443c16c9cf586fabdb8825285b6c2df51d7b9cc6ea doesn&amp;#x27;t match hash from RLP data 0x43e9314aa31336563c1f1a450ce9cd2d46ae52836db9f2234afef9525b7353ec\nTx hash 0x831e4e6d7a221cf74ffc23da2224ab2558f4efffbcdc6f926a471ca4c25a5919 doesn&amp;#x27;t match hash from RLP data 0x278fd6872546c5a69af9e282030ae58d3b1311d6f9dc4733c70a082aa3c14d22\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x52eb9e430fb0ed95c852448958a1337cd2f46f84cab697003c5e26b91708c874 doesn&amp;#x27;t match hash from RLP data 0xa0a6d1e5e9aaaa37878357013a098c3b44278f6e62a1c1bdbf22486df02e7a0f\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x01-modulus_0x02-ModExpOutput_returned_data_0x00]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x01-modulus_0x02-ModExpOutput_returned_data_0x00]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x01-modulus_0x02-ModExpOutput_returned_data_0x00]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x95c408c249efa692f16019790208c6af682b3927&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x490970f543905d963faec86222793c88ed2aca18ed4bea2d316fd136ad7b7848 matches hash from RLP data\nTx hash 0xcb14418542b152e4c5f3ee9d04700055b39c8b1a613f5bc28166ffaad5d87778 doesn&amp;#x27;t match hash from RLP data 0x430044ef27fd52e2b75359254dbc8c9af8920669d59746cf9261916375eb02cb\nTx hash 0xc67ecf5cdc327575b2084b3c2f73406158647d9256bc94214ad6a7c17d22cce3 doesn&amp;#x27;t match hash from RLP data 0xdb09fe62b7e7c79749dc4b4ff2d9b2d3a07fd7473a17e43e3ab054c790122baf\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x8d628d6c454770c86b4ca5600eb316c30005b4057c2971b52f9e735e07fd1976 doesn&amp;#x27;t match hash from RLP data 0x9f4deaf89e9c33cf6379bb3879a1fddb71f96c9b9ea4696a6b6a1a77757cc3f4\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x01-exponent_0x01-modulus_0x02-ModExpOutput_returned_data_0x01]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x01-exponent_0x01-modulus_0x02-ModExpOutput_returned_data_0x01]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x01-exponent_0x01-modulus_0x02-ModExpOutput_returned_data_0x01]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe55b14d2d1e4d7917d44c533650e747a372acf92&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x244a9076d2e1f0324bede3eb202192acf38a10d801bc14c0a927cae7312f4013 matches hash from RLP data\nTx hash 0x2e90acfac88e2e438ba50fafc200f3b8177b8e17107fa7908ac326314f3f0d86 doesn&amp;#x27;t match hash from RLP data 0x8673b7a2462f889dd90a4c64445ff6176c6e8a37164b846a3b56cb063f5d5667\nTx hash 0x6a7a8e147da7491608383116d27b01e179611e777479ea50df7e65f7d337438e doesn&amp;#x27;t match hash from RLP data 0x15ed952769d0d779a521395e62a5f7a193c33e131ef0ecb0397b943ae1862ce9\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x4f9e527da2a424384f38d7c2ab8571035e4d9967ee4e16dc87be3579019f9108 doesn&amp;#x27;t match hash from RLP data 0x1b17a56f554b87efb49b5234a2fd3b7bb785493b07d39649ffc96f5308a59849\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x02-exponent_0x01-modulus_0x03-ModExpOutput_returned_data_0x02]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x02-exponent_0x01-modulus_0x03-ModExpOutput_returned_data_0x02]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x02-exponent_0x01-modulus_0x03-ModExpOutput_returned_data_0x02]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x1ff08af4cfe39b9a6c73965582d47eed89701067&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0xcafab659877ea6a70dd583b354165495e40c0b2ff84e44b900f7df7da37618fc matches hash from RLP data\nTx hash 0xc8235e6a19cd55e970fab4fe22608b5726c7eaf646e2a99a113d1fb56f1b30d0 doesn&amp;#x27;t match hash from RLP data 0x66b0870727d98fd08b51d39cde23d23a3e699c5fa323b933557ac6aa4beffe89\nTx hash 0xbd548a00a050166861e82f20f3bb04d8690d9f2c95b3e876d69ff98f7baa45f7 doesn&amp;#x27;t match hash from RLP data 0x5029c42ac30b26493f51efb33a4abc7b3acbd3e0775318e0f1394dd58580e168\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x12f1270445ec64eb956af18aec0fcbb494b8260446142ae3e59c4514a67a380a doesn&amp;#x27;t match hash from RLP data 0xe5c6e47bc5a9801be1fb12ab491b74b243993001693d218d223f008006a1c081\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x02-exponent_0x02-modulus_0x05-ModExpOutput_returned_data_0x04]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x02-exponent_0x02-modulus_0x05-ModExpOutput_returned_data_0x04]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x02-exponent_0x02-modulus_0x05-ModExpOutput_returned_data_0x04]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x749da3918f28a481c26f330efd129022607f1272&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0xdcdfc52553adb1ae670652375f7780453f07f716ea48b7704c6c9825abf591a6 matches hash from RLP data\nTx hash 0x540ad1ebcb3229b06974ba0541a85b23f1e7441bb92a09058acdcbf77ce7e6e0 doesn&amp;#x27;t match hash from RLP data 0x3afce64ad60643b764f1d38631f91bf24d6fba90188f7dfad47256154c6b72bb\nTx hash 0x55ce8a118f538f199ee19882e29d8cea409d480792a8e693feadf018788b0986 doesn&amp;#x27;t match hash from RLP data 0x2187add393a9949228f7b9317535145edbca06026a7004f0e88cf43f996e1b68\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xf8a2114f6fedc9d980358517f211faa52c4909fab28d49c5e406556c171cdaa9 doesn&amp;#x27;t match hash from RLP data 0xa3bf228dd98faa237ed92a3d4bdbd253a95db8d9e4e0ffd534c1999449e477fd\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x-ModExpOutput_returned_data_0x]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x-ModExpOutput_returned_data_0x]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x-ModExpOutput_returned_data_0x]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x2899629b1c74584934e3ada1a2d093b28321a6c2&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x26091eaf42f8353cd167d2eeb2ae3f3973c1697e7773b717f60d670fc83b649d matches hash from RLP data\nTx hash 0xf6d9bd22079eb32fc2be1ae14ea9eaf6c9a87a817bd0c3f2373f8a370819e9fb doesn&amp;#x27;t match hash from RLP data 0x030d51b60dc7b48d4af0cfb760d55af16f181665ebb744de83fc408a6146c272\nTx hash 0x2a74ba41c82b777de8bde6db0379c9cce914d7774ca90eb8b93d046932dc544b doesn&amp;#x27;t match hash from RLP data 0x03c4453f1f433a72b564f146fc095a79a69a038fd40f2cd8cc9fa72bf0acae10\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xbf9557fe686d6d3d524afa34f0b5648dd18b2eadcc7d0e9a102d82b897f8faa5 doesn&amp;#x27;t match hash from RLP data 0xf3274903ab02a4218064018dafb3668e30df9e1e6f467af0dadb22d77a775384\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x00-ModExpOutput_returned_data_0x00]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x00-ModExpOutput_returned_data_0x00]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x00-ModExpOutput_returned_data_0x00]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x105a8dd5eaec10c2cabeaed1b0dfc065a9332cf3&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0xec671185eb679a49c4d09bb664d3dbd67a41f7bbe2046eef108c2ca10ee84a90 matches hash from RLP data\nTx hash 0xbb6a45348b3a1d6b7384d71906292bebda9267bacb0873ba3406a6e0aca9e3bf doesn&amp;#x27;t match hash from RLP data 0x3ecfd5a2f65fea1cbaaf54b26abe2bbf9b8ce5567be2d233e9ac84b92a50f1de\nTx hash 0xd63cd3df08f043ddc6a710b1ad84fe0a1ca21f1fca6e92c2aaf8d970ca3ced89 doesn&amp;#x27;t match hash from RLP data 0x8d5668a4881b13fa654959597dc65f1531c4aebba4b7fd65193bd9ebc1c1689b\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xa90d1a9151d7755e7089bf96a202cfba30847432c4f588f64635480f572d5adb doesn&amp;#x27;t match hash from RLP data 0x06932097f0c25b87913d7fb7811876f36c7ac568d2a134a9e4055db62d822a95\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x01-ModExpOutput_returned_data_0x00]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x01-ModExpOutput_returned_data_0x00]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x01-ModExpOutput_returned_data_0x00]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x90bbfd3eb824594dbe4d3e6508825d6cea92e3ea&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0xed72d4787232088768bac02e35637733ba47d8b2154597e86c35dd0f2bccf972 matches hash from RLP data\nTx hash 0x2a52e53a460c377eefdf61a3cdb8d5c0e935171c9806632f1acd4f4b7e44c695 doesn&amp;#x27;t match hash from RLP data 0x1e61f4a0a8a53e281d8b4ff6c88d2add50855ce0b48118215524a3e5d655f30b\nTx hash 0xa2fdd2cf82953676b2d6dddf3e87c8d250d6356e1d4296ea7001a066f4a14195 doesn&amp;#x27;t match hash from RLP data 0x70401a4d75bdb213b35c52b6073728be43bf02d73f995d9bf132404fd1f7ab26\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x811b6f9cd18964caa057392863682f4d72f0075be4220c360fc2fb8c18232cdf doesn&amp;#x27;t match hash from RLP data 0x806e46b81680ce5e6f16a4425416ee71f540b5a4099f278c640d2ead0155b920\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x0001-ModExpOutput_returned_data_0x0000]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x0001-ModExpOutput_returned_data_0x0000]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x0001-ModExpOutput_returned_data_0x0000]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x110312ac16d11fda0aa4bb15bed1e7937879dbdf&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0xd233f31d9fa70b8ce234454120d4b1b6394baf69a44fc086302c7df9e49c70fe matches hash from RLP data\nTx hash 0xe3177ef100993de976cd9b818989419cbc73e436c85376e9adb8f52f7a28b3ea doesn&amp;#x27;t match hash from RLP data 0x49dbc05aa1cf7cb9b7e7381df4f0e7612087a8b0ab25ef7dc1e1b0d11a6cd742\nTx hash 0x57bd84732751bffb461bc7cc79f4ffdfde52c3f2af516a0b6ebc905b982fe8b5 doesn&amp;#x27;t match hash from RLP data 0x7e3fa160d81406aff1da7cf48205723cc007f4dc5f362759346721f95c9485be\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x3bbceb039ff7f4116a80fe02e5f1f56d8bab7de3195ad59c41e00d6f6e830d4f doesn&amp;#x27;t match hash from RLP data 0xec19e322d793b52c5f194bcd76d2041862eb6fe036091af57c691dcecd91b380\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x-declared_exponent_length_4294967296-declared_modulus_length_1-ModExpOutput_call_success_False-returned_data_0x00]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x-declared_exponent_length_4294967296-declared_modulus_length_1-ModExpOutput_call_success_False-returned_data_0x00]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-ModExpInput_base_0x-exponent_0x-modulus_0x-declared_exponent_length_4294967296-declared_modulus_length_1-ModExpOutput_call_success_False-returned_data_0x00]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x4489dbc020ab7bb2d41b721f992c0ce5c33ef168&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0xe57d1f8d89204a8e64c98019f23b2b72949e1a545d7868b9f390cd4396d63dae matches hash from RLP data\nTx hash 0x8c317af6064f338cdf492339162470d57706f03a16a3e6122686759a191b3425 doesn&amp;#x27;t match hash from RLP data 0x3ce48e51672fbf82ede17aeeb078b59c504505f22ca3d11128c9358b97e00235\nTx hash 0x294e65035638d5ed66aa91d3ba067fc45ce7818b62abfeadc3b9baff08c2d9c7 matches hash from RLP data\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xc3c6be2da2fb5cb5e7289e594fd95ce24373518024b361cfd12116ff502a88ab doesn&amp;#x27;t match hash from RLP data 0x170bb6e893fe2a9410ef053c75543d968b87fd7ecfe12803a86aa689ca678bfc\nUsed balance=0.462959759999999998\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case1]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case1]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case1]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x392b3871d35808a3616594e16ff102b70310c5d6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x12e630653f7dbcac9805bd1777b03d23cbbe4a04690baebce9c1c310667a57ae matches hash from RLP data\nTx hash 0xf0e2773f7b0c196b44ea924c842d26bc894194b533258c03ab5f71901956563e doesn&amp;#x27;t match hash from RLP data 0x1b62c3ed97f60cd380a207ad7790f1ca6ae1c0c37cd9e6c71ff1464377342097\nTx hash 0x128d1fb17c00349355396609bb2910d46d9576d83e874cbf72b3a138b2284572 doesn&amp;#x27;t match hash from RLP data 0xe45b66c491235f49175a44f48f0d1dc969662a751f92d81c839316fe82863b59\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x2a5ba7e0e2d3dc6d5d5f1d7e0e0a33969eb268923e953e37e1f256abb3bed84a doesn&amp;#x27;t match hash from RLP data 0x788592c4a2f0b605484573c7dc34a48373f7651dbc942538f6788108bfc91e71\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case2]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case2]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case2]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xd737091fcad5be40a8f046f2bd9807f85f29ab33&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x656ace86e969be5bc0b0da4acc33067ce59d949f7398171d2143022c3ff25bdf matches hash from RLP data\nTx hash 0x53c8a8c244d6e10912cbe131c3e406a6cde3e4f7a27620c6a7e62da512a120e3 doesn&amp;#x27;t match hash from RLP data 0x71d3bd76028780990a5354ef0b05bc8a7cb4f34306084815694bc919bf527213\nTx hash 0xe34cc02e3a4a5fafd112a45ecbec09fa0f94c81d4ada6ee9f38cad3175e4b51e doesn&amp;#x27;t match hash from RLP data 0xaf0fe9fb46ebeb19b81a8d0ba62231e50159a1427dd8b4a7f638ddf6e14f3cd4\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x7c549fc2207d2f337c39afdcb3e299e6026b25497aad4fc0cc04bd671099fa21 doesn&amp;#x27;t match hash from RLP data 0x85bbbd70ec30da369bdfe2b803cace543b2bdeef3221d2162e477965153c2adc\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case3-raw-input-out-of-gas]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case3-raw-input-out-of-gas]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case3-raw-input-out-of-gas]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5b298310901954552f268b1fb318a85a969cda5e&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x0ab0c22385ff71ed7f71474c0171aafaa06d5b7f9b7cdb566b8979ff9b5eebfc matches hash from RLP data\nTx hash 0x8607016f3193b17eb09e5b3da67524205fa40453304d636604ad0ebedb57758e doesn&amp;#x27;t match hash from RLP data 0x072f4ac6bfc8dbdfd453c670ee5a9e54eff3a99c88f624559457f27475682410\nTx hash 0x22f1371106f1b93ab959ea2fdb798bdacf3c9244618091bf41e1decb9913fad6 matches hash from RLP data\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x4f9a6a5290a5892a3d66959973f0d4c9cd14a80bcdb79a46cab43ce1520b26c0 doesn&amp;#x27;t match hash from RLP data 0xbfe32e6e841a4820c38c4e10e2b91e99e1149f2a0c7253a3882d6b641ed5d9a1\nUsed balance=0.462959759999999998\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case4-extra-data_07]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case4-extra-data_07]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case4-extra-data_07]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x6645a4c585a73463c7157fc22db7656bb8073424&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0x3218a8a2b446ac989984be27ceff86ad7400ab7fa540e689687ed661d2813ca3 matches hash from RLP data\nTx hash 0x54a201266ded411175d9ceeaa2da64d9495a4f7d37bd6e5f4ee65a5117b3b2c3 doesn&amp;#x27;t match hash from RLP data 0x488f58e1fda336d9b712950c1c4835735e32fc4dec557afb16627ffe80faa518\nTx hash 0x01a6d149d43478220b2d34229b165794817a5ad706c7814cb380ef5eb2ea253a doesn&amp;#x27;t match hash from RLP data 0x0677200f0444f713ce298357f4155e595077c4ca7b983ede2f520e700b8074ab\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x28d1b235a31cb4fe450b8a88f786576c574511132dfbfc765b065dc597294bfc doesn&amp;#x27;t match hash from RLP data 0x510291093966d9fd23f72d7d04c4b0be3021facc81732c5405b51cf804592b0a\nUsed balance=0.391959759999999990\n&#34;}], &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case5-raw-input]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case5-raw-input]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/byzantium/eip198_modexp_precompile/test_modexp.py::test_modexp[fork_Cancun-state_test-EIP-198-case5-raw-input]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x5eda95be2263c483be3a813e3ae059edbe50201f&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x697db0187bf86b454a26007ed7d42f933ac9375e&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 137570\nTx hash 0xf17db0b134e97fdaab64532937fad1a7e0c4e2055c919427fdabe9aa0035cd3c matches hash from RLP data\nTx hash 0xf43bb48e4b0d34eb6586774db69e4992f8791a699f86b3912f7298ebb9b050a9 doesn&amp;#x27;t match hash from RLP data 0x5b0eb8a8582be9d214912f599b587417b13b426a73132efadf88689e23754912\nTx hash 0x4f08b123c0bf0c4788d0d75978c51dcdc8c5ee47b9469ba02754ff90df13aeab doesn&amp;#x27;t match hash from RLP data 0xbe96fd9d914e82868e1fc86d61113cf777b1d27c7114c0036f6cd7bc2dfdf02c\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xe4b42382ed428445a5903235ba1f2a2907540feeab5ad21d8618b8461623ab13 doesn&amp;#x27;t match hash from RLP data 0x53df261d1c93bf4a5ed2c3bc0537513dad89165c85fb3daa63a325771b35804a\nUsed balance=0.391959759999999990\nTx hash 0x77f9651586783d2fef0047044d8eed5f4475142634ca9f25a50ba45953f49ad9 doesn&amp;#x27;t match hash from RLP data 0xd8e62c5458c9f9020cda184ca9cd8d7aa2b382a2764841d2bce760e1b5e02d21\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;Execute Test Report&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > td')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > td')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+</html>

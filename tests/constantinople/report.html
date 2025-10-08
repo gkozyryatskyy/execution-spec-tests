@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">Execute Test Report</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">Execute Test Report</h1>
+    <p>Report generated on 08-Oct-2025 at 21:32:06 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.1.1</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="6">No results found. Check the filters.</th>
+        </tr>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="6">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left"><</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">></div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">27 tests took 00:03:05.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled/>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" />
+            <span class="passed">27 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled/>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled/>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled/>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled/>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled/>
+            <span class="rerun">0 Reruns</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th class="sortable" data-column-type="sender">Sender</th>
+          <th class="sortable" data-column-type="fundedAccounts">Funded Accounts</th>
+          <th class="sortable" data-column-type="fundedAccounts">Deployed Contracts</th>
+        </tr>
+      </thead>
+    </table>
+  </body>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.11.13&#34;, &#34;Platform&#34;: &#34;macOS-14.5-arm64-arm-64bit&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;8.4.1&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;regex&#34;: &#34;0.2.0&#34;, &#34;html&#34;: &#34;4.1.1&#34;, &#34;xdist&#34;: &#34;3.8.0&#34;, &#34;json-report&#34;: &#34;1.5.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;cov&#34;: &#34;4.1.0&#34;, &#34;rerunfailures&#34;: &#34;16.0.1&#34;, &#34;custom-report&#34;: &#34;1.0.1&#34;}, &#34;Command-line args&#34;: &#34;&lt;code&gt;execute -c /Users/luismastrangelo/work/execution-spec-tests/src/cli/pytest_commands/pytest_ini_files/pytest-execute.ini --rootdir . -rA --verbose --fork=Cancun --rpc-endpoint=http://localhost:7546/ --rpc-seed-key=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106 --rpc-chain-id 298 --html=tests/constantinople/report.html --self-contained-html --sender-funding-txs-gas-price=710 gwei --default-gas-price=710_000_000_000 --sender-fund-refund-gas-limit=1_000_000 --seed-account-sweep-amount=70000 ether --eoa-fund-amount-default=8_000_000_000_000_000_000_000 --transaction-gas-limit=15_000_000 --tx-wait-timeout 15 tests/constantinople&lt;/code&gt;&#34;, &#34;Senders&#34;: {&#34;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&#34;: &#34;Used balance=58.251743320000002768&#34;}}, &#34;tests&#34;: {&#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_35]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_35]&#34;, &#34;duration&#34;: &#34;00:00:09&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_35]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:09&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe6cb60a11e316ebe264badac631655e00c22eb65&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\nStarting EOA index: 0xf9ed568c25143084683e5a61d10bd7442d90bba9b286f8941eec228b6981a4cc\nTx hash 0xeeccb4979fbe21581b0de98f02790a0acb4d6b8b398eccd659b1100b23003ffa doesn&amp;#x27;t match hash from RLP data 0x506f44040752a9eea71e5aace0a96dbe000cc5e0f7b75cc2e15cb38a4381dea2\n\n----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 477260\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x8d15693d32b994f05db97ec4d856a40f149c1f54637a2434ed64678e32bc8d1c doesn&amp;#x27;t match hash from RLP data 0x9381d7df4306195c2656a000f8aa9550e499d267d7c053f803dae0a8fdf05a97\nTx hash 0x583ac07cf7189b382f744b5ef47f7069dabe760f152211121eae5a72129609c0 doesn&amp;#x27;t match hash from RLP data 0x182957fef805cc0af124ed0e55ee4f5f27e64ffab12596a92fb2a5d563e5cfa6\nTx hash 0x1b13b43f8dc8c8ee9098e4f0fbf3c79e8bb1c396a9a18d66da10c2eddf892423 matches hash from RLP data\nTx hash 0x491d24a8e941f32ef338381934a6b4068160f8e1ca09ee0294643856a3c6ba31 doesn&amp;#x27;t match hash from RLP data 0x4acc4abec2ff3e3ab23f636a16c14a0903b62c4a9f8cf289f76e0454785dc5d7\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xe098a1c364afef96d2a9a756f4bd67ce93c606dabbf7a31e567ff287e6d38922 doesn&amp;#x27;t match hash from RLP data 0x1ec7f8eb9d2aac8e6413de706626242560131d7f47460f44ce8b3928236da734\nUsed balance=1.657287469999999985\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_32]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_32]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_32]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x24a857c514446e228b47c97909b866b48c38e14b&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 477284\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x6590d0fe57ad4e5c3f886d2d91e94a2f570ec1722242079a6f0d78abed57b88f doesn&amp;#x27;t match hash from RLP data 0x1006f25eadae0a566a810f5ae8461f7005b6f5f44fdb5c6436c521a71607220d\nTx hash 0xf8190106255b05954b40a063a868cd625c21b526a200148e09f9e8bc1503ad84 doesn&amp;#x27;t match hash from RLP data 0x132ba54ce8c4683343d4ee6ba5df6f73999d13160d896d2f2a139464eaf6fa01\nTx hash 0xa421868e39e33bbb0db5e997f1a8f18180b56f007b2ed9b26397aa5798b498a5 matches hash from RLP data\nTx hash 0xb1486cf234cb29faf34410fd29a3dee1a882fa84270a0268322107d4cccc404a doesn&amp;#x27;t match hash from RLP data 0xdfb3af0c64a9e4656104ec89e7da88b64a3fbef7db88335667dbdad2068f82d8\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x959240336f03d76ab8d78d92dd6f7eb5d51ea798c83c394a3fee1f96c644e321 doesn&amp;#x27;t match hash from RLP data 0x92f7d476032df02e6bdf596f4c53c17241f180f619a709380531848f915a640d\nUsed balance=1.657301670000000060\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_0]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE-call_return_size_0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x2d62ed9d6bd8e56d708094bd26e07d2d8212aee4&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127412\nDeploying contract with gas limit: 477212\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x8110848bc3133605f8d2cf1b1e9202b0e857f591215c477937d54fa36f3d7629 doesn&amp;#x27;t match hash from RLP data 0x209b6353534d622d6486e811aba458fc40814e503e7545e83ca5506e7404d3e4\nTx hash 0xf8e3da1f0f996094949500c4a2fc66a1cb94cde2bfb5412dd9f21df107121a9e doesn&amp;#x27;t match hash from RLP data 0x3611b226e267c07c00982fdd14c7b6372b2092eaa2a8ee9bcc9d6f30156763d9\nTx hash 0x4b0043b545c0ba72f12f4d4a934113085cc56fc09c5116629ec7b14271cb6aff matches hash from RLP data\nTx hash 0x058e42ecbb3a2924ff44a81839caf24eb5ee373adaecf155884d7ec0abbc2ad5 doesn&amp;#x27;t match hash from RLP data 0xa78ffd78374391aa3d70c8dadd7aae0a94f3486e90a667a92c224895ff0860c8\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x6802e13da975b31d5154cdb7d8551504fea69772bacf49733786a5dc1716647f doesn&amp;#x27;t match hash from RLP data 0x28f3833e451018cdd2540177ed518af284374c7e6532ec81792a2b3dfb95769e\nUsed balance=1.657246999999999915\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_35]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_35]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_35]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc3fcc354f9d43612138aa58c67cb1dd79c1fceb3&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 478124\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x09acf19064f5d4d291500010839727c046b90aee28bca24961151e1b7c4be744 doesn&amp;#x27;t match hash from RLP data 0x10135dcac45e5e6281c9b07430dbaeca8860252b7d14c638097a92e64c229b18\nTx hash 0xb787a1b22bed59c941bd0c6f0feb3c3fd8548b660d2177b1fa853397c38c55ac doesn&amp;#x27;t match hash from RLP data 0x169d4012c15c16db3f7750f225b4480349dce26cd74901357a4f292484679945\nTx hash 0x7560be65e968bd798a05217c6b2454d59a1c0156079930b12bf8a74c77bbb8cb matches hash from RLP data\nTx hash 0x939f8f4fc9ed61a17c723330360dae8189b7dde4f35c68798073ca9fe5a25f7b doesn&amp;#x27;t match hash from RLP data 0xec9fb0946c294583fcc472c635cbcb3f86169c4137064c1241fb637ebce10a66\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xc4d4f500c49f4ef9b90aa8d53854a15bf41436b9fa8d97fdc29b3d3a8c581285 doesn&amp;#x27;t match hash from RLP data 0x81b13a847ef0245594692ad23d87edff632e0102465c4762dd9418927ebe70d8\nUsed balance=1.657778790000000058\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_32]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_32]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_32]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x33c24a039e50cba413e799fb2f6e414170125f05&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 478124\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x15f9dfa7ca0c3af358f3e121abce4260709bd1ef6abb5edfc7ab701043166d23 doesn&amp;#x27;t match hash from RLP data 0x1b8c037cf9eb996673d4936f2227ec4ddd1c4dedda9900effa8a373a17d1c9a2\nTx hash 0x54e2757980f12e59a1dbf6cbf22fb43b8621184d6f16cbc4dee441385aa6b856 doesn&amp;#x27;t match hash from RLP data 0x6eb389ffdd8a360b683f18eecf2357737b76c18c442ef30a06a144683d4724c8\nTx hash 0x3a49a917e0095596362c382cd6812369b0d64be1af120106dfdcd2891989cbec matches hash from RLP data\nTx hash 0x3cdd79c1db5b41594a7b98c4db32a60a2b26a53b5e24639889b923ad9b7c18ba doesn&amp;#x27;t match hash from RLP data 0x8a613b4137f9e54a9ff39ea1df80854dcd074669481542611f5336d6a5ebe180\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xdd02b1256514dd3a756ba51d16a53c88bbd76f106f61351da6090e4043b7a278 doesn&amp;#x27;t match hash from RLP data 0x1f19090406ab5866fe7b6d4c98223aff8d79f88bdcd3853993c53ed44dbbf198\nUsed balance=1.657778790000000058\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_0]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_RETURN-create_type_CREATE2-call_return_size_0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x2fc2cb67f5296fc78e6511ba295e8eb0f69d3afa&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127412\nDeploying contract with gas limit: 478052\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0xb0d8bb956e5589c12676cc09cc860250edbc71e6c121c52d892de6aad9127028 doesn&amp;#x27;t match hash from RLP data 0xcacea4919f3007c0415a085c5ba6c61ab8da3b0560e4d0d963dac3be5f6cbb77\nTx hash 0xd5de68104c133b4a2d0a42f33a81248a61b55bec5aa550c410ca87ac9c22e143 doesn&amp;#x27;t match hash from RLP data 0x83898f108261f25def021ac50fb81910cddf6cbfcc2f6ebf8fbdd02ebe28e1cd\nTx hash 0x014aee83a2f881aefe6fee42ebd0754501f4ac3ca4d3f7ae88987bf5cbd4684c matches hash from RLP data\nTx hash 0x09b8314be125a82a05aba5d39795ae863642d45440f425d9eba7844ca957e0d6 doesn&amp;#x27;t match hash from RLP data 0xbf5fafae02c9bcea3676ceb0f450f50d5367c8a18a42346467698a297da8b80f\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xd05204e7a0b0eae3e16b2b887caf027044e9777e8225eebe26fc9a5c4c978cbf doesn&amp;#x27;t match hash from RLP data 0x612172a86b9f5e94b7faf1ffbc671c800bbe228b62546eb09fe410afff05ec3c\nUsed balance=1.657724119999999912\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_35]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_35]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_35]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0000edab4d587c84f7b60f540036065440b8e8d6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 477284\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0xcf28b63988e2441823b3a74ef434ca61f8f53a79312f2e6ba3ab5ad1dad86cb2 doesn&amp;#x27;t match hash from RLP data 0x128f433c33ad7925f758147204f33dac1ebd14fd8d5e5e6037575dbc87203121\nTx hash 0x016a8588bbad0b10c918c2e5e5ac6634fbcb2df93f10daf100a1a48c5c2d06f9 doesn&amp;#x27;t match hash from RLP data 0x0dd1bf7774abf77c72778b87e6c39154c126b5265d43c829e006c891c5799e47\nTx hash 0x869b8c51a763eeab33ff1b52e7181bb01d2b567e8db3dc0e330f4d486cb0841c matches hash from RLP data\nTx hash 0x239481767bc2d155a00568db89514ee23d34c893986faf7c68712fab9f766230 doesn&amp;#x27;t match hash from RLP data 0xa14a1bd6329e18241b7fc7d0ecfb65c709e105dfe33eaf77716715ab048056d6\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xead46606d31c72a3182983b587b89274eea820451f2e011b48aabeb2e69c0e8c doesn&amp;#x27;t match hash from RLP data 0x1e23974a026213256ba1e1d499b452e6bf05a39cdc6557c26d0a32716300decc\nUsed balance=1.657301670000000060\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_32]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_32]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_32]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x104b6ba276d5e45f3b0cf035341a8836e7eb43d7&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 477284\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x34e711061ac636515ea1baad0552e493f839bd3c02dfb2d9b8eb7ccf9d75ca09 doesn&amp;#x27;t match hash from RLP data 0x6a1821bc7a8f954d6d96a774c1415ac1647842d1e40b646ac298bca36d5aec4d\nTx hash 0x9b518cee6dbeb56341ad95b0f512208a92a23ba39db78ebf6aeb9c22c3101f8e doesn&amp;#x27;t match hash from RLP data 0xb79578d774549d0eac484a9a4f0e4c25d5264a33a2a8618352099397de45884e\nTx hash 0x7b9d76d773d2170ce15de40db4890dc27ada98eb1686272ee407059edad389a0 matches hash from RLP data\nTx hash 0x7fc49709b0c4cf70fed7ffe98dbf48f4a3cb0be3d852e9d16a0a16facecadc5e doesn&amp;#x27;t match hash from RLP data 0x1047261f4457812ac3fc83b4e11d7c3aa5d80c10a5ddc4de9654c3f77dba1913\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x9e627ba3adab6f4b7c64f18196c813db4856fc606a335951a3aa562ac1b59634 doesn&amp;#x27;t match hash from RLP data 0xd45a2fda5193bb1681d8ac236416adfe5e60a44c19136906620848d34fc72c8d\nUsed balance=1.657301670000000060\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_0]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE-call_return_size_0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x991b2e8b5bdfe7ddfcf235e00d2a1084f30e7186&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127412\nDeploying contract with gas limit: 477212\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x0082c5d0927b054d0a9a35720afcafeae5666e4f6c29e7dab27990147a322b1b doesn&amp;#x27;t match hash from RLP data 0x76825ffbae61bd0085965b41fd709a7c47350ca8540a3e5dde052fa024cfaf61\nTx hash 0x3cac590a0491b26aca7058049f7e3461edac2259d62c5106e6e8ac49d4e706a5 doesn&amp;#x27;t match hash from RLP data 0x12417b642ee643a84bd31e71c6b91b0628cbe1e5c030507e48f3a2a5e0a63f1e\nTx hash 0xbc7abbdc7e3f1ed2e7d95203f9303c7ceea35f016633525b25b2d1fbf06c31d6 matches hash from RLP data\nTx hash 0xb6f156bdfc3fa7b6aca084fe76c4f167824519b07f79beb6c2d8508419233f6e doesn&amp;#x27;t match hash from RLP data 0xa1e5171813fba195d4c3440293625d0df0dd2368466147a0f5bbf713d8f5c1ce\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xf977ad39215681e73f64e169286d38ef25dd0c64a0871a688e01c529bc34798c doesn&amp;#x27;t match hash from RLP data 0xc30b8c8ee020f82dee6655fc0f0dbea18abb04336d1fa97bb8c4f3d77e019776\nUsed balance=1.657246999999999915\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_35]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_35]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_35]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x79df1fcf454343903c5044fdef8c7b3a8d038c8c&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 478124\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0xcd4d927849f0e2f03ca02f2044c083af7df2cb85e4a05af3bc47bae417ca7982 doesn&amp;#x27;t match hash from RLP data 0x113f741b5fe2747d5b99fffe54a5354f991bb99ddb1e0bb8480db87c64805d08\nTx hash 0x523563e71571a954f41a00a8dc731910018f87a691a9980df2e14539b1e5f001 doesn&amp;#x27;t match hash from RLP data 0x1835f955faf1cccc6cf04f858a3925385458947af7841d179be9f4cc50352df4\nTx hash 0x61d3891391d800cbabe4034986b651c76dc703d87a7ef98afc3e568f7fc27aa2 matches hash from RLP data\nTx hash 0x5ef97c1c206e3cc611991465180538932f9b7ca56f3d65e4a7edc7b68417b917 doesn&amp;#x27;t match hash from RLP data 0xa9d509f40547afbca3fd1a0e6df4a9d24a323a3f7018d7e9cbe7910d137e346a\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xb6939dc0bbd807112b3ef9e66b072e8f187c2c8ca64a4291d5b295190fa061bb doesn&amp;#x27;t match hash from RLP data 0x6f71a7eb035c74c1d73753f2beb9ca9024fe7ee924df2b7f5021fc9c2f65e453\nUsed balance=1.657778790000000058\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_32]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_32]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_32]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbf259ea5fd0e24b030573da0cab084bf5b987b4b&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 478124\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x4f5079096b984cf8d2ff945f8b58a78b5e0a9583ae951f6e1d280fd1a14161fa doesn&amp;#x27;t match hash from RLP data 0x1dee81b1ddb7ae85758465234183d28eae982889cb7eb67042fd5cea3c904857\nTx hash 0x17fa1103cd672dfe108249932851e2cd4e91b6f0bbe0bcc7e24f3a3f212088e8 doesn&amp;#x27;t match hash from RLP data 0x04ebf59542a0c0fb3b64dde3198c3d5db37d1e428e85c813e851b7a6545566b4\nTx hash 0x313270ff39d37e7072d5b165f375014e7ba6f9b8df238baef5ae5f57ed524ef9 matches hash from RLP data\nTx hash 0xacbe801e1538e4db5fbb2cdee3a915cd181b4c012d8497ebdcc783fad17b2146 doesn&amp;#x27;t match hash from RLP data 0x7dc38097dcd53ca1b42a7e236811e9f5dfefdb0a0542f562a59432509193903c\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xa5e3fce9805dafb53cf4a2d1d8c72d9ec18dba11acfbdd7c9c97557a4a21424d doesn&amp;#x27;t match hash from RLP data 0xd3b2761cd6e884d896fb1f98e1f61b0880964d8829d086455dcebbdcfe8baa5c\nUsed balance=1.657778790000000058\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_0]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_RETURN-return_type_REVERT-create_type_CREATE2-call_return_size_0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa75503bf0f01e7b31e14f780239a3863b3d71569&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127412\nDeploying contract with gas limit: 478052\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x1d7c3a55eadc87646877234f588e0119b5a3e05506ce8c9ea3cec54de654b844 doesn&amp;#x27;t match hash from RLP data 0x98200ba004fc500e0a9629400497a10eebec02b7a4d46e44c61def4b9cbd7220\nTx hash 0x7c0e36b4f01dfd513a0df670e15e4ea6b35d95613d8be8206c37be090307948b doesn&amp;#x27;t match hash from RLP data 0xe2d19372bd854abbbcbb14064efe1c93cadd163e4ce66a24315f5f28ccc41a90\nTx hash 0x79b67fd664d840a4064a7c1f0bc89f937aae786d9e23732ad41de539a27b3888 matches hash from RLP data\nTx hash 0x1ab7d71c2f2dff71915382fceb9e196cdefb271cbdf9b396f7ca0e990accafed doesn&amp;#x27;t match hash from RLP data 0xbb0175520578aa743d7091b8059c4cdc57aa11b59e732c2148c0c477fce0fbbd\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xb6a03ca69d78ef2cce12a9147e58fe338a701bfc995d0f0983b4defaff00a480 doesn&amp;#x27;t match hash from RLP data 0xd45320220e9cb248de8c184e6c5d98ad8cc11554f6c0c95f432c3dfb717fee3d\nUsed balance=1.657724119999999912\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_35]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_35]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_35]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x9fad1bf0b032d2d05ccc3bc18023b6d1e084a325&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 477284\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x500fab1b39505ab719dbd1ea53eaef825944e976b60f94790f63359b680fb018 doesn&amp;#x27;t match hash from RLP data 0x6dc8912b41d36b4fefe2b9288d4cb78ba82daa1119871a2c9b45fcdf781d9a8c\nTx hash 0x3398f7c3d943a115cb95a4585119d94f374dcb1c9d9931b00a0f6ba0a60f7bef doesn&amp;#x27;t match hash from RLP data 0xcb9078b75cd21f10d8bc1f83e38d698788ac930968470f4602d3186993789a3c\nTx hash 0x59b71a40ce990db925aac0e07169953e7871414f915707eabb98058204645e25 matches hash from RLP data\nTx hash 0xb1a665c3970c8931e92ec90b43b0f73186b8fd0a2686b4dc7d40df35142faa6d doesn&amp;#x27;t match hash from RLP data 0x0a085ccab370a71649ef3e12ffc028fe71dbf81de9a0a2b87727e08ccd851365\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x5c1b763651a9e5520f9fb03ba0a5cd45c38fb53596d220a65e110e9e4b748b1b doesn&amp;#x27;t match hash from RLP data 0xf72fe37850a5ffe687fe7af7a78fece4deabcf9adbb1b98b416794599c6ae53d\nUsed balance=1.657301670000000060\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_32]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_32]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_32]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x9f3bd2ffe137636956ed914ba7516de302046e25&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 477284\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x4b27a06d3a7d8574800ce0db15ea13c7bed2bf785e7e4ff9c1a1e59a6bc7dfb2 doesn&amp;#x27;t match hash from RLP data 0x9b6bebaee1cfe9113cd1217a24a32f920d757cb03919f1ee5efd17b6ba5ca22d\nTx hash 0x4c9ad4fd7e6878bd9a254c157f21edb851fd4ac177398043e9ff9b526ba2ffbd doesn&amp;#x27;t match hash from RLP data 0x2f735b74f3aa3e29e6a618bd42f336d0e8c66e3fef3cc0c300771184b6a64a6e\nTx hash 0xcc68363767dcc42a5254632d84ce529876252a5f22f99abb3ac107e0eed16a09 matches hash from RLP data\nTx hash 0x774f29b2da830478b45036657748e8490099c808897f23a5521241666ca616cb doesn&amp;#x27;t match hash from RLP data 0x4b172d0ac388ff7cf5be622949197771f2155cf9957d9a83f40813b03b4608bd\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x7451f2176757a37537fe62d79500c5d2496170643c27b1f6ae74b5dc4ab31291 doesn&amp;#x27;t match hash from RLP data 0x41239bf74a29459a771b6d02dc9b6a372961c98ea842e31130d10af14b2fc01e\nUsed balance=1.657301670000000060\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_0]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE-call_return_size_0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbbd47387c9596c66ab8db51e32caabe042fd37a5&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127412\nDeploying contract with gas limit: 477212\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x5e54e333733e0d12a5d56150b8880b04706271cf3f9681c5472550e759dfb937 doesn&amp;#x27;t match hash from RLP data 0xa4617361f519f9b8bf232acfaafac7a537051809a4bc4e096c3250510ace11dd\nTx hash 0x1f8fe996d5ff29c0c3aba14718f02c2ae028d3fed7fa430e095e8efe227e89dd doesn&amp;#x27;t match hash from RLP data 0x169f32ecbd5e835c234590fdfd65d87f89b69e1758d3802ac89de8f40972de3a\nTx hash 0xebd3d5c2877faeb81951a597a583539d5e82cc9aab11c822671f47de1616558a matches hash from RLP data\nTx hash 0xe716bcb9ae3acb961a0258679536f5124d4b73e3787e48e5cc6b0b8e5397df2b doesn&amp;#x27;t match hash from RLP data 0xd24f9b715d768d7212681155b439e4488ae94b91d162c8f22098387f2ae8e6b6\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x0ea57733a4cdbe667778ab7bc6e635fd49d5ef07cfcdb764311628029a07eaeb doesn&amp;#x27;t match hash from RLP data 0x9c18e23c6a051cd4b4fc6c5235d5afc962a7f5e7b74490995fe822a8645c60c6\nUsed balance=1.657246999999999915\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_35]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_35]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_35]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0f61d1f1630b4a8e518f01a150fba1cbea3af0e9&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 478124\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x461d8eb245f5af69f40da678fd91eb741ea4599558ad520b5d9a949d563dfef8 doesn&amp;#x27;t match hash from RLP data 0x0f06929e4242f73b4c53966267a23cbeae8e2816633d2ed2062db816d8d6bf26\nTx hash 0xa23a119b24acf43196186936084384dba7c96fe90a463ce1c4fcea523dadb119 doesn&amp;#x27;t match hash from RLP data 0xbebd37ffa408e9e6e4dcbf510c4984457a1d97e3871ddda19643d097f8495e96\nTx hash 0x6d314087196d9f09424958cb7f63c7c00e3f369308711d111d9aafdcba66c236 matches hash from RLP data\nTx hash 0x33a5b5a602b3eb3c404baf75da0acad1942f20ccb24d3cfad638fe92e6dd5349 doesn&amp;#x27;t match hash from RLP data 0x9903965a289525d38b803c9003fcad664ac87148d7e445f493bc23b41a394ace\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xa0caf312753c4767b48a1fefafd5bd8c24fe19a10191e1de8e07d19f8c916efd doesn&amp;#x27;t match hash from RLP data 0x2146301c4a49a9b383f9b3a81a39d0dad2992d28a7cc4bcb04c39a09d8f6b98d\nUsed balance=1.657778790000000058\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_32]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_32]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_32]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe9a2f50b8bc419ef440ef3a18fb4cece597fd7e2&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 478124\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x2d50783542bbcab11b3ff6c1bb77723daec649d53acc10de11a7eaf69895ffc0 doesn&amp;#x27;t match hash from RLP data 0xfc9e892b2ac5c5d011d069fabf2a9c5fb67ca64c51807d5a32e82862229e8e8f\nTx hash 0x9d572aa77e7f0e626ee86a995aed6f19025cacfe3ffb412cadb57e52f6723d0e doesn&amp;#x27;t match hash from RLP data 0x8417ff0736addeebf94b669acba9b70362ae63519df6a25baee22c4e2a6c9872\nTx hash 0xe0cdba36a643d266476e1d687b3f373528fa65e1fe8acbeb84d778245551f8ce matches hash from RLP data\nTx hash 0xc84484c4e375b953ee420f5065d0010b51296530e79edb01490c1f63ca0a117f doesn&amp;#x27;t match hash from RLP data 0x982ca3e45dafe2d43a2c4fea58c1ba3656b7a770a9a770f0288e578c37dcd5f2\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xab6f02545dc35738ed34e5dc99df507b57fccd70478e21f648e7ff2aa1bf2cfc doesn&amp;#x27;t match hash from RLP data 0x90d8a300946fb22f54f057f4459bb1740595b390267aa94dc65f4c208fa048c7\nUsed balance=1.657778790000000058\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_0]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_RETURN-create_type_CREATE2-call_return_size_0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xf9f5d61ca8283eabfa96b9183a211a24ec045b85&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127412\nDeploying contract with gas limit: 478052\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x66b7c787939cfc1a4f662b6437abfa4a012748ed40d9c444dabd6af32f205d2a doesn&amp;#x27;t match hash from RLP data 0x95fabc4789d8fbe30250e18eca67cbb003c81ce90322698fee7c35255afce03d\nTx hash 0x41ad10c02567302a9ba2fc59a4f8c4c854a4ae8fe07445398cf3cff4d8e66ba8 doesn&amp;#x27;t match hash from RLP data 0xe60f193b0687fd8dfd7603e2cb9a91c9867a5be384a225f6516ff76882ca9b69\nTx hash 0x2d363820434f6c9994f30db9675c2b8e47da448c8091727ffef0ef1dc082a8aa matches hash from RLP data\nTx hash 0x9c2eec874f810b3da753627179421a263764430d59a0e7643323e7910639f022 doesn&amp;#x27;t match hash from RLP data 0x230cc02f60b7ddf8070ab60ad343a5cfa09ec9997fce6ec1c248722acb723fa3\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xf19face3518db0d85825f663b2fcae4f80ab410337cf31485ab8447d1c0246d2 doesn&amp;#x27;t match hash from RLP data 0x819ba85d898c176b81552349be4d62310247865be0325b969bf4c885538586d8\nUsed balance=1.657724119999999912\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_35]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_35]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_35]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x7fb14fc7a500e7e185415c97204e9da7ab327c46&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 477284\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x9bdf8815fbbf3d780b4ee74d9afa71395ee76e1da1b702f00341e51788f8b134 doesn&amp;#x27;t match hash from RLP data 0x28a99b47ba98684e488c2a9eb12ec85422b566230aa80a2be0328a7e346b466f\nTx hash 0x0c430a36546c079c6ebf26dd6afcc5d5d1b99af83fbf6f2afac86e6131781313 doesn&amp;#x27;t match hash from RLP data 0x3a4fae57bd31a699b2f7532c6621e5d57779828382d93726389bf1eee1f4fd0c\nTx hash 0xdb57767f0a20d2f2f206a16ff421b8f4474663a5fc3be522286f26ea9a9b5bc6 matches hash from RLP data\nTx hash 0x4f21f71f03e9cc5dd97e26215fb65c513fba79e92f4ed5e5cc357ebb30c23a52 doesn&amp;#x27;t match hash from RLP data 0x27f62a641d8590b26b28bf2b2244ecdcc8ba7c3ba8870e2c553331999e04ba86\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xf49e1fa0397c334b61958b6c060c48d891834deaee2aefd15b211ca32274cd6a doesn&amp;#x27;t match hash from RLP data 0x4c17c44bd64c2e934e2b746f7d8397181de4351ca98e7cde9710422c612f53af\nUsed balance=1.657301670000000060\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_32]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_32]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_32]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x11944cc62598682b5836e06273ddc6a05def5935&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 477284\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x192bb4c3b55c51ea20ab5987824f3640f57bc5b10a5eb6e4c59c4a87eed41d64 doesn&amp;#x27;t match hash from RLP data 0xf447cbfbea72e33beeb3c56247be43013db4ac86c854db18130e74d45a501583\nTx hash 0x397e2dcae78f33a387b7d65986239ba6f9f94c886e01a7b41d34ec2970de6e9e doesn&amp;#x27;t match hash from RLP data 0xd0211f6c0529d37ffed6cf32d218fc5f2dda436eec04c8aa61c6bb64097d582e\nTx hash 0xb245f9d198aeb297e67a8dcee2a43701e983e91287b2b7a4b2599f130fdfd284 matches hash from RLP data\nTx hash 0x6e2bc2127d244f9348ca37c608bc4aa8ff94cad6d12be826daada63ee6b35300 doesn&amp;#x27;t match hash from RLP data 0x23d6242168b551a7473048b375c497b0c8328f6cbaa8679b580e0e7c822e8cc4\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x7641a0b5a72a65d1621db2240ccd6dbce0098dc6f9c12ebb3a8bd1c71fb4d435 doesn&amp;#x27;t match hash from RLP data 0x3bfabfc48ce8305a0891154814e8e92c5dd536e61bc26b025bed4807b8c53dce\nUsed balance=1.657301670000000060\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_0]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE-call_return_size_0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xdddca9dc6f730d06f2286f222ce5aa6684fe4bbc&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127412\nDeploying contract with gas limit: 477212\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0x33a46099bff30760a9829ef29b504abe52e9cfbc51cf6a522da1ef033a11726f doesn&amp;#x27;t match hash from RLP data 0x34cd330b9e9f3726ffde1e08c06e52e4be3ea763ef4736cf5c48b1e0645bb95f\nTx hash 0x071eba712dfa2c9aec397c36876056f0ea5f0cab58a123c3847a859379280a4b doesn&amp;#x27;t match hash from RLP data 0xb2c82dfbee61fd72c313ec00c3867b9c5c961944e7d0fd36f7067ba2a00c048f\nTx hash 0xb3bcc709447fb0225898732d6c692ab756d8da640c92d146c969f6630ddd5e5a matches hash from RLP data\nTx hash 0x41a231da5e0223bdd28610c36247b3b30b08d3a262580f467e6b40ba71994581 doesn&amp;#x27;t match hash from RLP data 0xfcbd43b545bc46e2c711712debf5c98aa696b572f05d5abd988b001b10c361b4\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x87a612923e612816302838e0d7b46301015fbe5e1e0e256bd8e3a789474fbee9 doesn&amp;#x27;t match hash from RLP data 0xd1212bdf5f5957a3dc90871fa00057cc6d13aa288a3d07f4e3a2476bd8054039\nUsed balance=1.657246999999999915\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_35]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_35]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_35]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x1961dc17659c73c2e633e645057297070d558f03&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 478124\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0xa23a4ec7da8eab2178f7c9c44ca84eaa501f69c8a985886d77aad265f4b51672 doesn&amp;#x27;t match hash from RLP data 0xca00936ed1a08ddae792d49377c9be30d93f8b5b23391d0b379550b62e37a47f\nTx hash 0x5489652b8530256cd7cf49ffc98cf79e98f3a74d3ece82e8023a22fc55ff42ba doesn&amp;#x27;t match hash from RLP data 0x903098b0328bf1a58f78fb0085b26ba5f15f356caf2a764e4ccd2c68bb61b4bb\nTx hash 0xcda8c0dd9b24e6e387646189958ecae320c47c1428129d3165a35f28272a4488 matches hash from RLP data\nTx hash 0xcd4bf0617dc84c1d338c031d97db99403b3e712aefd726ce6e022fd063ac0168 doesn&amp;#x27;t match hash from RLP data 0x67e0cca3d353eefc604b89c1a676169b956a00ffed10134aaad031bc0cb18ff6\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x13debe877c8127fc8cf6ba4d3f00831f887ca606eadd35334812b585244bde39 doesn&amp;#x27;t match hash from RLP data 0x2ddfbf778279e3b4d0df7e44727cf03c5876dc24f12c54ff74bc56af30802cc1\nUsed balance=1.657778790000000058\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_32]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_32]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_32]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x8a2ee2938368b7efb2781653b3b4e64cda66b2f5&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127436\nDeploying contract with gas limit: 478124\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0xc2fe199c3155dfd59c06a42997dc9db220eaafc0c89a2f849a3b49effd0b13f0 doesn&amp;#x27;t match hash from RLP data 0x8301688852435fbb9e264a14c9f0dc459169812b822f41996cf87aa88738baca\nTx hash 0x1b1343e68bd07e9bf980402bf1314b4047614defe4ad8481912190be4309af83 doesn&amp;#x27;t match hash from RLP data 0x30a1568a48dbe4f628749169710901e3aa643e4c48e5e1301848bcb5a087b66f\nTx hash 0xcc516c10b98b3810de91d1ed54010aacdd22c2953c983b5cb0303972a779f596 matches hash from RLP data\nTx hash 0x33bab9fb3a085b27eaf9a4c777846d26ebf73e03a6b04690db44e573d3523c0d doesn&amp;#x27;t match hash from RLP data 0x5813fcd08c487da9206bde11e7593633faad21537e7bf6aa0ddd3cdc2ba50ac0\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x913cd294518883d658e03e6dd7f7cbc4af9cf2b0a7477c6be87ee806656c77ae doesn&amp;#x27;t match hash from RLP data 0x811633a1b5cd22fab8a527a98ee91de7dd96cd3091eebeb3222bb1f2ace960aa\nUsed balance=1.657778790000000058\n&#34;}], &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_0]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip1014_create2/test_create_returndata.py::test_create2_return_data[fork_Cancun-state_test-return_type_in_create_REVERT-return_type_REVERT-create_type_CREATE2-call_return_size_0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x37dbbcbf11d2aa297bef87eb08388cba0bd26529&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 127412\nDeploying contract with gas limit: 478052\n[DEBUG] Transaction value 0xde0b6b3a7640000 scaled by `TINYBAR_TO_WEIBAR`\nTx hash 0xb02821e56e0039adec12e4801b6f9d4c249b178dcabdc4b113d37ca9d935c67a doesn&amp;#x27;t match hash from RLP data 0xe0405e0bf3d54ff7b3e381cb9a14f05934ab27e308af2707073371a5026c13f5\nTx hash 0x9ca608764dd7d468c78873b3746711744180ef129fb6b372bf550df105a347ab doesn&amp;#x27;t match hash from RLP data 0x7f0cdf902f79196b7fb5f8262e5a495392c4ac4e3d3c6922a18f82dee6be0530\nTx hash 0x949b3074ae52b961a898e2cb319b083f2e5ee19b54a0692baf6a0a4f764a7d13 matches hash from RLP data\nTx hash 0x7b41ccd068accdb79980e211f34a4764c8a6856518261857e90bf4f030411d30 doesn&amp;#x27;t match hash from RLP data 0x64c91e5bdfe4ce0dded0474c3d161eefc47466b1771580c1ef47980cbe8eec49\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x82939fde98d06fe866b153f6cbb7e49858c0ade414828a2e539ff3ef327255f0 doesn&amp;#x27;t match hash from RLP data 0x642e10ade7f955b74b83d692cbfc7b650dc2da40d020fba8e0d6954f60f975c5\nUsed balance=1.657724119999999912\n&#34;}], &#34;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-sar]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-sar]&#34;, &#34;duration&#34;: &#34;00:00:10&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-sar]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:10&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x8b7ce90260e837247bd519e50e5b43d523b7b4a6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 5674462\nTx hash 0xb371a9f59264c2db20136ccd11ff7bcc518cf540f1f16d7af7c0b0c80d7e2eaa doesn&amp;#x27;t match hash from RLP data 0xb1fc6a6add3b98b37376f53a3923c3e0f222ae4eba83af4440b8f4309362b72d\nTx hash 0x029e95383c485f9f5ceb1a61966e15d0a53816df6d919b90ea9b9733f384576c matches hash from RLP data\nTx hash 0x9b3aded7e611ddf7b946e4b312e6f6d32e93995f8975964634e78986d0ab773e doesn&amp;#x27;t match hash from RLP data 0x671aa3f07c93a3fed97d2daf8c072c519f5e1d55cd038d45d942c6bef04015fa\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xf9e701cdfd471b2d32b845d14a6b26b7d2ff3864224ac004c877e2e3cfcb2fc4 doesn&amp;#x27;t match hash from RLP data 0x27765f9b2533b7b672cbb54829e47f68f8ce17d951853c3d1651aafa213a15db\nUsed balance=6.285399960000000341\n&#34;}], &#34;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-shl]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-shl]&#34;, &#34;duration&#34;: &#34;00:00:11&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-shl]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:11&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0c7197f5200060c5e5a379bff0d2e4214dc78066&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 5674462\nTx hash 0x0d3d2cedc7ee2d6b06cb736a97d85c0f978a5c743b5c4c725e66a5603474de90 doesn&amp;#x27;t match hash from RLP data 0x20ff1805173a1ad723cc3e158adc618e18f6f9c47aa808d1a37bacf50d0deb42\nTx hash 0x373a68ec3fa4ac50c7cccb5cd183b47cf04f7e290d3dd9567d9b346ef1a084b9 matches hash from RLP data\nTx hash 0x3428f967f07fa46076ce08f47c46d8387a906eb2740c5f146b55fff686d965bf doesn&amp;#x27;t match hash from RLP data 0x5784839b7e2775a6eafe3a0977c89e4bfa0927449b78a67b76c1114a3cf282f4\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xd18b0afa9d9d5f6a11ddfcf37f9d6211336d67fd5f7297809f92fa6e9e3c7aea doesn&amp;#x27;t match hash from RLP data 0x1ac643a4f24ef23e33e1e865d84ddc600c6ef0f7232b6bc0b7df9bd19cdbe2a8\nUsed balance=6.092914699999999684\n&#34;}], &#34;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-shr]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-shr]&#34;, &#34;duration&#34;: &#34;00:00:14&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py::test_combinations[fork_Cancun-state_test-shr]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:14&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xa983b848d8621787eff23bebf10a2c6d834a8a5b&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x07e37ba85a589b78be08c3ec7747adf238b0fdc8&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 5674462\nTx hash 0x69b7f0364ea3d948a8b43a902403e598c6b0e8e51e6e6d954351aee555919bb1 doesn&amp;#x27;t match hash from RLP data 0xf9e6cda5fe3fbe47c15a7e60c75461570f0dd5fad260ef755265a7ae042b5144\nTx hash 0x81f9a92f326c46e0e1e0158a0e004e0d8bfc182075eb41eb2e8cab7301874b45 matches hash from RLP data\nTx hash 0x4744c053b88db8e8e6b2c6b46606437032b7f4eb7f23609791170a28b45b753b doesn&amp;#x27;t match hash from RLP data 0xaa6be0ede4a63fb46679fed5d0afe758d127139fd4b86e38345fa324e5249e89\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xd26345a715270c50fa10d92abe5f7efb2e06d9d81ac8b8cfd361ee9c2b9f396e doesn&amp;#x27;t match hash from RLP data 0xdcfbb9a7738031649fa79db06f61c2afa007b441437dc8abe5aecf017e9cde33\nUsed balance=6.092914699999999684\nTx hash 0x46945aa69a6f21b2bc864e83c1dbcd10d3cd036d5a6eb3c64d58dabe9f6bada8 doesn&amp;#x27;t match hash from RLP data 0x0e00a886b1176bade5347b8628e200008761385d82b1d26e16df40c44fed3d25\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;Execute Test Report&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > td')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > td')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+</html>
