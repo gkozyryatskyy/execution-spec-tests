@@ -165,6 +165,12 @@ class BaseRPC:
         )
 
         response = self._make_request(self.url, payload, headers, timeout)
+
+        # NOTICE Useful for viewing and debugging JSON-RPC Relay errors
+        # This error check is equivalent to `raise_for_status`'s
+        if 400 <= response.status_code < 600:
+            print(f"post_request: {response.json()} payload: {payload}")
+
         response.raise_for_status()
         response_json = response.json()
 

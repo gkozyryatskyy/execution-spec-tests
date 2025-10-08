@@ -14,6 +14,7 @@ from ethereum_test_tools import Opcodes as Op
 
 
 @pytest.mark.valid_from("Frontier")
+@pytest.mark.skip(reason="Uses `BLOCKHASH(0)` which is not supported in long-lived networks")
 def test_genesis_hash_available(blockchain_test: BlockchainTestFiller, pre: Alloc):
     """
     Verify BLOCKHASH returns genesis and block 1 hashes.

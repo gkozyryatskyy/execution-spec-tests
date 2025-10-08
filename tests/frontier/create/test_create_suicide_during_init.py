@@ -45,6 +45,7 @@ class Operation(Enum):
     "operation",
     [Operation.SUICIDE, Operation.SUICIDE_TO_ITSELF],
 )
+@pytest.mark.skip(reason="`SELFDESTRUCT` to `ADDRESS` triggers `OBTAINER_SAME_CONTRACT_ID`")
 def test_create_suicide_during_transaction_create(
     state_test: StateTestFiller,
     fork: Fork,
