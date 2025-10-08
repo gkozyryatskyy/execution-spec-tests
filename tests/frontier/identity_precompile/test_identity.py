@@ -63,7 +63,9 @@ from .common import CallArgs, generate_identity_call_bytecode
             0x1,
             True,
             id="identity_1_nonzerovalue",
-            marks=pytest.mark.skip(reason="Value transfer to identity precompile is not supported https://github.com/gkozyryatskyy/execution-spec-tests/issues/12"),
+            marks=pytest.mark.skip(
+                reason="Value transfer to identity precompile is not supported https://github.com/gkozyryatskyy/execution-spec-tests/issues/12"
+            ),
         ),
         pytest.param(
             CallArgs(gas=0x30D40, value=0x1, args_size=0x0),
