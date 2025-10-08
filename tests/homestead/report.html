@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">Execute Test Report</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">Execute Test Report</h1>
+    <p>Report generated on 08-Oct-2025 at 21:27:17 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.1.1</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="6">No results found. Check the filters.</th>
+        </tr>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="6">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left"><</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">></div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">9 tests took 00:00:55.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled/>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" />
+            <span class="passed">9 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled/>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled/>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled/>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled/>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled/>
+            <span class="rerun">0 Reruns</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th class="sortable" data-column-type="sender">Sender</th>
+          <th class="sortable" data-column-type="fundedAccounts">Funded Accounts</th>
+          <th class="sortable" data-column-type="fundedAccounts">Deployed Contracts</th>
+        </tr>
+      </thead>
+    </table>
+  </body>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.11.13&#34;, &#34;Platform&#34;: &#34;macOS-14.5-arm64-arm-64bit&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;8.4.1&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;regex&#34;: &#34;0.2.0&#34;, &#34;html&#34;: &#34;4.1.1&#34;, &#34;xdist&#34;: &#34;3.8.0&#34;, &#34;json-report&#34;: &#34;1.5.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;cov&#34;: &#34;4.1.0&#34;, &#34;rerunfailures&#34;: &#34;16.0.1&#34;, &#34;custom-report&#34;: &#34;1.0.1&#34;}, &#34;Command-line args&#34;: &#34;&lt;code&gt;execute -c /Users/luismastrangelo/work/execution-spec-tests/src/cli/pytest_commands/pytest_ini_files/pytest-execute.ini --rootdir . -rA --verbose --fork=Cancun --rpc-endpoint=http://localhost:7546/ --rpc-seed-key=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106 --rpc-chain-id 298 --html=tests/homestead/report.html --self-contained-html --sender-funding-txs-gas-price=710 gwei --default-gas-price=710_000_000_000 --sender-fund-refund-gas-limit=1_000_000 --seed-account-sweep-amount=70000 ether --eoa-fund-amount-default=8_000_000_000_000_000_000_000 --transaction-gas-limit=15_000_000 --tx-wait-timeout 15 tests/homestead&lt;/code&gt;&#34;, &#34;Senders&#34;: {&#34;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&#34;: &#34;Used balance=2.514574839999999867&#34;}}, &#34;tests&#34;: {&#34;tests/homestead/coverage/test_coverage.py::test_coverage[fork_Cancun-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/coverage/test_coverage.py::test_coverage[fork_Cancun-state_test]&#34;, &#34;duration&#34;: &#34;00:00:09&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/coverage/test_coverage.py::test_coverage[fork_Cancun-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:09&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xdca49e938f31e4ec0f3be91cb3ea250e2ce33127&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\nStarting EOA index: 0x8b3273ca3ebccd74c98d6b17c0059c7dc1d3a4a3aa7f7c70352bbb12cea27e03\nTx hash 0x16e6bcff9435741190478d91287aee31e4d403dec3a835323e6f6e016a54d452 doesn&amp;#x27;t match hash from RLP data 0x5197a6d6ba2677253b92ca0e487bc86a0d9067c1dcdb6fac7e23704cf1888fb6\n\n----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 144680\nDeploying contract with gas limit: 123860\n[DEBUG] Adjusted max_fee_per_gas 0xa54f4c3c00\nTx hash 0xc614c5207c88e7b06023f535b36d352c1a74bbb50b8378efb6bf421c3f2304a7 doesn&amp;#x27;t match hash from RLP data 0xb832de46e74756b41d952919005414a20870b13474f385654ed754d9cefd57e0\nTx hash 0x7cb12d9117e3e864ad4629c87c9b3b158a0639b335a8cf7e73fc3b726c81e53f doesn&amp;#x27;t match hash from RLP data 0x683262a143d945a72683820f0ed0e3befec5cb10a66198a53bab6daf8a1f21a1\nTx hash 0x2bcfe2e8c405fa3bd1ca1faf4c3a5c3835eb46dba131135580d6db2bb8d3c6cb matches hash from RLP data\n[DEBUG] Adjusted max_fee_per_gas 0xa54f4c3c00\nTx hash 0x979aba70b4f2ac17cd1ef8ba85960ae58f97439b161d10e995fc294f78e49f06 doesn&amp;#x27;t match hash from RLP data 0xb2603ea7dcbee15f5a1a9224a53d95b9dc2ea5132f055506e96e25f8fe6959f0\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x18ac5a091c3f720646c4df0da7ba8f19effde51fb011708579de5279f9c269f5 matches hash from RLP data\nUsed balance=1.239150720000000039\n&#34;}], &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_STATICCALL-evm_code_type_LEGACY-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_STATICCALL-evm_code_type_LEGACY-state_test]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_STATICCALL-evm_code_type_LEGACY-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xc4577dd4a5c0ff7851586aee9aa63304f2df1d65&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 125636\nTx hash 0x6331f84cbede73d23797107146ae942acb78ca1082be273a26dbb19c0e0659fe doesn&amp;#x27;t match hash from RLP data 0x38186f454a55a8639b4ac47e8afdb016fdace09f9865de46a68b627d0ffa1fce\nTx hash 0x075faca4c28c086e07929bc10664ebc42954bdf080151792b706c2af2ee1f0ae matches hash from RLP data\nTx hash 0xad8d81e20ee38eda03fd014bc7db9786bd35f997ac7ad07c31e58adaf677249d doesn&amp;#x27;t match hash from RLP data 0xcc40035a9575d87c09a1dc8a7e9cfa5b120cfb6a9f58ce7e7963b78386e12e85\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xc11db9b03f2f232a2f3c0d8cea3745814d5cfec018e5e368970121e7ca3f524e doesn&amp;#x27;t match hash from RLP data 0x6cb07be60ec6e18f942c632678e98dd482973d3e35e9f036df6b003cfd7bd1f2\nUsed balance=0.157981389999999999\n&#34;}], &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_DELEGATECALL-evm_code_type_LEGACY-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_DELEGATECALL-evm_code_type_LEGACY-state_test]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_DELEGATECALL-evm_code_type_LEGACY-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x6e7e1d433eee13378e6bfcc82e89d7faf7c27715&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 125636\nTx hash 0xe3dba4e699dc925155572d3750974d936cd9a5afd4f74c6a6a3ff4670a37e324 doesn&amp;#x27;t match hash from RLP data 0x7fb59d24b6f0a61950a5dd8280996baa537f3edc73d0135c267707064d869040\nTx hash 0x25c7ccff121a9808023ebc4234eb3053d565e9493d3bcfde4aa93cf593563099 matches hash from RLP data\nTx hash 0x30e39572308618cb0884c1de5fe437f30ae0875625478bd9ff40bf93ae65764a doesn&amp;#x27;t match hash from RLP data 0x14622cb72269184ff463ad7a37901f360fad0f8bda565bbb704c5c52ea88757f\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xa9d376a2f3736b6882cec694b35c327bfa6c4790c398369dc24520f2d13da7b1 doesn&amp;#x27;t match hash from RLP data 0x4dd49e9b8d055bd0568ed1c55e038da41cedd89777b50df987409b7fb49f7714\nUsed balance=0.157981389999999999\n&#34;}], &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_CALL-evm_code_type_LEGACY-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_CALL-evm_code_type_LEGACY-state_test]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_CALL-evm_code_type_LEGACY-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe6a8046d760cb840aff8441b836a3bf6bc8c6d93&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 126476\nTx hash 0x1ac023ab56d8b847202a908777ca2a54bd2564695092fee09af48c5126b50474 doesn&amp;#x27;t match hash from RLP data 0x51eab52708fc37f09b1304f95dd79c78e34201432c2f02ea6695340e1461f321\nTx hash 0x664289daa8d7c7fadb0d1069963ffcdd16fc1765e2be73775029c2ddbc4b790e matches hash from RLP data\nTx hash 0x9669ce27904a3644ca3a97195e55731d94eca4027859ed3d87f23bf6891d3b3d doesn&amp;#x27;t match hash from RLP data 0x1f59bb6e473e91b1005c797df6b30199700ce9b99b0ea53f33f80c73c07048a7\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xcd613a81377f7b7d371016444bd37db117c4807c54cfd7c2a9a6b08da1767061 doesn&amp;#x27;t match hash from RLP data 0xd607245266a93709743fde0a229537e5bf0fe3a27c20aad4c07dbb7d1f42d7ba\nUsed balance=0.158458509999999997\n&#34;}], &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_CALLCODE-evm_code_type_LEGACY-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_CALLCODE-evm_code_type_LEGACY-state_test]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/identity_precompile/test_identity.py::test_identity_return_overwrite[fork_Cancun-call_opcode_CALLCODE-evm_code_type_LEGACY-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x395d2b9f3fa8c960d52fa7391bc78fa970adc7b6&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 126476\nTx hash 0xce36f086a58b376539972aafbafe5c99bb5ebe46d01372c4dc54b0f426a7b158 doesn&amp;#x27;t match hash from RLP data 0xf69ebce4e963b831caadc04377585a7d08f685fa2f701a86d044fd7040b7bf20\nTx hash 0x408bcb0fa0daa7a2a30fac40936192b6f62f6ebd42c11afbb63023635e95bc57 matches hash from RLP data\nTx hash 0x329b4a55e759787e71981283cdf3614f17dca5ea537d63ea0823a7db8ceb2e54 doesn&amp;#x27;t match hash from RLP data 0xe274d200c282ac6c58f36fb0d0ed140be1dcf921c9eb6a15893d050e0ee73f09\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x0bda897fbc5314e8c77e3f6dbacd7c6a8842d3d3a3d3ed966f25fef42ee0f440 doesn&amp;#x27;t match hash from RLP data 0x4be6df5688f9bb6f5f9a367b07bb1bc9f5c6ae8eb022f0941841161803d841ca\nUsed balance=0.158458509999999997\n&#34;}], &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_STATICCALL-evm_code_type_LEGACY-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_STATICCALL-evm_code_type_LEGACY-state_test]&#34;, &#34;duration&#34;: &#34;00:00:06&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_STATICCALL-evm_code_type_LEGACY-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:06&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x35673062f932e324b0d1576893aa8dd23c01a822&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 129890\nTx hash 0x5d27cd4086b25a57c142742cc6244411d18e58f028688ac033ecfe5d0d945251 doesn&amp;#x27;t match hash from RLP data 0x51863afa0ab985952cefd45813bab9c93287822d2771ca0d56134c7eff42e209\nTx hash 0x428bbcb483e7ee05a4113dff6cc511278e33bc8c857661982d5e2be97afe697a matches hash from RLP data\nTx hash 0x6ae7e780c1c959daad515ac94dcecf7eeac6ed4897d824c5c773bddc9e31cefe doesn&amp;#x27;t match hash from RLP data 0x8bbee0e41e8b2566e533544f6f421beecc7dccccd7d90126e0e791e20770516b\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x7434f6a4332e472d8e37fdbc2acb385a593702e9b667296b644dc64ac3cc0467 doesn&amp;#x27;t match hash from RLP data 0xbcf6bc95091819488433494f8aa1aa289f3d585a0b7c197561a41ba6c5924044\nUsed balance=0.160397519999999988\n&#34;}], &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_DELEGATECALL-evm_code_type_LEGACY-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_DELEGATECALL-evm_code_type_LEGACY-state_test]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_DELEGATECALL-evm_code_type_LEGACY-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xe67727ff73f560c963cd8450fef2aade8286152d&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 129890\nTx hash 0x675932083dfca31213ab2dc8aa040d7975318a27c1bfc5edfce3df2fdf2c337b doesn&amp;#x27;t match hash from RLP data 0x1e3f340dd409612dca0961c0d2a708744fc136a0f9339b9d5cc1d99d0d84ff36\nTx hash 0x30f281620a1c2f64d10304f397ae19acfa57e208b7937c7b9a87c1d42c452839 matches hash from RLP data\nTx hash 0x1199a7544df557342fdb857528f950fb6083c058370130729d4244a11e20992e doesn&amp;#x27;t match hash from RLP data 0x1efb4eed8da4b303f746e68034bb9fc9ebaa390bb512d933f49cee4292da03cd\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xc7a5c665d2987be755c262830e7184ea7da4cf6f948ccf5c9e23895046b133e9 doesn&amp;#x27;t match hash from RLP data 0x67f1e65e616c72dfe9e952c44ea06a3ccc880b62d74b906fa131d2f021c58e7d\nUsed balance=0.160397519999999988\n&#34;}], &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_CALL-evm_code_type_LEGACY-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_CALL-evm_code_type_LEGACY-state_test]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_CALL-evm_code_type_LEGACY-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0xbf413eef2ab7673f141f0ad41a956fb1a557247a&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 130730\nTx hash 0x1b3216b5c518aea98fe3aaafb083aa54d192382aae54a8c424e1d3dbe605c1f1 doesn&amp;#x27;t match hash from RLP data 0x4ea1f8ff9a80f647ba78ef0919c80180fd31e9444da9838594c5b7e0b41987e9\nTx hash 0x5523b9fa8b8ae5c1cd838d795d555ad64e6a31331578a63d9d685d99cdc81671 matches hash from RLP data\nTx hash 0xfb044fabc5d082cc49f5402687d3368b1631b684f0dbb47420a880910e18bed2 doesn&amp;#x27;t match hash from RLP data 0x57513b8284ce3416d5fb6f464bcae21c1455ceb3feb2bab6fbf90bddf03a03da\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0xf44ae36eec7ff1dac2dde063b87a441b614a3a4e988a47a02e25b174891e38d5 doesn&amp;#x27;t match hash from RLP data 0x8a32e96a2e455124e1cb365cbc36d1cc9e3c3b14bb8b7678c591f96ce7a579b8\nUsed balance=0.160874640000000013\n&#34;}], &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_CALLCODE-evm_code_type_LEGACY-state_test]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_CALLCODE-evm_code_type_LEGACY-state_test]&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/homestead/identity_precompile/test_identity.py::test_identity_return_buffer_modify[fork_Cancun-call_opcode_CALLCODE-evm_code_type_LEGACY-state_test]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x0cb2296da2cd5cd57d9e3cdb02ab897fbe474249&lt;/td&gt;&#34;, &#34;&lt;td&gt;0x8490a5a06a9006983a65cb69840b1f56c04acab8&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stdout call -----------------------------\nDeploying contract with gas limit: 130730\nTx hash 0x7039ac794b93c921f648d3f5260329cfce2104b0178822657c5d9e1871ae0147 doesn&amp;#x27;t match hash from RLP data 0x2a9d101c4970e887db8b51f110938a177ef6d138b24acdfb874c16d230f90cc2\nTx hash 0x306415b8e9e7cf05a04c24306573133b70c2d7ea54f1a020f0eb693b78eda11c matches hash from RLP data\nTx hash 0x7a317d87b06af9f51d5cfc18598fa495215a46362f1da1422ad42feac8e705af doesn&amp;#x27;t match hash from RLP data 0x5361fef9749ee5def902d4c2798e5858f5247cf099620ccb2b9b1342513e1d54\n--------------------------- Captured stdout teardown ---------------------------\nTx hash 0x9261bada33cf65a01812775de4215f36d4711c2b4eae127a940d9f7cf371373b doesn&amp;#x27;t match hash from RLP data 0x86c5dee52d1502228115075d8baf5adf4fac728ec75c02277fd58b7702a7fd12\nUsed balance=0.160874640000000013\nTx hash 0xbe9f82d0d4b5226eef12b9660a799464f2c5e4affe7699dfffe560ecf19096b4 doesn&amp;#x27;t match hash from RLP data 0xef8cfdf823e7dda7858840b69a953c95f00b22ecd508515717b56a54f14aaf1f\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;Execute Test Report&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > td')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > td')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+</html>
