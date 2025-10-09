@@ -195,6 +195,18 @@ Pull requests should have reasonable substance or resolve an existing repository
 
 Care is required when adding PRs or issues for functionality that is live on Ethereum mainnet, please refer to the [Security Policy](SECURITY.md) for more information about reporting vulnerabilities and eligibility for the [bug bounty program](https://bounty.ethereum.org).
 
+## Client Spec Test Reports
+
+- [Frontier](https://gkozyryatskyy.github.io/execution-spec-tests/tests/frontier/report.html)
+- [Homestead](https://gkozyryatskyy.github.io/execution-spec-tests/tests/homestead/report.html)
+- [Byzantium](https://gkozyryatskyy.github.io/execution-spec-tests/tests/byzantium/report.html)
+- [Constantinople](https://gkozyryatskyy.github.io/execution-spec-tests/tests/constantinople/report.html)
+- [Istanbul](https://gkozyryatskyy.github.io/execution-spec-tests/tests/istanbul/report.html)
+- [Berlin](https://gkozyryatskyy.github.io/execution-spec-tests/tests/berlin/report.html)
+- [Paris](https://gkozyryatskyy.github.io/execution-spec-tests/tests/paris/report.html)
+- [Shanghai](https://gkozyryatskyy.github.io/execution-spec-tests/tests/shanghai/report.html)
+- [Cancun](https://gkozyryatskyy.github.io/execution-spec-tests/tests/cancun/report.html)
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
