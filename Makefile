@@ -3,7 +3,7 @@
 #
 # The following environment variables were set in the Relay configmap
 # RATE_LIMIT_DISABLED: "true"
-# MAX_TRANSACTION_FEE_THRESHOLD: 100000000
+# MAX_TRANSACTION_FEE_THRESHOLD: "100000000"
 
 UV=uv
 SOLO=solo
