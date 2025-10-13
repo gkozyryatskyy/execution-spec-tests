@@ -9,7 +9,7 @@ UV=uv
 SOLO=solo
 SOLO_DEPLOYMENT=solo-one-shot
 
-FORK=Cancun
+FORK=Prague
 RPC_URL=http://localhost:7546/
 SEED_KEY=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106
 
