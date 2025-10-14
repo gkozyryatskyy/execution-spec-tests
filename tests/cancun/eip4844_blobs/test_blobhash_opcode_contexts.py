@@ -284,6 +284,7 @@ def test_blobhash_opcode_contexts(
         post=post,
     )
 
+
 # NOTICE Fails with tx type 4 when running on Prague fork
 @pytest.mark.with_all_tx_types(selector=lambda x: x != 3)
 def test_blobhash_opcode_contexts_tx_types(
