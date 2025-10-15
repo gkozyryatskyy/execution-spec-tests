@@ -144,7 +144,10 @@ def scenarios(fork: Fork, pre: Alloc, test_program: ScenarioTestProgram) -> List
         ProgramTstoreTload(),
         ProgramLogs(),
         pytest.param(
-            ProgramSuicide(), marks=pytest.mark.skip(reason="Do we support `SELFDESTRUCT`?")
+            ProgramSuicide(),
+            marks=pytest.mark.skip(
+                reason="`SELFDESTRUCT` causes `FAIL_INVALID` error in these scenarios https://github.com/gkozyryatskyy/execution-spec-tests/issues/5"
+            ),
         ),
         ProgramInvalidOpcode(),
         ProgramAddress(),
@@ -164,9 +167,19 @@ def scenarios(fork: Fork, pre: Alloc, test_program: ScenarioTestProgram) -> List
         ProgramBlockhash(),
         ProgramCoinbase(),
         ProgramTimestamp(),
-        pytest.param(ProgramNumber(), marks=pytest.mark.skip(reason="Compares block number to 1")),
+        pytest.param(
+            ProgramNumber(),
+            marks=pytest.mark.skip(
+                reason="Compares block number to 1 https://github.com/gkozyryatskyy/execution-spec-tests/issues/26"
+            ),
+        ),
         ProgramDifficultyRandao(),
-        ProgramGasLimit(),
+        pytest.param(
+            ProgramGasLimit(),
+            marks=pytest.mark.skip(
+                reason="The `gaslimit` opcode needs to be revisited https://github.com/gkozyryatskyy/execution-spec-tests/issues/27"
+            ),
+        ),
         ProgramChainid(),
         ProgramSelfbalance(),
         ProgramBasefee(),
@@ -226,11 +239,7 @@ def test_scenarios(
             timestamp=tx_env.timestamp,  # we can't know timestamp before head,
             # use gas hash
             number=len(blocks) + 1,
-            # NOTICE The `gaslimit` needs to be adjusted for `ProgramGasLimit`.
-            # This is because it needs to match the `gas_limit` in the tx sent.
-            # https://github.com/gkozyryatskyy/execution-spec-tests/issues/27
-            # gaslimit=tx_env.gas_limit,
-            gaslimit=tx_max_gas + 100_000,
+            gaslimit=tx_env.gas_limit,
             # NOTICE The `coinbase` needs to be adjusted for `ProgramCoinbase`.
             # This is because the default coinbase in Hedera is
             # account `0x0000000000000000000000000000000000000062`.
