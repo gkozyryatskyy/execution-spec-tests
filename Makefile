@@ -53,4 +53,4 @@ fund-seed-account: ADDRESS=$(shell cast wallet address $(SEED_KEY))
 fund-seed-account: SOLO_DEPLOYMENT=$(error Set the `SOLO_DEPLOYMENT` variable to your Solo deployment to enable funding the seed account)
 fund-seed-account:
 	@echo "Funding seed account $(ADDRESS) with $(HBAR_AMOUNT) HBARs using Solo deployment $(SOLO_DEPLOYMENT)"
-	$(SOLO) account update --account-id $(ADDRESS) --deployment $(SOLO_DEPLOYMENT) --hbar-amount $(HBAR_AMOUNT)
+	$(SOLO) ledger account update --account-id $(ADDRESS) --deployment $(SOLO_DEPLOYMENT) --hbar-amount $(HBAR_AMOUNT)
