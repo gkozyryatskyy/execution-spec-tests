@@ -3,10 +3,11 @@
 #
 # The following environment variables were set in the Relay configmap
 # RATE_LIMIT_DISABLED: "true"
-# MAX_TRANSACTION_FEE_THRESHOLD: 100000000
+# MAX_TRANSACTION_FEE_THRESHOLD: "100000000"
 
 UV=uv
 SOLO=solo
+SOLO_DEPLOYMENT=solo-one-shot
 
 FORK=Cancun
 RPC_URL=http://localhost:7546/
@@ -41,16 +42,28 @@ tests/%/report.html: tests/%/*/test_*.py
 		--sender-fund-refund-gas-limit=1_000_000 \
 		--seed-account-sweep-amount='70000 ether' \
 		--eoa-fund-amount-default=8_000_000_000_000_000_000_000 \
-		--transaction-gas-limit=15_000_000 \
 		--tx-wait-timeout 15 \
 		$(PYTEST_OPTS) tests/$*
 
 clean:
 	-rm -v tests/*/report.html
 
+solo-start:
+	$(SOLO) one-shot single deploy --deployment $(SOLO_DEPLOYMENT)
+
+solo-stop:
+	$(SOLO) one-shot single destroy --deployment $(SOLO_DEPLOYMENT)
+
 fund-seed-account: HBAR_AMOUNT=1000000000
 fund-seed-account: ADDRESS=$(shell cast wallet address $(SEED_KEY))
-fund-seed-account: SOLO_DEPLOYMENT=$(error Set the `SOLO_DEPLOYMENT` variable to your Solo deployment to enable funding the seed account)
 fund-seed-account:
 	@echo "Funding seed account $(ADDRESS) with $(HBAR_AMOUNT) HBARs using Solo deployment $(SOLO_DEPLOYMENT)"
 	$(SOLO) ledger account update --account-id $(ADDRESS) --deployment $(SOLO_DEPLOYMENT) --hbar-amount $(HBAR_AMOUNT)
+
+relay-config:
+	$(SOLO) relay node upgrade --values-file relay.yaml --deployment $(SOLO_DEPLOYMENT)
+
+relay-restart:
+	kubectl rollout restart deployment relay-1
+	kubectl rollout status deployment relay-1 --timeout=60s
+	$(SOLO) relay node upgrade --deployment $(SOLO_DEPLOYMENT)
