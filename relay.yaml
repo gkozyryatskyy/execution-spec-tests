@@ -13,3 +13,7 @@ relay:
     # However, there are some tests like EIP-152's `test_blake2b_large_gas_limit`
     # that exercise the network with a very high `gaslimit` value.
     MAX_TRANSACTION_FEE_THRESHOLD: "100000000"
+
+    # We also disable the HBAR Rate limiter `HBAR_RATE_LIMIT_TINYBAR`, which can limit
+    # the amount of HBARs spent by the operator in a specified amount of time.
+    HBAR_RATE_LIMIT_TINYBAR: "0"
