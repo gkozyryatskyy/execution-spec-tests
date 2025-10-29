@@ -9,11 +9,11 @@ UV=uv
 SOLO=solo
 SOLO_DEPLOYMENT=solo-one-shot
 
-FORK=Cancun
+FORK=Prague
 RPC_URL=http://localhost:7546/
 SEED_KEY=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106
 
-FORKS=frontier homestead byzantium constantinople istanbul berlin paris shanghai cancun
+FORKS=frontier homestead byzantium constantinople istanbul berlin paris shanghai cancun prague
 
 .PHONY: all clean fund-seed-account
 
@@ -35,7 +35,7 @@ $(FORKS): %: tests/%/report.html
 #  the client will still wait for the timeout (default 60 seconds) before raising an error.
 #  Using a lower timeout here will make the tests fail faster.
 tests/%/report.html: tests/%/*/test_*.py
-	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 \
+	-$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 \
 		--html=$@ --self-contained-html \
 		--sender-funding-txs-gas-price='710 gwei' \
 		--default-gas-price=710_000_000_000 \

@@ -217,7 +217,7 @@ def test_transaction_validity_type_1_type_2(
 )
 @pytest.mark.parametrize(
     "ty",
-    [pytest.param(3, id="type_3")],
+    [pytest.param(3, id="type_3", marks=pytest.mark.skip(reason="Type 3 not supported"))],
 )
 def test_transaction_validity_type_3(
     state_test: StateTestFiller,
