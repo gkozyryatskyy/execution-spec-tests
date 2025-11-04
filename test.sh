@@ -25,6 +25,10 @@ export TEST_ACCOUNT_ECDSA_PRIVATE_KEY_DER_2=3030020100300706052b8104000a04220420
 export TEST_ACCOUNT_ECDSA_PRIVATE_KEY_DER_3=3030020100300706052b8104000a042204203bcb2fbd18610f44eda2bfd58df63d053e2a6b165617a2ef5e5cca079e0c588a
 export TEST_ACCOUNT_HBAR_AMOUNT=10000
 
+export SEED_KEY=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106
+
+export RELAY_VERSION=0.73.0-rc1
+
 ######################### functions #########################
 
 check_k8s_context() {
@@ -59,13 +63,15 @@ solo_start() {
   solo consensus node setup --deployment "${SOLO_DEPLOYMENT}" -i node1 --local-build-path "${CONSENSUS_NODE_DIR}/hedera-node/data/" --dev
   solo consensus node start --deployment "${SOLO_DEPLOYMENT}" -i node1 --dev
   solo mirror node add --enable-ingress --pinger --deployment "${SOLO_DEPLOYMENT}" --cluster-ref kind-${SOLO_CLUSTER_NAME} --dev
-  solo relay node add --deployment "${SOLO_DEPLOYMENT}" -i node1 --dev
+  solo relay node add --deployment "${SOLO_DEPLOYMENT}" -i node1 --dev --values-file relay.yaml
   solo explorer node add --deployment "${SOLO_DEPLOYMENT}" --cluster-ref kind-${SOLO_CLUSTER_NAME} --dev
 
   # add test accounts to the network
   solo ledger account create --deployment "${SOLO_DEPLOYMENT}" --dev --hbar-amount "${TEST_ACCOUNT_HBAR_AMOUNT}" --private-key --set-alias --ecdsa-private-key "${TEST_ACCOUNT_ECDSA_PRIVATE_KEY_DER_1}"
   solo ledger account create --deployment "${SOLO_DEPLOYMENT}" --dev --hbar-amount "${TEST_ACCOUNT_HBAR_AMOUNT}" --private-key --set-alias --ecdsa-private-key "${TEST_ACCOUNT_ECDSA_PRIVATE_KEY_DER_2}"
   solo ledger account create --deployment "${SOLO_DEPLOYMENT}" --dev --hbar-amount "${TEST_ACCOUNT_HBAR_AMOUNT}" --private-key --set-alias --ecdsa-private-key "${TEST_ACCOUNT_ECDSA_PRIVATE_KEY_DER_3}"
+
+  solo ledger account create --deployment "${SOLO_DEPLOYMENT}" --dev --hbar-amount 1000000000 --private-key --set-alias --ecdsa-private-key "${SEED_KEY}"
 }
 
 solo_stop() {

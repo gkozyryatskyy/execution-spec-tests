@@ -35,7 +35,7 @@ $(FORKS): %: tests/%/report.html
 #  the client will still wait for the timeout (default 60 seconds) before raising an error.
 #  Using a lower timeout here will make the tests fail faster.
 tests/%/report.html: tests/%/*/test_*.py
-	$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 \
+	-$(UV) run execute remote -rA --verbose --fork=$(FORK) --rpc-endpoint=$(RPC_URL) --rpc-seed-key=$(SEED_KEY) --rpc-chain-id 298 \
 		--html=$@ --self-contained-html \
 		--sender-funding-txs-gas-price='710 gwei' \
 		--default-gas-price=710_000_000_000 \
