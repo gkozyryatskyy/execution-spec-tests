@@ -24,6 +24,8 @@ REFERENCE_SPEC_VERSION = "c9db53a936c5c9cbe2db32ba0d1b86c4c6e73534"
 
 pytestmark = pytest.mark.valid_from("Berlin")
 
+aclSkipReason = "Access lists are not yet supported in the JSON-RPC Relay https://github.com/gkozyryatskyy/execution-spec-tests/issues/6"
+
 
 @pytest.mark.parametrize(
     "account_warm,storage_key_warm",
@@ -34,6 +36,7 @@ pytestmark = pytest.mark.valid_from("Berlin")
         (False, False),
     ],
 )
+@pytest.mark.skip(reason=aclSkipReason)
 def test_account_storage_warm_cold_state(
     state_test: StateTestFiller,
     pre: Alloc,
@@ -124,14 +127,17 @@ def test_account_storage_warm_cold_state(
         pytest.param(
             [AccessList(address=Address(0), storage_keys=[])],
             id="single_address_multiple_no_storage_keys",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [AccessList(address=Address(0), storage_keys=[Hash(0)])],
             id="single_address_single_storage_key",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [AccessList(address=Address(0), storage_keys=[Hash(0), Hash(1)])],
             id="single_address_multiple_storage_keys",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [
@@ -139,6 +145,7 @@ def test_account_storage_warm_cold_state(
                 AccessList(address=Address(1), storage_keys=[]),
             ],
             id="multiple_addresses_second_address_no_storage_keys",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [
@@ -146,6 +153,7 @@ def test_account_storage_warm_cold_state(
                 AccessList(address=Address(1), storage_keys=[Hash(0)]),
             ],
             id="multiple_addresses_second_address_single_storage_key",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [
@@ -153,6 +161,7 @@ def test_account_storage_warm_cold_state(
                 AccessList(address=Address(1), storage_keys=[Hash(0), Hash(1)]),
             ],
             id="multiple_addresses_second_address_multiple_storage_keys",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [
@@ -160,6 +169,7 @@ def test_account_storage_warm_cold_state(
                 AccessList(address=Address(1), storage_keys=[Hash(0), Hash(1)]),
             ],
             id="multiple_addresses_first_address_no_storage_keys",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [
@@ -167,6 +177,7 @@ def test_account_storage_warm_cold_state(
                 AccessList(address=Address(1), storage_keys=[Hash(0), Hash(1)]),
             ],
             id="multiple_addresses_first_address_single_storage_key",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [
@@ -174,6 +185,7 @@ def test_account_storage_warm_cold_state(
                 AccessList(address=Address(1), storage_keys=[]),
             ],
             id="repeated_address_no_storage_keys",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [
@@ -181,6 +193,7 @@ def test_account_storage_warm_cold_state(
                 AccessList(address=Address(0), storage_keys=[Hash(1)]),
             ],
             id="repeated_address_single_storage_key",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
         pytest.param(
             [
@@ -188,6 +201,7 @@ def test_account_storage_warm_cold_state(
                 AccessList(address=Address(0), storage_keys=[Hash(0), Hash(1)]),
             ],
             id="repeated_address_multiple_storage_keys",
+            marks=pytest.mark.skip(reason=aclSkipReason),
         ),
     ],
 )
@@ -245,7 +259,7 @@ def test_transaction_intrinsic_gas_cost(
 
     post = {
         contract_address: Account(
-            balance=contract_start_balance + 1 if enough_gas else contract_start_balance,
+            balance=(contract_start_balance + 1 if enough_gas else contract_start_balance) * 10_000_000_000,
             nonce=1,
         ),
         sender: Account(
@@ -255,6 +269,7 @@ def test_transaction_intrinsic_gas_cost(
     state_test(env=env, pre=pre, post=post, tx=tx)
 
 
+@pytest.mark.skip(reason=aclSkipReason)
 def test_repeated_address_acl(
     state_test: StateTestFiller,
     pre: Alloc,

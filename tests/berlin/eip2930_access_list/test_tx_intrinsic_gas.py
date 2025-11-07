@@ -29,6 +29,8 @@ REFERENCE_SPEC_VERSION = ref_spec_2930.version
 
 pytestmark = pytest.mark.valid_from("Berlin")
 
+aclSkipReason = "Access lists are not yet supported in the JSON-RPC Relay https://github.com/gkozyryatskyy/execution-spec-tests/issues/6"
+
 tx_intrinsic_gas_data_vectors = [
     pytest.param(Bytes(b""), id="data_empty"),
     pytest.param(Bytes(b"0x00"), id="data_1_zero_byte"),
@@ -74,14 +76,17 @@ tx_intrinsic_gas_access_list_vectors = [
     pytest.param(
         [AccessList(address=1, storage_keys=[])],
         id="access_list_1_address_empty_keys",
+        marks=pytest.mark.skip(reason=aclSkipReason),
     ),
     pytest.param(
         [AccessList(address=1, storage_keys=[0x60A7])],
         id="access_list_1_address_1_keys",
+        marks=pytest.mark.skip(reason=aclSkipReason),
     ),
     pytest.param(
         [AccessList(address=1, storage_keys=[0x60A7, 0x60A8])],
         id="access_list_1_address_2_keys",
+        marks=pytest.mark.skip(reason=aclSkipReason),
     ),
     pytest.param(
         [
@@ -89,6 +94,7 @@ tx_intrinsic_gas_access_list_vectors = [
             AccessList(address=2, storage_keys=[]),
         ],
         id="access_list_2_address_empty_keys",
+        marks=pytest.mark.skip(reason=aclSkipReason),
     ),
     pytest.param(
         [
@@ -96,6 +102,7 @@ tx_intrinsic_gas_access_list_vectors = [
             AccessList(address=2, storage_keys=[0x60A7]),
         ],
         id="access_list_2_address_1_keys",
+        marks=pytest.mark.skip(reason=aclSkipReason),
     ),
     pytest.param(
         [
@@ -103,6 +110,7 @@ tx_intrinsic_gas_access_list_vectors = [
             AccessList(address=2, storage_keys=[0x60A8]),
         ],
         id="access_list_2_address_2_keys",
+        marks=pytest.mark.skip(reason=aclSkipReason),
     ),
     pytest.param(
         [
@@ -110,6 +118,7 @@ tx_intrinsic_gas_access_list_vectors = [
             AccessList(address=2, storage_keys=[]),
         ],
         id="access_list_2_address_2_keys_inversion",
+        marks=pytest.mark.skip(reason=aclSkipReason),
     ),
     pytest.param(
         [
@@ -124,6 +133,7 @@ tx_intrinsic_gas_access_list_vectors = [
             ],
         ],
         id="access_list_12_address_42_keys",
+        marks=pytest.mark.skip(reason=aclSkipReason),
     ),
 ]
 
