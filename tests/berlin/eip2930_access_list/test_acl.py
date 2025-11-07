@@ -24,6 +24,8 @@ REFERENCE_SPEC_VERSION = "c9db53a936c5c9cbe2db32ba0d1b86c4c6e73534"
 
 pytestmark = pytest.mark.valid_from("Berlin")
 
+TINYBAR_TO_WEIBAR_COEF = 10_000_000_000
+
 aclSkipReason = "Access lists are not yet supported in the JSON-RPC Relay https://github.com/gkozyryatskyy/execution-spec-tests/issues/6"
 
 
@@ -259,7 +261,7 @@ def test_transaction_intrinsic_gas_cost(
 
     post = {
         contract_address: Account(
-            balance=(contract_start_balance + 1 if enough_gas else contract_start_balance) * 10_000_000_000,
+            balance=(contract_start_balance + 1 if enough_gas else contract_start_balance) * TINYBAR_TO_WEIBAR_COEF,
             nonce=1,
         ),
         sender: Account(
