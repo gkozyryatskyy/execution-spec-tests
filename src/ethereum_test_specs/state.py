@@ -448,6 +448,7 @@ class StateTest(BaseTest):
             # If not benchmark mode, skip gas used validation
             if self._operation_mode != OpMode.BENCHMARKING:
                 self.skip_gas_used_validation = True
+            print(f"skip_gas_used_validation: {self.skip_gas_used_validation}")
             return TransactionPost(
                 blocks=[[self.tx]],
                 post=self.post,

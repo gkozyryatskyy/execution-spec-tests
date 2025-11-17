@@ -39,6 +39,7 @@ class TransactionPost(BaseExecute):
 
         # Track transaction hashes for gas validation (benchmarking)
         all_tx_hashes = []
+        expected_receipts = dict()
 
         for block in self.blocks:
             signed_txs = []
@@ -59,12 +60,24 @@ class TransactionPost(BaseExecute):
                     if transaction.error is None:
                         eth_rpc.send_wait_transaction(transaction)
                         all_tx_hashes.append(transaction.hash)
+                        if transaction.expected_receipt is not None:
+                            expected_receipts[transaction.hash] = transaction.expected_receipt
                     else:
                         with pytest.raises(SendTransactionExceptionError):
                             eth_rpc.send_transaction(transaction)
             else:
                 eth_rpc.send_wait_transactions(signed_txs)
                 all_tx_hashes.extend([tx.hash for tx in signed_txs])
+                for transaction in signed_txs:
+                    if transaction.expected_receipt is not None:
+                        expected_receipts[transaction.hash] = transaction.expected_receipt
+
+        for tx_hash, expected_receipt in expected_receipts.items():
+            print(f"Expected Receipt for Transaction {tx_hash} {expected_receipt}.")
+            receipt = eth_rpc.get_transaction_receipt(tx_hash)
+            assert receipt is not None, f"Failed to get receipt for transaction {tx_hash}"
+            gas_used = int(receipt["gasUsed"], 16)
+            print(f"Transaction {tx_hash} used {gas_used} gas.")
 
         # Perform gas validation if required for benchmarking
         # Ensures benchmark tests consume exactly the expected gas
