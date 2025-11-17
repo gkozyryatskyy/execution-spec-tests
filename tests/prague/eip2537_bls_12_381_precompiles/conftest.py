@@ -167,7 +167,14 @@ def call_contract_address(pre: Alloc, call_contract_code: Bytecode) -> Address:
 @pytest.fixture
 def sender(pre: Alloc) -> EOA:
     """Sender of the transaction."""
-    return pre.fund_eoa(1_000_000_000_000_000_000)
+    # NOTICE The upstream default of 1 ether is not enough to cover high gas limit tests.
+    # This is because values are scaled up by `TINYBAR_TO_WEIBAR` factor (10_000_000_000)
+    # when sending any transaction. See `transaction_types.py::Transaction.model_post_init` and
+    # https://github.com/gkozyryatskyy/execution-spec-tests/issues/17 for more details.
+    #
+    # Thus, the funding amount needs to be increased to cover for the higher gas limits costs.
+    # The new value was chosen to match the funding amount `--eoa-fund-amount-default`
+    return pre.fund_eoa(8_000 * 1_000_000_000_000_000_000)
 
 
 @pytest.fixture

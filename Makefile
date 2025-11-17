@@ -28,6 +28,11 @@ $(FORKS): %: tests/%/report.html
 #   This value needs to be less than or equal to the Relay's `MAX_TRANSACTION_FEE_THRESHOLD` setting for the tests to pass.
 #   The default value for `MAX_TRANSACTION_FEE_THRESHOLD` is `15_000_000`.
 #
+#	On the other hand, there are some tests like `test_bls12_pairing.py::test_valid_multi_inf`
+#	that use this gas limit to determine the size of calldata to send to the precompile.
+#	If the gas limit is too high, the JSON-RPC Relay will reject the transaction because
+#	it exceeds the Jumbo transaction limit.
+#
 # --tx-wait-timeout
 #  This timeout is used when waiting for a transaction to be included in a block.
 #  On a local Solo environment this is fairly quick.
@@ -42,6 +47,7 @@ tests/%/report.html: tests/%/*/test_*.py
 		--sender-fund-refund-gas-limit=1_000_000 \
 		--seed-account-sweep-amount='70000 ether' \
 		--eoa-fund-amount-default=8_000_000_000_000_000_000_000 \
+		--transaction-gas-limit=12_500_000 \
 		--tx-wait-timeout 15 \
 		$(PYTEST_OPTS) tests/$*
 
