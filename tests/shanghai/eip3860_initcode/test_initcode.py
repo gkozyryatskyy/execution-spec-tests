@@ -188,16 +188,13 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
         pytest.param(
             i,
             g,
-            marks=([pytest.mark.skip(reason="Not supported in Hiero")] if i._name_ == "empty" else [pytest.mark.exception_test, pytest.mark.skip(reason="TODO: intrinsic gas")] if g == "too_little_intrinsic_gas" else []),
+            marks=([pytest.mark.skip(reason="Empty initcode not supported in Hiero https://github.com/gkozyryatskyy/execution-spec-tests/issues/14")] if i._name_ == "empty" else [pytest.mark.exception_test, pytest.mark.skip(reason="TODO: intrinsic gas")] if g == "too_little_intrinsic_gas" else []),
         )
         for i in [
             # Glib: 249740,249940/Tests(int,exec): 252788,253012/Diff 3048,3072
             INITCODE_ZEROS_MAX_LIMIT,
             # Glib: 839420,839620 / Tests: 842468,842692/Diff 3048,3072
             INITCODE_ONES_MAX_LIMIT,
-            # Glib: INVALID_ETHEREUM_TRANSACTION/Tests: 53000,53000 see
-            # https://github.com/hiero-ledger/hiero-consensus-node/blob/main/hedera-node/hedera-smart-contract-service-impl/src/main/java/com/hedera/node/app/service/contract/impl/infra/HevmTransactionFactory.java#L279
-            # https://github.com/hiero-ledger/hiero-consensus-node/blob/30b8ac9ff0fc03052697e9dd5b67dfd4fd073406/hedera-node/hedera-smart-contract-service-impl/src/main/java/com/hedera/node/app/service/contract/impl/infra/HevmTransactionFactory.java#L328
             EMPTY_INITCODE,
             # TODO Glib: Success
             SINGLE_BYTE_INITCODE,
@@ -247,7 +244,12 @@ class TestContractCreationGasUsage:
         Upon EIP-7623 activation, we need to use an access list to raise the
         intrinsic gas cost to be above the floor data cost.
         """
-        # NOTICE
+        # NOTICE Access lists are not supported in the JSON-RPC Relay/JS SDK yet.
+        # Thus, access lists are removed before sending the transaction to the network.
+        #
+        # However, these access lists are used to calculate the intrinsic gas cost.
+        # In order to match the intrinsic gas cost supported by the Relay, 
+        # we need to remove them from the calculation.
         # return [AccessList(address=Address(i), storage_keys=[]) for i in range(1, 478)]
         return None
 
