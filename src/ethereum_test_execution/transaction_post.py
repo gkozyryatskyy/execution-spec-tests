@@ -60,7 +60,7 @@ class TransactionPost(BaseExecute):
                     if transaction.error is None:
                         eth_rpc.send_wait_transaction(transaction)
                         all_tx_hashes.append(transaction.hash)
-                        if transaction.expected_receipt is not None:
+                        if transaction.expected_receipt is not None and transaction.expected_receipt.gas_used is not None:
                             expected_receipts[transaction.hash] = transaction.expected_receipt
                     else:
                         with pytest.raises(SendTransactionExceptionError):
@@ -69,15 +69,19 @@ class TransactionPost(BaseExecute):
                 eth_rpc.send_wait_transactions(signed_txs)
                 all_tx_hashes.extend([tx.hash for tx in signed_txs])
                 for transaction in signed_txs:
-                    if transaction.expected_receipt is not None:
+                    if transaction.expected_receipt is not None and transaction.expected_receipt.gas_used is not None:
                         expected_receipts[transaction.hash] = transaction.expected_receipt
 
         for tx_hash, expected_receipt in expected_receipts.items():
-            print(f"Expected Receipt for Transaction {tx_hash} {expected_receipt}.")
             receipt = eth_rpc.get_transaction_receipt(tx_hash)
             assert receipt is not None, f"Failed to get receipt for transaction {tx_hash}"
             gas_used = int(receipt["gasUsed"], 16)
-            print(f"Transaction {tx_hash} used {gas_used} gas.")
+            print(f"=== Transaction {tx_hash} used {gas_used} gas <--> expected {int(expected_receipt.gas_used.hex(), 16)} gas ===")
+            assert gas_used == expected_receipt.gas_used, (
+                f"Gas used validation for transaction `{tx_hash}` failed: "
+                f"Receipt's gas used is {gas_used}, "
+                f"but expected is {int(expected_receipt.gas_used.hex(), 16)}."
+            )
 
         # Perform gas validation if required for benchmarking
         # Ensures benchmark tests consume exactly the expected gas

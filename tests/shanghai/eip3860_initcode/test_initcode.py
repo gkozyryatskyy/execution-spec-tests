@@ -188,7 +188,7 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
         pytest.param(
             i,
             g,
-            marks=([pytest.mark.skip(reason="Empty initcode not supported in Hiero https://github.com/gkozyryatskyy/execution-spec-tests/issues/14")] if i._name_ == "empty" else [pytest.mark.exception_test, pytest.mark.skip(reason="TODO: intrinsic gas")] if g == "too_little_intrinsic_gas" else []),
+            marks=([pytest.mark.skip(reason="Empty initcode(calldata) not supported in Hiero https://github.com/gkozyryatskyy/execution-spec-tests/issues/14")] if i._name_ == "empty" else [pytest.mark.exception_test, pytest.mark.xfail(reason="TODO: intrinsic gas")] if g == "too_little_intrinsic_gas" else []),
         )
         for i in [
             # Glib: 249740,249940/Tests(int,exec): 252788,253012/Diff 3048,3072
