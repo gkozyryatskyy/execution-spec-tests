@@ -180,8 +180,6 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
     return True
 
 
-# TODO Glib: this can be related to gas difference
-# https://github.com/hyperledger/besu/pull/8817/files
 @pytest.mark.parametrize(
     "initcode,gas_test_case",
     [
@@ -191,20 +189,13 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
             marks=([pytest.mark.skip(reason="Empty initcode(calldata) not supported in Hiero https://github.com/gkozyryatskyy/execution-spec-tests/issues/14")] if i._name_ == "empty" else [pytest.mark.exception_test, pytest.mark.xfail(reason="TODO: intrinsic gas")] if g == "too_little_intrinsic_gas" else []),
         )
         for i in [
-            # Glib: 249740,249940/Tests(int,exec): 252788,253012/Diff 3048,3072
             INITCODE_ZEROS_MAX_LIMIT,
-            # Glib: 839420,839620 / Tests: 842468,842692/Diff 3048,3072
             INITCODE_ONES_MAX_LIMIT,
             EMPTY_INITCODE,
-            # TODO Glib: Success
             SINGLE_BYTE_INITCODE,
-            # Glib: (consumed,used): 53260,53460/Tests: 53238,53462/Diff -22,2
             INITCODE_ZEROS_32_BYTES,
-            # Glib: (consumed,used): 53264,53464/Tests: 53244,53468/Diff -20,4
             INITCODE_ZEROS_33_BYTES,
-            # Glib: 249612,249812 / Tests: 252658,252882/Diff 3046,3070
             INITCODE_ZEROS_49120_BYTES,
-            # Glib: 249616,249816 / Tests: 252664,252888/Diff 3046,3070
             INITCODE_ZEROS_49121_BYTES,
         ]
         for g in [
