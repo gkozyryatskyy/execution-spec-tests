@@ -63,7 +63,14 @@ def callee_bytecode(dest: int, src: int, length: int) -> Bytecode:
 @pytest.fixture
 def tx_access_list() -> List[AccessList]:
     """Access list for the transaction."""
-    return [AccessList(address=Address(i), storage_keys=[]) for i in range(1, 10)]
+    # NOTICE Access lists are not supported in the JSON-RPC Relay/JS SDK yet.
+    # Thus, access lists are removed before sending the transaction to the network.
+    #
+    # However, these access lists are used to calculate the intrinsic gas cost.
+    # In order to match the intrinsic gas cost supported by the Relay, 
+    # we need to remove them from the calculation.
+    # return [AccessList(address=Address(i), storage_keys=[]) for i in range(1, 10)]
+    return None
 
 
 @pytest.fixture
