@@ -362,11 +362,6 @@ class Transaction(
         # Set default values for fields that are required for certain tx types
         if self.ty <= 1 and self.gas_price is None:
             self.gas_price = TransactionDefaults.gas_price
-        # NOTICE Sending access list is currently not supported
-        # https://github.com/gkozyryatskyy/execution-spec-tests/issues/6
-        if adjust and self.ty >= 1:
-            self.access_list = []
-
         if self.ty >= 1 and self.access_list is None:
             self.access_list = []
         if self.ty < 1:
