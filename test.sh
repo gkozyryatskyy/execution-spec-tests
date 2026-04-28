@@ -8,7 +8,8 @@ set -e
 
 WORK_DIR="$(pwd)"
 # CONSENSUS_NODE_DIR="../../hiero-consensus-node"
-CONSENSUS_NODE_DIR="../hiero-consensus-node"
+# CONSENSUS_NODE_DIR="../hiero-consensus-node"
+CONSENSUS_NODE_DIR="/Users/user/development/hashgraph/hiero-consensus-node"
 APP_PROPERTIES_PATH="./application.properties"
 
 export SOLO_BASE_NAME=hedera
@@ -53,9 +54,13 @@ solo_start() {
   solo deployment cluster attach --deployment "${SOLO_DEPLOYMENT}" --cluster-ref kind-${SOLO_CLUSTER_NAME} --num-consensus-nodes 1 --dev
   solo keys consensus generate --gossip-keys --tls-keys --deployment "${SOLO_DEPLOYMENT}" --dev
   # --------- build (./gradlew assemble) in consensus node dir
-  cd "${CONSENSUS_NODE_DIR}"
-  ./gradlew assemble
-  cd "${WORK_DIR}"
+  # NOTE: Skipped — build CN manually first with JDK 25:
+  #   export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home
+  #   export PATH="$JAVA_HOME/bin:$PATH"
+  #   cd $CONSENSUS_NODE_DIR && ./gradlew assemble
+  # cd "${CONSENSUS_NODE_DIR}"
+  # ./gradlew assemble
+  # cd "${WORK_DIR}"
   # ----------------------------------------------------------------------------
   # network components
   # --------- with local consensus build
