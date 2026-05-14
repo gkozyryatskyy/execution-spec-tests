@@ -104,6 +104,58 @@ solo_destroy() {
   rm -rf ~/.solo
 }
 
+# Full reset: wipes Solo state, every kind cluster, every helm repo, helm
+# caches, port-forwards, and the Pectra-specific Docker images we pulled.
+# Use when `solo_stop` / `solo_destroy` leaves you in a half-broken state,
+# or when a stale helm repo URL is breaking `solo init`. Safe to run from
+# anywhere; failures at each step are swallowed.
+solo_nuke() {
+  echo ">>> Nuke: graceful Solo teardown (best-effort)"
+  solo explorer node destroy --cluster-ref=kind-${SOLO_CLUSTER_NAME} --deployment="${SOLO_DEPLOYMENT}" --force --dev 2>/dev/null || true
+  solo mirror-node node destroy --cluster-ref=kind-${SOLO_CLUSTER_NAME} --deployment="${SOLO_DEPLOYMENT}" --force --dev 2>/dev/null || true
+  solo consensus node stop --deployment="${SOLO_DEPLOYMENT}" -i node1 --dev 2>/dev/null || true
+  solo consensus network destroy --deployment="${SOLO_DEPLOYMENT}" --force --delete-pvcs --delete-secrets --dev 2>/dev/null || true
+  solo cluster-ref config disconnect --cluster-ref kind-${SOLO_CLUSTER_NAME} --dev 2>/dev/null || true
+
+  echo ">>> Nuke: kill leftover kubectl port-forwards"
+  pkill -f "kubectl.*port-forward" 2>/dev/null || true
+
+  echo ">>> Nuke: delete every kind cluster"
+  for c in $(kind get clusters 2>/dev/null); do
+    kind delete cluster -n "$c"
+  done
+
+  echo ">>> Nuke: wipe Solo state (~/.solo)"
+  rm -rf ~/.solo
+
+  echo ">>> Nuke: remove every helm repo"
+  for r in $(helm repo list 2>/dev/null | tail -n +2 | awk '{print $1}'); do
+    helm repo remove "$r" || true
+  done
+
+  echo ">>> Nuke: clear helm caches"
+  rm -rf ~/Library/Caches/helm ~/Library/Preferences/helm ~/.config/helm 2>/dev/null || true
+
+  echo ">>> Nuke: remove Pectra-relevant Docker images"
+  # Images we pull/load for Solo + the Pectra-preview MN setup. Edit the
+  # regex below if you want to keep something (or to nuke more).
+  docker images --format '{{.Repository}}:{{.Tag}}' 2>/dev/null \
+    | grep -E '^(gcr\.io/mirrornode/|docker\.io/carlie45/hedera-mirror-|docker\.io/ikavaldzhiev/hedera-mirror-|ghcr\.io/hiero-ledger/hiero-json-rpc-relay|kindest/node)' \
+    | xargs -r docker rmi -f 2>/dev/null || true
+
+  # Uncomment for the truly nuclear option (affects ALL Docker state on this
+  # machine — unrelated containers, volumes, networks, build cache):
+  # docker system prune -a -f --volumes
+
+  echo ""
+  echo ">>> Nuke complete. Verify:"
+  echo "  kind get clusters      -> should be empty"
+  echo "  helm repo list         -> should error 'no repositories'"
+  echo "  ls ~/.solo             -> should error 'No such file'"
+  echo "  docker images | grep -E 'mirrornode|hiero|kindest|carlie45'"
+  echo "                         -> should be empty"
+}
+
 ######################### main #########################
 case "$1" in
 
@@ -121,8 +173,11 @@ case "$1" in
       destroy)
         solo_destroy
         ;;
+      nuke)
+        solo_nuke
+        ;;
     	*)
-    		echo "Usage: [start|stop|status|destroy]"
+    		echo "Usage: [start|stop|status|destroy|nuke]"
     		exit 1
     		;;
     esac
