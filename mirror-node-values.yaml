@@ -1,0 +1,7 @@
+rest:
+  config:
+    hiero:
+      mirror:
+        rest:
+          response:
+            enableDelegationAddress: true

@@ -29,6 +29,15 @@ export TEST_ACCOUNT_HBAR_AMOUNT=10000
 export SEED_KEY=0x6c6e6727b40c8d4b616ab0d26af357af09337299f09c66704146e14236972106
 
 export RELAY_VERSION=0.73.0-rc1
+export MIRROR_NODE_VERSION=0.153.0
+export MIRROR_NODE_VALUES_FILE=./mirror-node-values.yaml
+
+# Pectra-preview MN images (Glib's hedera-evm-testing setup).
+# Pulled and re-tagged as ${MIRROR_NODE_VERSION} so Solo's chart picks them
+# up locally via pullPolicy: IfNotPresent. Set any var to "" to skip its
+# override and let Solo pull the official 0.153.0 image instead.
+export MIRROR_NODE_WEB3_IMAGE="${MIRROR_NODE_WEB3_IMAGE-docker.io/carlie45/hedera-mirror-web3:0.73.0-pectra-preview-alpha.4}"
+export MIRROR_NODE_IMPORTER_IMAGE="${MIRROR_NODE_IMPORTER_IMAGE-docker.io/carlie45/hedera-mirror-importer:0.73.0-pectra-preview-alpha.4}"
 
 ######################### functions #########################
 
@@ -64,10 +73,24 @@ solo_start() {
   # ----------------------------------------------------------------------------
   # network components
   # --------- with local consensus build
-  solo consensus network deploy --deployment "${SOLO_DEPLOYMENT}" --application-properties "${APP_PROPERTIES_PATH}" --dev
+  solo consensus network deploy --deployment "${SOLO_DEPLOYMENT}" --application-properties "${APP_PROPERTIES_PATH}" --pvcs true --dev
   solo consensus node setup --deployment "${SOLO_DEPLOYMENT}" -i node1 --local-build-path "${CONSENSUS_NODE_DIR}/hedera-node/data/" --dev
   solo consensus node start --deployment "${SOLO_DEPLOYMENT}" -i node1 --dev
-  solo mirror node add --enable-ingress --pinger --deployment "${SOLO_DEPLOYMENT}" --cluster-ref kind-${SOLO_CLUSTER_NAME} --dev
+
+  # Preload Pectra-preview MN images into kind, re-tagged as ${MIRROR_NODE_VERSION}
+  # so Solo's chart picks them up locally (IfNotPresent) instead of pulling from gcr.io.
+  if [ -n "${MIRROR_NODE_WEB3_IMAGE}" ]; then
+    docker pull "${MIRROR_NODE_WEB3_IMAGE}"
+    docker image tag "${MIRROR_NODE_WEB3_IMAGE}" "gcr.io/mirrornode/hedera-mirror-web3:${MIRROR_NODE_VERSION}"
+    kind load docker-image "gcr.io/mirrornode/hedera-mirror-web3:${MIRROR_NODE_VERSION}" --name "${SOLO_CLUSTER_NAME}"
+  fi
+  if [ -n "${MIRROR_NODE_IMPORTER_IMAGE}" ]; then
+    docker pull "${MIRROR_NODE_IMPORTER_IMAGE}"
+    docker image tag "${MIRROR_NODE_IMPORTER_IMAGE}" "gcr.io/mirrornode/hedera-mirror-importer:${MIRROR_NODE_VERSION}"
+    kind load docker-image "gcr.io/mirrornode/hedera-mirror-importer:${MIRROR_NODE_VERSION}" --name "${SOLO_CLUSTER_NAME}"
+  fi
+
+  solo mirror node add --enable-ingress --pinger --deployment "${SOLO_DEPLOYMENT}" --cluster-ref kind-${SOLO_CLUSTER_NAME} --mirror-node-version="${MIRROR_NODE_VERSION}" --values-file "${MIRROR_NODE_VALUES_FILE}" --dev
   # solo relay node add --deployment "${SOLO_DEPLOYMENT}" -i node1 --dev --values-file relay.yaml
   solo explorer node add --deployment "${SOLO_DEPLOYMENT}" --cluster-ref kind-${SOLO_CLUSTER_NAME} --dev
 
