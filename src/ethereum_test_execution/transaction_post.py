@@ -94,7 +94,9 @@ class TransactionPost(BaseExecute):
                 assert nonce == 0, f"Nonce of {address} is {nonce}, expected 0."
             else:
                 if "balance" in account.model_fields_set:
-                    assert balance == account.balance, (
+                    # if balance is set through relay, eth decimal places = hbar decimal places (relay converts it)
+                    # if balance is set inside contract code, nothing is converted and eth decimal places = hbar decimal places * 10_000_000_000 (10^18 vs 10^8)
+                    assert balance == account.balance or balance == account.balance * 10_000_000_000, (
                         f"Balance of {address} is {balance}, expected {account.balance}."
                     )
                 if "code" in account.model_fields_set:

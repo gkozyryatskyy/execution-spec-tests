@@ -87,10 +87,8 @@ class TransactionByHashResponse(Transaction):
         #  - https://github.com/hiero-ledger/hiero-mirror-node/issues/11860
         #  - https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/4436
         # assert self.transaction_hash == self.hash
-        if self.transaction_hash == self.hash:
-            print(f"Tx hash {self.transaction_hash} matches hash from RLP data")
-        else:
-            print(f"Tx hash {self.transaction_hash} doesn't match hash from RLP data {self.hash}")
+        if self.transaction_hash != self.hash:
+            print(f"!!!!!! Tx hash {self.transaction_hash} doesn't match hash from RLP data {self.hash}")
 
 
 class ForkchoiceState(CamelModel):
