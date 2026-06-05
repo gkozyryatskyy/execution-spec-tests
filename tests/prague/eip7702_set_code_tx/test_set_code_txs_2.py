@@ -1680,7 +1680,7 @@ def test_pointer_resets_an_empty_code_account_with_storage(
 
     tx_create_suicide_from_pointer = Transaction(
         to=contract_create,
-        gas_limit=800_000,
+        gas_limit=2_000_000,
         data=Op.SSTORE(6, 6)
         + Op.MSTORE(0, deploy_code.hex())
         + Op.RETURN(32 - len(deploy_code), len(deploy_code)),

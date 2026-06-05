@@ -3149,7 +3149,7 @@ def test_empty_authorization_list(
     """Test sending an invalid transaction with empty authorization list."""
     tx = Transaction(
         gas_limit=100_000,
-        to=pre.deploy_contract(code=b""),
+        to=pre.deploy_contract(code=Bytecode()),
         value=0,
         authorization_list=[],
         error=TransactionException.TYPE_4_EMPTY_AUTHORIZATION_LIST,
@@ -3357,7 +3357,7 @@ def test_delegation_clearing_and_set(
     sender = pre.fund_eoa()
 
     tx = Transaction(
-        gas_limit=10_000_000,
+        gas_limit=2_000_000,
         to=auth_signer,
         value=0,
         authorization_list=[
@@ -3814,13 +3814,14 @@ def test_set_code_from_account_with_non_delegating_code(
             6,
             0,
             TransactionException.INSUFFICIENT_MAX_FEE_PER_GAS,
-            marks=pytest.mark.execute(pytest.mark.skip(reason="requires specific base fee")),
+            marks=pytest.mark.execute(pytest.mark.skip(reason="Fee not applied to Hedera")),
             id="insufficient_max_fee_per_gas",
         ),
         pytest.param(
             7,
             8,
             TransactionException.PRIORITY_GREATER_THAN_MAX_FEE_PER_GAS,
+            marks=pytest.mark.execute(pytest.mark.skip(reason="Fee not applied to Hedera")),
             id="priority_greater_than_max_fee_per_gas",
         ),
     ],
