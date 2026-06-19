@@ -36,12 +36,6 @@ from .spec import Spec, ref_spec_3860
 if not TransactionDefaults.adjust_tx_values:
     pytest.skip(reason="TransactionDefaults.adjust_tx_values is set", allow_module_level=True)
 
-# TODO Glib: seems like Hedera has no INITCODE limit check.
-#  Hedera has just Jumbo tx payload check = 131072
-#  details https://swirldslabs.slack.com/archives/C09B3UPEMKM/p1756384889485429
-#   - https://github.com/hiero-ledger/hiero-consensus-node/issues/20872
-JUMBO_MAX_PAYLOAD_SIZE = 131072
-
 REFERENCE_SPEC_GIT_PATH = ref_spec_3860.git_path
 REFERENCE_SPEC_VERSION = ref_spec_3860.version
 
@@ -51,37 +45,6 @@ pytestmark = pytest.mark.valid_from("Shanghai")
 """
 Initcode templates used throughout the tests
 """
-# TODO Glib: for contract create: initcode limit -> jumbo tx payload limit
-#  - https://github.com/hiero-ledger/hiero-consensus-node/issues/20872
-INITCODE_ONES_MAX_LIMIT_JUMBO = Initcode(
-    deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
-    initcode_length=JUMBO_MAX_PAYLOAD_SIZE,
-    padding_byte=0x01,
-    name="max_size_ones",
-)
-
-INITCODE_ZEROS_MAX_LIMIT_JUMBO = Initcode(
-    deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
-    initcode_length=JUMBO_MAX_PAYLOAD_SIZE,
-    padding_byte=0x00,
-    name="max_size_zeros",
-)
-
-INITCODE_ONES_OVER_LIMIT_JUMBO = Initcode(
-    deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
-    initcode_length=JUMBO_MAX_PAYLOAD_SIZE + 1,
-    padding_byte=0x01,
-    name="over_limit_ones",
-)
-
-INITCODE_ZEROS_OVER_LIMIT_JUMBO = Initcode(
-    deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
-    initcode_length=JUMBO_MAX_PAYLOAD_SIZE + 1,
-    padding_byte=0x00,
-    name="over_limit_zeros",
-)
-# TODO Glib: ------------------------------------
-
 INITCODE_ONES_MAX_LIMIT = Initcode(
     deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
     initcode_length=Spec.MAX_INITCODE_SIZE,
@@ -159,10 +122,10 @@ SINGLE_BYTE_INITCODE.execution_gas = 0
 @pytest.mark.parametrize(
     "initcode",
     [
-        INITCODE_ZEROS_MAX_LIMIT_JUMBO,
-        INITCODE_ONES_MAX_LIMIT_JUMBO,
-        pytest.param(INITCODE_ZEROS_OVER_LIMIT_JUMBO, marks=pytest.mark.exception_test),
-        pytest.param(INITCODE_ONES_OVER_LIMIT_JUMBO, marks=pytest.mark.exception_test),
+        INITCODE_ZEROS_MAX_LIMIT,
+        INITCODE_ONES_MAX_LIMIT,
+        pytest.param(INITCODE_ZEROS_OVER_LIMIT, marks=pytest.mark.exception_test),
+        pytest.param(INITCODE_ONES_OVER_LIMIT, marks=pytest.mark.exception_test),
     ],
     ids=get_initcode_name,
 )
@@ -191,7 +154,7 @@ def test_contract_creating_tx(
         sender=sender,
     )
 
-    if len(initcode) > JUMBO_MAX_PAYLOAD_SIZE:
+    if len(initcode) > Spec.MAX_INITCODE_SIZE:
         # Initcode is above the max size, tx inclusion in the block makes
         # it invalid.
         post[create_contract_address] = Account.NONEXISTENT
@@ -578,7 +541,7 @@ class TestCreateInitcode:
         Test contract creation via CREATE/CREATE2, parametrized by initcode
         that is on/over the max allowed limit.
         """
-        if len(initcode) > JUMBO_MAX_PAYLOAD_SIZE:
+        if len(initcode) > Spec.MAX_INITCODE_SIZE:
             # Call returns 0 as out of gas s[0]==1
             post[caller_contract_address] = Account(
                 nonce=1,
