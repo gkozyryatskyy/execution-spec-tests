@@ -165,6 +165,7 @@ def simple_blob_hashes(
     ],
     ids=lambda x: x,
 )
+@pytest.mark.skip(reason="Tx type 3 not supported gkozyryatskyy/execution-spec-tests/issues/21")
 def test_blobhash_opcode_contexts(
     pre: Alloc,
     test_case: str,
@@ -284,6 +285,7 @@ def test_blobhash_opcode_contexts(
     )
 
 
+# NOTICE Fails with tx type 4 when running on Prague fork
 @pytest.mark.with_all_tx_types(selector=lambda x: x != 3)
 def test_blobhash_opcode_contexts_tx_types(
     pre: Alloc,

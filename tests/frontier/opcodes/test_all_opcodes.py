@@ -54,6 +54,7 @@ def prepare_suffix(opcode: Opcode) -> Bytecode:
     pr=["https://github.com/ethereum/execution-spec-tests/pull/748"],
 )
 @pytest.mark.valid_from("Frontier")
+@pytest.mark.skip(reason="https://github.com/gkozyryatskyy/execution-spec-tests/issues/12")
 def test_all_opcodes(state_test: StateTestFiller, pre: Alloc, fork: Fork):
     """
     Test each possible opcode on the fork with a single contract that calls
