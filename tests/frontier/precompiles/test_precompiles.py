@@ -77,6 +77,11 @@ def test_precompiles(
     precompiled contract exists at the given address.
 
     """
+    if not precompile_exists:
+        pytest.skip(
+            reason="Calls to Hedera reserved accounts causes gas consumption differences https://github.com/gkozyryatskyy/execution-spec-tests/issues/25"
+        )
+
     env = Environment()
 
     # Empty account to serve as reference

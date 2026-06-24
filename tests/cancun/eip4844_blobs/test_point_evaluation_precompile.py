@@ -547,7 +547,15 @@ def test_tx_entry_point(
 
     # Starting from EIP-7623, we need to use an access list to raise the
     # intrinsic gas cost to be above the floor data cost.
-    access_list = [AccessList(address=Address(i), storage_keys=[]) for i in range(1, 10)]
+
+    # NOTICE Access lists are not supported in the JSON-RPC Relay/JS SDK yet.
+    # Thus, access lists are removed before sending the transaction to the network.
+    #
+    # However, these access lists are used to calculate the intrinsic gas cost.
+    # In order to match the intrinsic gas cost supported by the Relay, 
+    # we need to remove them from the calculation.
+    # access_list = [AccessList(address=Address(i), storage_keys=[]) for i in range(1, 10)]
+    access_list = None
 
     # Gas is appended the intrinsic gas cost of the transaction
     tx_intrinsic_gas_cost_calculator = fork.transaction_intrinsic_cost_calculator()

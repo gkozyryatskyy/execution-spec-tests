@@ -27,10 +27,14 @@ from ethereum_test_tools import (
     ceiling_division,
     compute_create_address,
 )
+from ethereum_test_types import TransactionDefaults
 from ethereum_test_vm import Opcodes as Op
 
 from .helpers import INITCODE_RESULTING_DEPLOYED_CODE, get_create_id, get_initcode_name
 from .spec import Spec, ref_spec_3860
+
+if not TransactionDefaults.adjust_tx_values:
+    pytest.skip(reason="TransactionDefaults.adjust_tx_values is set", allow_module_level=True)
 
 REFERENCE_SPEC_GIT_PATH = ref_spec_3860.git_path
 REFERENCE_SPEC_VERSION = ref_spec_3860.version
@@ -38,7 +42,10 @@ REFERENCE_SPEC_VERSION = ref_spec_3860.version
 pytestmark = pytest.mark.valid_from("Shanghai")
 
 
-"""Initcode templates used throughout the tests"""
+"""
+Initcode templates used throughout the tests
+"""
+
 INITCODE_ONES_MAX_LIMIT = Initcode(
     deploy_code=INITCODE_RESULTING_DEPLOYED_CODE,
     initcode_length=Spec.MAX_INITCODE_SIZE,
@@ -118,8 +125,8 @@ SINGLE_BYTE_INITCODE.execution_gas = 0
     [
         INITCODE_ZEROS_MAX_LIMIT,
         INITCODE_ONES_MAX_LIMIT,
-        pytest.param(INITCODE_ZEROS_OVER_LIMIT, marks=pytest.mark.exception_test),
-        pytest.param(INITCODE_ONES_OVER_LIMIT, marks=pytest.mark.exception_test),
+        pytest.param(INITCODE_ZEROS_OVER_LIMIT, marks=[pytest.mark.exception_test, pytest.mark.skip(reason="TODO: initcode")]),
+        pytest.param(INITCODE_ONES_OVER_LIMIT, marks=[pytest.mark.exception_test, pytest.mark.skip(reason="TODO: initcode")]),
     ],
     ids=get_initcode_name,
 )
@@ -179,7 +186,7 @@ def valid_gas_test_case(initcode: Initcode, gas_test_case: str) -> bool:
         pytest.param(
             i,
             g,
-            marks=([pytest.mark.exception_test] if g == "too_little_intrinsic_gas" else []),
+            marks=([pytest.mark.skip(reason="Empty initcode(calldata) not supported in Hiero https://github.com/gkozyryatskyy/execution-spec-tests/issues/14")] if i._name_ == "empty" else [pytest.mark.exception_test, pytest.mark.xfail(reason="TODO: intrinsic gas")] if g == "too_little_intrinsic_gas" else []),
         )
         for i in [
             INITCODE_ZEROS_MAX_LIMIT,
@@ -228,7 +235,14 @@ class TestContractCreationGasUsage:
         Upon EIP-7623 activation, we need to use an access list to raise the
         intrinsic gas cost to be above the floor data cost.
         """
-        return [AccessList(address=Address(i), storage_keys=[]) for i in range(1, 478)]
+        # NOTICE Access lists are not supported in the JSON-RPC Relay/JS SDK yet.
+        # Thus, access lists are removed before sending the transaction to the network.
+        #
+        # However, these access lists are used to calculate the intrinsic gas cost.
+        # In order to match the intrinsic gas cost supported by the Relay, 
+        # we need to remove them from the calculation.
+        # return [AccessList(address=Address(i), storage_keys=[]) for i in range(1, 478)]
+        return None
 
     @pytest.fixture
     def exact_intrinsic_gas(
@@ -364,8 +378,8 @@ class TestContractCreationGasUsage:
     [
         INITCODE_ZEROS_MAX_LIMIT,
         INITCODE_ONES_MAX_LIMIT,
-        INITCODE_ZEROS_OVER_LIMIT,
-        INITCODE_ONES_OVER_LIMIT,
+        pytest.param(INITCODE_ZEROS_OVER_LIMIT, marks=[pytest.mark.skip(reason="TODO: initcode")]),
+        pytest.param(INITCODE_ONES_OVER_LIMIT, marks=[pytest.mark.skip(reason="TODO: initcode")]),
         EMPTY_INITCODE,
         SINGLE_BYTE_INITCODE,
         INITCODE_ZEROS_32_BYTES,

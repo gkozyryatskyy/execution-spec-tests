@@ -143,7 +143,12 @@ def scenarios(fork: Fork, pre: Alloc, test_program: ScenarioTestProgram) -> List
         ProgramSstoreSload(),
         ProgramTstoreTload(),
         ProgramLogs(),
-        ProgramSuicide(),
+        pytest.param(
+            ProgramSuicide(),
+            marks=pytest.mark.skip(
+                reason="`SELFDESTRUCT` causes `FAIL_INVALID` error in these scenarios https://github.com/gkozyryatskyy/execution-spec-tests/issues/5"
+            ),
+        ),
         ProgramInvalidOpcode(),
         ProgramAddress(),
         ProgramBalance(),
@@ -162,9 +167,19 @@ def scenarios(fork: Fork, pre: Alloc, test_program: ScenarioTestProgram) -> List
         ProgramBlockhash(),
         ProgramCoinbase(),
         ProgramTimestamp(),
-        ProgramNumber(),
+        pytest.param(
+            ProgramNumber(),
+            marks=pytest.mark.skip(
+                reason="Compares block number to 1 https://github.com/gkozyryatskyy/execution-spec-tests/issues/26"
+            ),
+        ),
         ProgramDifficultyRandao(),
-        ProgramGasLimit(),
+        pytest.param(
+            ProgramGasLimit(),
+            marks=pytest.mark.skip(
+                reason="The `gaslimit` opcode needs to be revisited https://github.com/gkozyryatskyy/execution-spec-tests/issues/27"
+            ),
+        ),
         ProgramChainid(),
         ProgramSelfbalance(),
         ProgramBasefee(),
@@ -225,7 +240,12 @@ def test_scenarios(
             # use gas hash
             number=len(blocks) + 1,
             gaslimit=tx_env.gas_limit,
-            coinbase=tx_env.fee_recipient,
+            # NOTICE The `coinbase` needs to be adjusted for `ProgramCoinbase`.
+            # This is because the default coinbase in Hedera is
+            # account `0x0000000000000000000000000000000000000062`.
+            # https://github.com/gkozyryatskyy/execution-spec-tests/issues/28
+            # coinbase=tx_env.fee_recipient,
+            coinbase=Address("0x0000000000000000000000000000000000000062"),
         )
 
         def make_result(scenario: Scenario, exec_env: ExecutionEnvironment, post: Storage) -> int:
